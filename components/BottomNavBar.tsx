@@ -1,10 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uniqBy from 'lodash.uniqby';
 import * as React from 'react';
-import { BottomNavigation, Text } from 'react-native-paper';
+import { BottomNavigation, Text, useTheme } from 'react-native-paper';
+import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { promiseEach } from '../HelperFunctions';
 import { SubsPleaseApi } from '../SubsPleaseApi';
 import { ReleasesTab } from './ReleasesTab';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export type ShowResolution = '480' | '540' | '720' | '1080';
 
@@ -28,27 +30,16 @@ export interface SubsPleaseShowApiResult {
   [showEpisode: string]: ShowInfo;
 }
 
+const Tab = createMaterialBottomTabNavigator();
 export const BottomNavBar = () => {
   const [index, setIndex] = React.useState(0);
   const [mounted, setMounted] = React.useState(true);
   const [loadingShowData, setLoadingShowData] = React.useState(false);
   const [showList, setShowList] = React.useState<ShowInfo[]>([]);
-
-  const routes = [
-    { key: 'releases', title: 'Releases', icon: 'new-box', color: '#3F51B5' },
-    { key: 'watchList', title: 'Watch list', icon: 'playlist-play', color: '#009688' },
-    { key: 'recents', title: 'Recents', icon: 'mailbox-open-up-outline', color: '#795548' },
-  ];
-
+  const { colors, dark } = useTheme();
   const ReleasesRoute = () => <ReleasesTab shows={showList} onRefresh={refreshShowData} loadingData={loadingShowData}/>;
-  const AlbumsRoute = () => <Text>Albums</Text>;
+  const WatchListRoute = () => <Text>Albums</Text>;
   const RecentsRoute = () => <Text>Recents</Text>;
-
-  const renderScene = BottomNavigation.SceneMap({
-    releases: ReleasesRoute,
-    watchList: AlbumsRoute,
-    recents: RecentsRoute,
-  });
 
   const refreshShowData = async () => {
     const getLatestShowListPromise = SubsPleaseApi.getLatestShowList();
@@ -109,10 +100,30 @@ export const BottomNavBar = () => {
   };
 
   return (
-    <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={setIndex}
-      renderScene={renderScene}
-    />
+    <Tab.Navigator
+      shifting
+    >
+      <Tab.Screen name="Releases" component={ReleasesRoute} options={{
+          tabBarLabel: 'Releases',
+          tabBarIcon: ({ color }) => (
+            <Icon name="new-box" color={color} size={25} />
+          ),
+          tabBarColor: colors.primary
+        }}/>
+      <Tab.Screen name="Watch list" component={WatchListRoute} options={{
+          tabBarLabel: 'Watch list',
+          tabBarIcon: ({ color }) => (
+            <Icon name="playlist-play" color={color} size={25} />
+          ),
+          tabBarColor: colors.secondary
+        }}/>
+      <Tab.Screen name="Recents" component={RecentsRoute} options={{
+          tabBarLabel: 'Recents',
+          tabBarIcon: ({ color }) => (
+            <Icon name="mailbox-open-up-outline" color={color} size={25} />
+          ),
+          tabBarColor: colors.tertiary
+        }}/>
+    </Tab.Navigator>
   );
 };

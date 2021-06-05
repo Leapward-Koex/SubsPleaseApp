@@ -1,12 +1,10 @@
 import * as React from 'react';
 import {FlatList, RefreshControl, SafeAreaView, ScrollView, useColorScheme} from 'react-native';
-import {Text} from 'react-native-paper';
+import {Text, useTheme} from 'react-native-paper';
 import {ShowInfo, SubsPleaseShowApiResult} from './BottomNavBar';
 import {ReleaseShow} from './ReleaseShow';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import uniqBy from 'lodash.uniqby';
+import { Appearance, AppearanceProvider } from 'react-native-appearance'
 import {
-  Colors,
   DebugInstructions,
   Header,
   LearnMoreLinks,
@@ -26,32 +24,19 @@ type ReleaseTabProps = {
 }
 export const ReleasesTab = (props: ReleaseTabProps) => {
   const { shows, onRefresh, loadingData } = props;
-  const isDarkMode = useColorScheme() === 'dark';
+  const { colors } = useTheme();
 
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: Appearance.getColorScheme() !== 'light' ? colors.subsPleaseDark2 : colors.subsPleaseLight2,
   };
 
   return (
     <SafeAreaView>
       <FlatList
+        style={backgroundStyle}
         data={shows} 
         renderItem={({item}) => <ReleaseShow showInfo={item} />}
         keyExtractor={show => `${show.page}${show.episode}`}/>
-      {/* <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        refreshControl={
-          <RefreshControl
-            refreshing={loadingData}
-            onRefresh={onRefresh}
-          />
-        }
-        style={backgroundStyle}
-        >
-        {shows.map((show, index) => (
-          
-        ))}
-      </ScrollView> */}
     </SafeAreaView>
   );
 };

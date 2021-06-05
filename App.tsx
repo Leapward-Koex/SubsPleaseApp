@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-
+import 'react-native-gesture-handler';
+import { NavigationContainer } from '@react-navigation/native';
 import {
   useColorScheme,
 } from 'react-native';
@@ -10,12 +11,42 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import { BottomNavBar } from './components/BottomNavBar';
 
+declare global {
+  namespace ReactNativePaper {
+    interface ThemeColors {
+      secondary: string,
+      tertiary: string,
+  
+      subsPleaseDark1: string,
+      subsPleaseDark2: string,
+      subsPleaseDark3: string,
+      darkText: string,
+  
+      subsPleaseLight1: string,
+      subsPleaseLight2: string,
+      subsPleaseLight3: string,
+      lightText: string
+    }
+  }
+}
+
 const theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    primary: 'tomato',
-    accent: 'yellow',
+    primary: '#cb2b78',
+    secondary: '#7289da',
+    tertiary: '#09d6d6',
+
+    subsPleaseDark1: '#111111',
+    subsPleaseDark2: '#1f1f1f',
+    subsPleaseDark3: '#333333',
+    darkText: '#c2c2c2',
+
+    subsPleaseLight1: '#ffffff',
+    subsPleaseLight2: '#f9f9f9',
+    subsPleaseLight3: '#ebebeb',
+    lightText: '#3d3d3d'
   },
 };
 
@@ -27,9 +58,11 @@ const App = () => {
   };
 
   return (
-    <PaperProvider theme={theme}>
-      <BottomNavBar />
-    </PaperProvider>
+    <NavigationContainer>
+      <PaperProvider theme={theme}>
+        <BottomNavBar />
+      </PaperProvider>
+    </NavigationContainer>
   );
 };
 
