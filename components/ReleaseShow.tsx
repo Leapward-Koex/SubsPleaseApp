@@ -1,17 +1,22 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react';
-import { Image, StyleSheet, Text, View, Linking } from 'react-native';
+import { Image, StyleSheet, Text, View, Linking, ImageBackground } from 'react-native';
 import { Appearance } from 'react-native-appearance';
 import { Avatar, Button, Card, Title, Paragraph, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { StorageKeys } from '../enums/enum';
+import { getDayOfWeek } from '../HelperFunctions';
+import { ShowInfo, ShowResolution, WatchList } from '../models/models';
 import { SubsPleaseApi } from '../SubsPleaseApi';
-import { ShowInfo, ShowResolution } from './BottomNavBar';
 
 type releaseShowProps = {
-    showInfo: ShowInfo
+    showInfo: ShowInfo,
+    watchList: WatchList,
+    onWatchListChanged: (updatedWatchList: WatchList) => void;
 }
 
 export const ReleaseShow = (props: releaseShowProps) => {
-    const { showInfo } = props;
+    const { showInfo, watchList, onWatchListChanged } = props;
     const { colors } = useTheme();
 
     const styles = StyleSheet.create({
@@ -43,10 +48,42 @@ export const ReleaseShow = (props: releaseShowProps) => {
         marginTop: 10,
         marginBottom: 10,
         marginRight: 5,
+        height: 130,
         backgroundColor: Appearance.getColorScheme() !== 'light' ? colors.subsPleaseDark1 : colors.subsPleaseLight1,
     };
 
     const textColour = Appearance.getColorScheme() !== 'light' ? colors.darkText : colors.lightText;
+
+    const addShowToList = () => {
+        watchList.shows.push({
+            showName: showInfo.show,
+            showImage: showInfo.image_url,
+            releaseTime: getDayOfWeek(showInfo.release_date)
+        });
+        onWatchListChanged(watchList);
+    }
+
+    const removeShowFromList = () => {
+        watchList.shows = watchList.shows.filter((show) => show.showName !== showInfo.show);
+        onWatchListChanged(watchList);
+    }
+
+    const getWatchlistActionButton = () => {
+        if (watchList.shows.filter((show) => show.showName === showInfo.show).length > 0) {
+            return (
+            <Button mode="contained" color={colors.tertiary} onPress={() => removeShowFromList()}>
+                <Icon name="plus" style={{paddingRight: 4}} size={13} color={colors.lightText} />
+                <Text style={{color: colors.lightText }}>Remove</Text>
+            </Button>
+            )
+        }
+        return (
+            <Button mode="contained" onPress={() => addShowToList()}>
+                <Icon name="plus" style={{paddingRight: 4}} size={13} color={colors.darkText} />
+                <Text style={{color: colors.darkText }}>Add</Text>
+            </Button>
+        )
+    }
 
     return (
         <Card style={cardStyle}>
@@ -60,16 +97,13 @@ export const ReleaseShow = (props: releaseShowProps) => {
                 />
                 </View>
                 <View style={{flex: 0.8, padding: 5}}>
-                    <Title style={{flexGrow: 1, color: textColour}}>{showInfo.show}</Title>
+                    <Title numberOfLines={2} ellipsizeMode='tail' style={{flexGrow: 1, color: textColour, paddingLeft: 10, paddingRight: 10}}>{showInfo.show}</Title>
                     <View style={{flexDirection: 'row', justifyContent: 'space-between',}}>
                         <View style={{flexDirection: 'row'}}>
                             {getMagnetButton('720')}
                             {getMagnetButton('1080')}
                         </View>
-                    <Button mode="contained" onPress={() => console.log('Pressed')}>
-                        <Icon name="plus" style={{paddingRight: 4}} size={13} color={textColour} />
-                        <Text style={{color: textColour }}>Add</Text>
-                    </Button>
+                        {getWatchlistActionButton()}
                     </View>
                 </View>
             </View>
