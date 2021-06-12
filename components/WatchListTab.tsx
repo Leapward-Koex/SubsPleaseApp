@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Animated, Dimensions, FlatList, Image, SafeAreaView, StyleSheet, View} from 'react-native';
+import {Animated, Dimensions, FlatList, Image, ImageBackground, SafeAreaView, StyleSheet, View} from 'react-native';
 import {Card, Text, Title, useTheme} from 'react-native-paper';
 import {ReleaseShow} from './ReleaseShow';
 import { Appearance } from 'react-native-appearance'
@@ -7,10 +7,14 @@ import { ShowInfo, WatchList, WatchListItem } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
 import { SubsPleaseApi } from '../SubsPleaseApi';
+import Carousel from 'react-native-snap-carousel';
+import { weekday } from '../HelperFunctions'
 
 const {height, width} = Dimensions.get('window');
-
-const daysOfWeek = [
+interface DayOfWeek {
+    dayName: string
+}
+const daysOfWeek: DayOfWeek[] = [
     { dayName: 'Monday' },
     { dayName: 'Tuesday' },
     { dayName: 'Wednesday' },
@@ -31,7 +35,7 @@ const WatchListShow = (showInfo: WatchListItem) => {
         },
     });
     return (
-        <Card>
+        <Card style={{marginBottom: 5, elevation: 2}} >
             <View style={{flexDirection: 'row', height: 130}}>  
                 <View style={{flex: 0.3}}>
                 <Image
@@ -42,7 +46,7 @@ const WatchListShow = (showInfo: WatchListItem) => {
                 />
                 </View>
                 <View style={{flex: 0.8, padding: 5}}>
-                    <Title numberOfLines={2} ellipsizeMode='tail' style={{flexGrow: 1, color: textColour, paddingLeft: 10, paddingRight: 10}}>{showInfo.showName}</Title>
+                    <Title numberOfLines={2} ellipsizeMode='tail' style={{flexGrow: 1, color: colors.lightText, paddingLeft: 10, paddingRight: 10}}>{showInfo.showName}</Title>
                 </View>
             </View>
         </Card>
@@ -58,8 +62,15 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
     const [showsForCurrentDay, setShowsForCurrentDay] = React.useState<WatchListItem[]>([])
     const cardStyle = {
         margin: 20,
-        width: width - 40,
-        backgroundColor: Appearance.getColorScheme() !== 'light' ? colors.subsPleaseDark1 : colors.subsPleaseLight1,
+        marginTop: 0,
+        padding: 20,
+        height: height - 160,
+        //width: width - 40,
+        borderRadius: 10,
+        backgroundColor: Appearance.getColorScheme() !== 'light' ? colors.subsPleaseLight1 : colors.subsPleaseLight1,
+        shadowColor: "#000",
+        
+        elevation: 6
     };
     React.useEffect(() => {
         const init = async () => {
@@ -69,23 +80,52 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
         init();
     }, [])
 
+    const getNoShowText = (showCount: number) => {
+        if(!showCount) {
+            return (
+                <>
+                    <Text style={{textAlignVertical: "center", textAlign: "center", fontSize: 18, paddingTop:'70%', paddingBottom: 10}}>Nothing on today...</Text>
+                    <Text style={{textAlignVertical: "center", textAlign: "center", fontSize: 18}}>(╯︵╰,)</Text>
+                </>
+            )
+        }
+    }
+
     return (
-        <Card style={cardStyle}>
-            {showsForCurrentDay.map((show, index) => <WatchListShow key={index} {...show}/>)}
-        </Card>
+        <View style={{marginTop: 20}}>
+            <Text style={{textAlignVertical: "center", textAlign: "center", fontSize: 24}}>{dayName}</Text>
+            <View style={cardStyle}>
+                {getNoShowText(showsForCurrentDay.length)}
+                {showsForCurrentDay.map((show, index) => <WatchListShow key={index} {...show} />)}
+            </View>
+        </View>
     );
 }
 
 export const WatchListTab = () => {
+    const carouselRef = React.useRef(null);
+    const currentDayName = weekday[new Date().getDay()];
+    const dayOfWeekIndex = daysOfWeek.indexOf(daysOfWeek.filter((dayOfWeek) => dayOfWeek.dayName === currentDayName)[0]);
     return (
-            <FlatList 
-                horizontal
-                snapToInterval={width}
-                decelerationRate={'fast'}
-                disableIntervalMomentum
+        <View style={{
+        backgroundColor: 'white',
+        height: '100%'}}>
+
+            <ImageBackground style={{width: '100%', height: '100%'}} source={require('../resources/images/primary-tertiary-blur-bg.png')}>
+                <Carousel
+                ref={carouselRef}
                 data={daysOfWeek}
-                renderItem={({ item }) => <ShowDayInfo {...item}/> }
-                keyExtractor={(item) => item.dayName}
-            />
+                renderItem={({item, index}) => <ShowDayInfo {...item}/> }
+                enableMomentum={true}
+                firstItem={dayOfWeekIndex}
+                layoutCardOffset={18}
+                inactiveSlideOpacity={0.7}
+                sliderWidth={width }
+                itemWidth={width}
+                itemHeight={height}
+                />
+            </ImageBackground>
+
+        </View>
     );
 }

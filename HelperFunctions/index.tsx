@@ -4,8 +4,9 @@ export async function promiseEach<T>(promiseArray: Promise<T>[], thenCallback: (
     }
 }
 
+export const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+
 export function getDayOfWeek(dateString: string) {
     const date = new Date(dateString);
-    const weekday = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     return weekday[date.getDay()];
 }
