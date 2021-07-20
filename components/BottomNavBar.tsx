@@ -14,10 +14,9 @@ const Tab = createMaterialBottomTabNavigator();
 export const BottomNavBar = () => {
   const [index, setIndex] = React.useState(0);
   const [mounted, setMounted] = React.useState(true);
-  const [loadingShowData, setLoadingShowData] = React.useState(false);
   const [showList, setShowList] = React.useState<ShowInfo[]>([]);
   const { colors, dark } = useTheme();
-  const ReleasesRoute = () => <ReleasesTab shows={showList} onRefresh={refreshShowData} loadingData={loadingShowData}/>;
+  const ReleasesRoute = () => <ReleasesTab shows={showList} />;
   const WatchListRoute = () => <WatchListTab />;
   const RecentsRoute = () => <Text>Recents</Text>;
 
@@ -37,7 +36,6 @@ export const BottomNavBar = () => {
         getSavedReleasesPromise,
       ]);
       // Combine the showlist here
-      debugger;
       const uniqueShows = uniqBy(
         apiShowList.concat(savedShowList),
         show => `${show.page}${show.episode}`,

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {Animated, Dimensions, FlatList, Image, ImageBackground, SafeAreaView, StyleSheet, View} from 'react-native';
-import {Card, Text, Title, useTheme} from 'react-native-paper';
+import {Button, Card, Text, Title, useTheme} from 'react-native-paper';
 import {ReleaseShow} from './ReleaseShow';
 import { Appearance } from 'react-native-appearance'
 import { ShowInfo, WatchList, WatchListItem } from '../models/models';
@@ -9,6 +9,7 @@ import { StorageKeys } from '../enums/enum';
 import { SubsPleaseApi } from '../SubsPleaseApi';
 import Carousel from 'react-native-snap-carousel';
 import { weekday } from '../HelperFunctions'
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const {height, width} = Dimensions.get('window');
 interface DayOfWeek {
@@ -23,7 +24,13 @@ const daysOfWeek: DayOfWeek[] = [
     { dayName: 'Saturday' },
     { dayName: 'Sunday' },
 ]
-const WatchListShow = (showInfo: WatchListItem) => {
+
+type WatshListShowProps = {
+    showInfo: WatchListItem;
+    onShowRemoved: (showName: string) => Promise<void>;
+}
+const WatchListShow = (props: WatshListShowProps) => {
+    const { showInfo, onShowRemoved } = props;
     const { colors } = useTheme();
     const textColour = Appearance.getColorScheme() !== 'light' ? colors.darkText : colors.lightText;
     const styles = StyleSheet.create({
@@ -47,6 +54,10 @@ const WatchListShow = (showInfo: WatchListItem) => {
                 </View>
                 <View style={{flex: 0.8, padding: 5}}>
                     <Title numberOfLines={2} ellipsizeMode='tail' style={{flexGrow: 1, color: colors.lightText, paddingLeft: 10, paddingRight: 10}}>{showInfo.showName}</Title>
+                    <Button mode="contained" color={colors.tertiary} onPress={() => onShowRemoved(showInfo.showName)}>
+                        <Icon name="minus" style={{paddingRight: 4}} size={13} color={colors.subsPleaseDark1} />
+                        <Text style={{color: colors.subsPleaseDark1 }}>Remove</Text>
+                    </Button>
                 </View>
             </View>
         </Card>
@@ -80,6 +91,13 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
         init();
     }, [])
 
+    const onRemoveShow = async (showName: string) => {
+        const watchList: WatchList = JSON.parse(await AsyncStorage.getItem(StorageKeys.WatchList) ?? "{shows: []}");
+        watchList.shows = watchList.shows.filter((show) => show.showName !== showName);
+        setShowsForCurrentDay(watchList.shows.filter((show) => show.releaseTime === dayName));
+        AsyncStorage.setItem(StorageKeys.WatchList, JSON.stringify(watchList));
+    }
+
     const getNoShowText = (showCount: number) => {
         if(!showCount) {
             return (
@@ -96,7 +114,7 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
             <Text style={{textAlignVertical: "center", textAlign: "center", fontSize: 24}}>{dayName}</Text>
             <View style={cardStyle}>
                 {getNoShowText(showsForCurrentDay.length)}
-                {showsForCurrentDay.map((show, index) => <WatchListShow key={index} {...show} />)}
+                {showsForCurrentDay.map((show, index) => <WatchListShow key={index} onShowRemoved={onRemoveShow} showInfo={show} />)}
             </View>
         </View>
     );

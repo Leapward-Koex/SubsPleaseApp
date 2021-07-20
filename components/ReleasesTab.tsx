@@ -6,21 +6,24 @@ import { Appearance } from 'react-native-appearance'
 import { ShowInfo, WatchList } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
+import { ReleaseTabHeader } from './ReleaseHeader';
+import { SubsPleaseApi } from '../SubsPleaseApi';
+import debounce from 'lodash.debounce';
 
 type ReleaseTabProps = {
   shows: ShowInfo[],
-  onRefresh: () => void;
-  loadingData: boolean;
 }
 export const ReleasesTab = (props: ReleaseTabProps) => {
-  const { shows, onRefresh, loadingData } = props;
+  const { shows } = props;
   const { colors } = useTheme();
   const [ watchList, setWatchList ] = React.useState<WatchList>();
+  const [ showList, setShowList ] = React.useState(shows);
 
   const scrollY = React.useRef( new Animated.Value(0)).current;
 
   const backgroundStyle = {
     backgroundColor: Appearance.getColorScheme() !== 'light' ? colors.subsPleaseDark2 : colors.subsPleaseLight2,
+    height: '100%'
   };
 
   React.useEffect(() => {
@@ -35,6 +38,19 @@ export const ReleasesTab = (props: ReleaseTabProps) => {
     AsyncStorage.setItem(StorageKeys.WatchList, JSON.stringify(updatedWatchList));
   }
 
+  const onSearchChanged = async (query: string) => {
+    const result = await SubsPleaseApi.getShowsFromSearch(query);
+    setShowList(result);
+  }
+
+  const debounceSearchHandler = React.useCallback(
+    debounce(onSearchChanged, 500)
+  , []);
+
+  const onSearchCancelled = () => {
+    setShowList(shows);
+  }
+
   if (!watchList) {
     return (
       <SafeAreaView>
@@ -44,12 +60,12 @@ export const ReleasesTab = (props: ReleaseTabProps) => {
       </SafeAreaView>
     )
   }
-
   return (
     <SafeAreaView>
+      <ReleaseTabHeader onSearchChanged={debounceSearchHandler} onSearchCancelled={onSearchCancelled} />
       <Animated.FlatList
         style={backgroundStyle}
-        data={shows}
+        data={showList}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }

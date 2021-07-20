@@ -18,9 +18,31 @@ export class SubsPleaseApi {
                 }));
                 return [];
             }
-        } catch (error) {
+        }
+        catch (error) {
             console.log('error', error);
             return [];
         }
     };
+
+    public static async getShowsFromSearch(searchTerm: string) {
+        try {
+            const response = await fetch(new URL(`/api/?f=search&tz=Pacific/Auckland&s=${encodeURIComponent(searchTerm)}`, SubsPleaseApi.apiBaseUrl).href);
+            if (response.ok) {
+                const showData: SubsPleaseShowApiResult = await response.json();
+                return Object.values(showData);
+            }
+            else {
+                console.log('error', JSON.stringify({
+                    status: response.status,
+                    statusText: response.statusText,
+                }));
+                return [];
+            }
+        }
+        catch (error) {
+            console.log('error', error);
+            return [];
+        }
+    }
 }

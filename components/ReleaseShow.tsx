@@ -72,15 +72,15 @@ export const ReleaseShow = (props: releaseShowProps) => {
         if (watchList.shows.filter((show) => show.showName === showInfo.show).length > 0) {
             return (
             <Button mode="contained" color={colors.tertiary} onPress={() => removeShowFromList()}>
-                <Icon name="plus" style={{paddingRight: 4}} size={13} color={colors.lightText} />
-                <Text style={{color: colors.lightText }}>Remove</Text>
+                <Icon name="minus" style={{paddingRight: 4}} size={13} color={colors.subsPleaseDark1} />
+                <Text style={{color: colors.subsPleaseDark1 }}>Remove</Text>
             </Button>
             )
         }
         return (
             <Button mode="contained" onPress={() => addShowToList()}>
-                <Icon name="plus" style={{paddingRight: 4}} size={13} color={colors.darkText} />
-                <Text style={{color: colors.darkText }}>Add</Text>
+                <Icon name="plus" style={{paddingRight: 4}} size={13} color={colors.subsPleaseLight1} />
+                <Text style={{color: colors.subsPleaseLight1 }}>Add</Text>
             </Button>
         )
     }
@@ -89,12 +89,13 @@ export const ReleaseShow = (props: releaseShowProps) => {
         <Card style={cardStyle}>
             <View style={{flexDirection: 'row', height: 130}}>
                 <View style={{flex: 0.3}}>
-                <Image
-                    style={styles.stretch}
-                    source={{
-                    uri: new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl).href,
-                    }}
-                />
+                    <Text style={{position: 'absolute', color: colors.subsPleaseLight1, backgroundColor: colors.primary, zIndex: 10, borderRadius: 8, padding: 3, margin: 3}}>{showInfo.episode}</Text>
+                    <Image
+                        style={styles.stretch}
+                        source={{
+                        uri: new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl).href,
+                        }}
+                    />
                 </View>
                 <View style={{flex: 0.8, padding: 5}}>
                     <Title numberOfLines={2} ellipsizeMode='tail' style={{flexGrow: 1, color: textColour, paddingLeft: 10, paddingRight: 10}}>{showInfo.show}</Title>
