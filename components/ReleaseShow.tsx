@@ -8,6 +8,8 @@ import { StorageKeys } from '../enums/enum';
 import { getDayOfWeek } from '../HelperFunctions';
 import { ShowInfo, ShowResolution, WatchList } from '../models/models';
 import { SubsPleaseApi } from '../SubsPleaseApi';
+import { NativeModules } from 'react-native';
+const { TorrentDownloader } = NativeModules
 
 type releaseShowProps = {
     showInfo: ShowInfo,
@@ -35,8 +37,11 @@ export const ReleaseShow = (props: releaseShowProps) => {
                 // check if we can download it in the app here?
                 Linking.openURL(desiredResoltion.magnet);
             }
+            const downloadTorrent = () => {
+                TorrentDownloader.createCalendarEvent('testName', 'testLocation');
+            }
             return (
-            <Button mode="text" onPress={() => openTorrent()}>
+            <Button mode="text" onPress={() => openTorrent()} onLongPress={() => downloadTorrent()}>
                 {`${resolution}p`}
             </Button>
             );
