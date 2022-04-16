@@ -213,10 +213,11 @@ export const WatchListTab = () => {
           ref={carouselRef}
           data={daysOfWeek}
           renderItem={({item, index}) => <ShowDayInfo {...item} />}
-          enableMomentum={true}
           firstItem={dayOfWeekIndex}
+          decelerationRate={'fast'}
           layoutCardOffset={18}
           inactiveSlideOpacity={0.7}
+          removeClippedSubviews
           sliderWidth={width}
           itemWidth={width}
           itemHeight={height}

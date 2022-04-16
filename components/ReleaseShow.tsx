@@ -35,8 +35,11 @@ type releaseShowProps = {
   onWatchListChanged: (updatedWatchList: WatchList) => void;
 };
 
-export const ReleaseShow = (props: releaseShowProps) => {
-  const {showInfo, watchList, onWatchListChanged} = props;
+export const ReleaseShow = ({
+  showInfo,
+  watchList,
+  onWatchListChanged,
+}: releaseShowProps) => {
   const {colors} = useTheme();
   const [modalVisible, setModalVisible] = React.useState(false);
   const [showDescription, setShowDescription] = React.useState('Loading...');

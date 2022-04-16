@@ -62,13 +62,6 @@ export const ReleasesTab = ({
     setShowList(shows);
   };
 
-  if (!watchList) {
-    return (
-      <SafeAreaView>
-        <View style={backgroundStyle} />
-      </SafeAreaView>
-    );
-  }
   return (
     <SafeAreaView>
       <View
@@ -120,7 +113,7 @@ export const ReleasesTab = ({
               <Animated.View style={{transform: [{translateY}], opacity}}>
                 <ReleaseShow
                   showInfo={item}
-                  watchList={watchList}
+                  watchList={watchList ?? {shows: []}}
                   onWatchListChanged={updatedWatchList =>
                     onWatchListChanged(updatedWatchList)
                   }

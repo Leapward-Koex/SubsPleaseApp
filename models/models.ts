@@ -21,11 +21,11 @@ export interface SubsPleaseShowApiResult {
 }
 
 export interface WatchListItem {
-    showName: string;
-    showImage: string;
-    releaseTime: string;
+  showName: string;
+  showImage: string;
+  releaseTime: string;
 }
 
 export interface WatchList {
-    shows: WatchListItem[];
+  shows: WatchListItem[];
 }
