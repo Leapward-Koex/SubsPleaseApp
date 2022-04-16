@@ -59,3 +59,4 @@ buck-out/
 /ios/Pods/
 
 /.expo
+index.android.bundle
