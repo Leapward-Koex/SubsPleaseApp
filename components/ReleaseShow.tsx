@@ -7,6 +7,10 @@ import {
   View,
   Linking,
   ImageBackground,
+  Pressable,
+  Modal,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
 import {Appearance} from 'react-native-appearance';
 import {
@@ -34,6 +38,8 @@ type releaseShowProps = {
 export const ReleaseShow = (props: releaseShowProps) => {
   const {showInfo, watchList, onWatchListChanged} = props;
   const {colors} = useTheme();
+  const [modalVisible, setModalVisible] = React.useState(false);
+  const [showDescription, setShowDescription] = React.useState('Loading...');
 
   const styles = StyleSheet.create({
     stretch: {
@@ -41,6 +47,46 @@ export const ReleaseShow = (props: releaseShowProps) => {
       borderBottomLeftRadius: 3,
       height: 130,
       resizeMode: 'cover',
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 22,
+      maxHeight: '100%',
+      overflow: 'scroll',
+    },
+    modalView: {
+      maxHeight: Dimensions.get('window').height - 50,
+      width: '90%',
+      margin: 20,
+      backgroundColor: 'white',
+      borderRadius: 5,
+      padding: 35,
+      alignItems: 'center',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+    },
+    button: {
+      borderRadius: 20,
+      padding: 10,
+      elevation: 2,
+    },
+    buttonOpen: {
+      backgroundColor: '#F194FF',
+    },
+    buttonClose: {
+      backgroundColor: '#2196F3',
+    },
+    modalText: {
+      marginBottom: 20,
+      fontSize: 20,
     },
   });
 
@@ -103,6 +149,21 @@ export const ReleaseShow = (props: releaseShowProps) => {
     onWatchListChanged(watchList);
   };
 
+  const getShowSynopsis = async () => {
+    const storedSynopsis = await AsyncStorage.getItem(
+      `${showInfo.page}-synopsis`,
+    );
+    if (storedSynopsis) {
+      setShowDescription(storedSynopsis);
+    } else {
+      const text = await SubsPleaseApi.getShowSynopsis(showInfo.page);
+      if (typeof text === 'string') {
+        setShowDescription(text);
+        await AsyncStorage.setItem(`${showInfo.page}-synopsis`, text);
+      }
+    }
+  };
+
   const getWatchlistActionButton = () => {
     if (
       watchList.shows.filter(show => show.showName === showInfo.show).length > 0
@@ -118,7 +179,11 @@ export const ReleaseShow = (props: releaseShowProps) => {
             size={13}
             color={colors.subsPleaseDark1}
           />
-          <Text style={{color: colors.subsPleaseDark1}}>Remove</Text>
+          {Dimensions.get('window').width > 500 ? (
+            <Text style={{color: colors.subsPleaseDark1}}>Remove</Text>
+          ) : (
+            <></>
+          )}
         </Button>
       );
     }
@@ -130,7 +195,11 @@ export const ReleaseShow = (props: releaseShowProps) => {
           size={13}
           color={colors.subsPleaseLight1}
         />
-        <Text style={{color: colors.subsPleaseLight1}}>Add</Text>
+        {Dimensions.get('window').width > 500 ? (
+          <Text style={{color: colors.subsPleaseLight1}}>Add</Text>
+        ) : (
+          <></>
+        )}
       </Button>
     );
   };
@@ -162,6 +231,10 @@ export const ReleaseShow = (props: releaseShowProps) => {
           <Title
             numberOfLines={2}
             ellipsizeMode="tail"
+            onPress={() => {
+              setModalVisible(true);
+              getShowSynopsis();
+            }}
             style={{
               flexGrow: 1,
               color: textColour,
@@ -178,6 +251,41 @@ export const ReleaseShow = (props: releaseShowProps) => {
             {getWatchlistActionButton()}
           </View>
         </View>
+      </View>
+      <View style={styles.centeredView}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}>
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Image
+                style={{
+                  height: '30%',
+                  width: '70%',
+                  marginBottom: 15,
+                }}
+                resizeMode="contain"
+                source={{
+                  uri: new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl)
+                    .href,
+                }}
+              />
+              <ScrollView>
+                <Text style={styles.modalText}>{showDescription}</Text>
+              </ScrollView>
+              <Button
+                style={{marginTop: 15}}
+                mode="contained"
+                onPress={() => setModalVisible(!modalVisible)}>
+                Close
+              </Button>
+            </View>
+          </View>
+        </Modal>
       </View>
     </Card>
   );
