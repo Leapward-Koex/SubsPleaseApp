@@ -1,4 +1,4 @@
-# SubsPleaseApp
+# SubsPlease App (Unofficial)
 
 This is a React native app that gets the latest releases from the SubsPlease API and presents them here.
 Only built with Android in mind.
