@@ -1,31 +1,28 @@
 import React, {useEffect, useState} from 'react';
 import 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
-import {
-  useColorScheme,
-} from 'react-native';
-import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
+import {NavigationContainer} from '@react-navigation/native';
+import {useColorScheme} from 'react-native';
+import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
 
-import {
-  Colors,
-} from 'react-native/Libraries/NewAppScreen';
-import { BottomNavBar } from './components/BottomNavBar';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {BottomNavBar} from './components/BottomNavBar';
+import nodejs from 'nodejs-mobile-react-native';
 
 declare global {
   namespace ReactNativePaper {
     interface ThemeColors {
-      secondary: string,
-      tertiary: string,
-  
-      subsPleaseDark1: string,
-      subsPleaseDark2: string,
-      subsPleaseDark3: string,
-      darkText: string,
-  
-      subsPleaseLight1: string,
-      subsPleaseLight2: string,
-      subsPleaseLight3: string,
-      lightText: string
+      secondary: string;
+      tertiary: string;
+
+      subsPleaseDark1: string;
+      subsPleaseDark2: string;
+      subsPleaseDark3: string;
+      darkText: string;
+
+      subsPleaseLight1: string;
+      subsPleaseLight2: string;
+      subsPleaseLight3: string;
+      lightText: string;
     }
   }
 }
@@ -46,7 +43,7 @@ const theme = {
     subsPleaseLight1: '#ffffff',
     subsPleaseLight2: '#f9f9f9',
     subsPleaseLight3: '#ebebeb',
-    lightText: '#3d3d3d'
+    lightText: '#3d3d3d',
   },
 };
 
@@ -56,6 +53,15 @@ const App = () => {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    nodejs.start('main.js');
+    nodejs.channel.addListener('message', msg => {
+      if (msg.name === 'log') {
+        console.log(msg.text);
+      }
+    });
+  }, []);
 
   return (
     <NavigationContainer>

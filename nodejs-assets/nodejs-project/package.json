@@ -1,0 +1,13 @@
+{
+  "name": "sample-node-project",
+  "version": "0.0.1",
+  "description": "node part of the project",
+  "main": "main.js",
+  "author": "janeasystems",
+  "license": "",
+  "dependencies": {
+    "esbuild": "^0.14.37",
+    "lodash.throttle": "^4.1.1",
+    "webtorrent": "^1.8.13"
+  }
+}

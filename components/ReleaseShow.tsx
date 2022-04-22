@@ -28,6 +28,9 @@ import {ShowInfo, ShowResolution, WatchList} from '../models/models';
 import {SubsPleaseApi} from '../SubsPleaseApi';
 import {NativeModules} from 'react-native';
 const {TorrentDownloader} = NativeModules;
+import nodejs from 'nodejs-mobile-react-native';
+import {DownloadDirectoryPath} from 'react-native-fs';
+import * as Progress from 'react-native-progress';
 
 type releaseShowProps = {
   showInfo: ShowInfo;
@@ -43,6 +46,14 @@ export const ReleaseShow = ({
   const {colors} = useTheme();
   const [modalVisible, setModalVisible] = React.useState(false);
   const [showDescription, setShowDescription] = React.useState('Loading...');
+  const [fileSize, setFileSize] = React.useState(0);
+  const [downloadProgress, setDownloadProgress] = React.useState(0);
+  const [downloadSpeed, setDownloadSpeed] = React.useState(0);
+  const [uploadSpeed, setUploadSpeed] = React.useState(0);
+  const [downloaded, setDownloaded] = React.useState(0);
+  const [callbackId] = React.useState(
+    (Math.random() + 1).toString(36).substring(7),
+  );
 
   const styles = StyleSheet.create({
     stretch: {
@@ -103,10 +114,24 @@ export const ReleaseShow = ({
         Linking.openURL(desiredResoltion.magnet);
       };
       const downloadTorrent = () => {
-        TorrentDownloader.downloadTorrent(
-          desiredResoltion.magnet,
-          'testLocation',
-        );
+        nodejs.channel.addListener('message', msg => {
+          if (msg.callbackId === callbackId) {
+            if (msg.name === 'torrent-metadata') {
+              setFileSize(msg.size);
+            } else if (msg.name === 'torrent-progress') {
+              setDownloadProgress(msg.progress);
+              setDownloaded(msg.downloaded);
+              setDownloadSpeed(msg.downloadSpeed);
+              setUploadSpeed(msg.uploadSpeed);
+            }
+          }
+        });
+        nodejs.channel.send({
+          name: 'download-torrent',
+          callbackId,
+          magnetUri: desiredResoltion.magnet,
+          location: DownloadDirectoryPath,
+        });
       };
       return (
         <Button
@@ -228,6 +253,16 @@ export const ReleaseShow = ({
             source={{
               uri: new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl).href,
             }}
+          />
+          <Progress.Pie
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: [{translateX: -35}, {translateY: -35}],
+            }}
+            progress={downloadProgress}
+            size={70}
           />
         </View>
         <View style={{flex: 0.8, padding: 5}}>
