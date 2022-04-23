@@ -3,7 +3,6 @@ import * as React from 'react';
 import {
   Image,
   StyleSheet,
-  Text,
   View,
   Linking,
   ImageBackground,
@@ -20,10 +19,11 @@ import {
   Title,
   Paragraph,
   useTheme,
+  Text,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {StorageKeys} from '../enums/enum';
-import {getDayOfWeek} from '../HelperFunctions';
+import {getDayOfWeek, humanFileSize} from '../HelperFunctions';
 import {ShowInfo, ShowResolution, WatchList} from '../models/models';
 import {SubsPleaseApi} from '../SubsPleaseApi';
 import {NativeModules} from 'react-native';
@@ -31,6 +31,14 @@ const {TorrentDownloader} = NativeModules;
 import nodejs from 'nodejs-mobile-react-native';
 import {DownloadDirectoryPath} from 'react-native-fs';
 import * as Progress from 'react-native-progress';
+
+enum DownloadingStatus {
+  NotDownloading,
+  DownloadStarting,
+  Downloading,
+  Seeding,
+  Completed,
+}
 
 type releaseShowProps = {
   showInfo: ShowInfo;
@@ -46,13 +54,18 @@ export const ReleaseShow = ({
   const {colors} = useTheme();
   const [modalVisible, setModalVisible] = React.useState(false);
   const [showDescription, setShowDescription] = React.useState('Loading...');
+  const [downloadingStatus, setDownloadingStatus] = React.useState(
+    DownloadingStatus.NotDownloading,
+  );
   const [fileSize, setFileSize] = React.useState(0);
   const [downloadProgress, setDownloadProgress] = React.useState(0);
   const [downloadSpeed, setDownloadSpeed] = React.useState(0);
   const [uploadSpeed, setUploadSpeed] = React.useState(0);
   const [downloaded, setDownloaded] = React.useState(0);
+  const [torrentPaused, setTorrentPaused] = React.useState(false);
   const [callbackId] = React.useState(
-    (Math.random() + 1).toString(36).substring(7),
+    showInfo.show + showInfo.release_date + showInfo.episode,
+    //(Math.random() + 1).toString(36).substring(7),
   );
 
   const styles = StyleSheet.create({
@@ -114,15 +127,19 @@ export const ReleaseShow = ({
         Linking.openURL(desiredResoltion.magnet);
       };
       const downloadTorrent = () => {
+        setDownloadingStatus(DownloadingStatus.DownloadStarting);
         nodejs.channel.addListener('message', msg => {
           if (msg.callbackId === callbackId) {
             if (msg.name === 'torrent-metadata') {
+              setDownloadingStatus(DownloadingStatus.Downloading);
               setFileSize(msg.size);
             } else if (msg.name === 'torrent-progress') {
               setDownloadProgress(msg.progress);
               setDownloaded(msg.downloaded);
               setDownloadSpeed(msg.downloadSpeed);
               setUploadSpeed(msg.uploadSpeed);
+            } else if (msg.name === 'torrent-done') {
+              setDownloadingStatus(DownloadingStatus.Seeding);
             }
           }
         });
@@ -192,6 +209,14 @@ export const ReleaseShow = ({
     }
   };
 
+  const setTorrentState = (state: 'resume' | 'pause') => {
+    setTorrentPaused(state !== 'resume');
+    nodejs.channel.send({
+      name: state,
+      callbackId,
+    });
+  };
+
   const getWatchlistActionButton = () => {
     if (
       watchList.shows.filter(show => show.showName === showInfo.show).length > 0
@@ -232,6 +257,80 @@ export const ReleaseShow = ({
     );
   };
 
+  const getActionInfoSection = () => {
+    if (downloadingStatus === DownloadingStatus.NotDownloading) {
+      return (
+        <View style={{flexDirection: 'row'}}>
+          {getMagnetButton('720')}
+          {getMagnetButton('1080')}
+        </View>
+      );
+    }
+    return (
+      <View>
+        <View style={{flexDirection: 'row'}}>
+          <Icon
+            name="arrow-up"
+            style={{marginRight: 5, marginTop: 2}}
+            size={13}
+            color={colors.subsPleaseLight3}
+          />
+          <Text style={{color: colors.subsPleaseLight3}}>
+            {humanFileSize(uploadSpeed)}/S
+          </Text>
+        </View>
+        <View style={{flexDirection: 'row'}}>
+          <Icon
+            name="arrow-down"
+            style={{marginRight: 5, marginTop: 2}}
+            size={13}
+            color={colors.subsPleaseLight3}
+          />
+          <Text style={{color: colors.subsPleaseLight3}}>
+            {humanFileSize(downloadSpeed)}/S
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
+  const getProgressOverlay = () => {
+    if (downloadingStatus === DownloadingStatus.NotDownloading) {
+      return <></>;
+    } else if (
+      downloadingStatus === DownloadingStatus.DownloadStarting ||
+      downloadingStatus === DownloadingStatus.Downloading
+    ) {
+      return (
+        <Progress.Pie
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: [{translateX: -35}, {translateY: -35}],
+          }}
+          color={'rgba(203,43,120,0.7)'}
+          progress={downloadProgress}
+          size={70}
+        />
+      );
+    } else if (downloadingStatus === DownloadingStatus.Seeding) {
+      return (
+        <Icon
+          name="arrow-up"
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: [{translateX: -32}, {translateY: -35}],
+          }}
+          size={70}
+          color={colors.primary}
+        />
+      );
+    }
+  };
+
   return (
     <Card style={cardStyle}>
       <View style={{flexDirection: 'row', height: 130}}>
@@ -254,16 +353,7 @@ export const ReleaseShow = ({
               uri: new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl).href,
             }}
           />
-          <Progress.Pie
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: [{translateX: -35}, {translateY: -35}],
-            }}
-            progress={downloadProgress}
-            size={70}
-          />
+          {getProgressOverlay()}
         </View>
         <View style={{flex: 0.8, padding: 5}}>
           <Title
@@ -282,10 +372,8 @@ export const ReleaseShow = ({
             {showInfo.show}
           </Title>
           <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-            <View style={{flexDirection: 'row'}}>
-              {getMagnetButton('720')}
-              {getMagnetButton('1080')}
-            </View>
+            {getActionInfoSection()}
+
             {getWatchlistActionButton()}
           </View>
         </View>

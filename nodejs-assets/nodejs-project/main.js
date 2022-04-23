@@ -22,6 +22,7 @@ class TorrentClient {
   }
 
   downloadTorrent(magnetUri, location) {
+    console.log('Starting torrent', this.callbackId);
     this.client.add(magnetUri, {path: location}, torrent => {
       // Got torrent metadata!
       rn_bridge.channel.send({
@@ -41,11 +42,12 @@ class TorrentClient {
           uploadSpeed: torrent.uploadSpeed,
           progress: torrent.progress,
         });
-      }, 100);
+      }, 1000);
       torrent.on('download', bytes => {
         throttledDownloadHandler();
       });
       torrent.on('done', () => {
+        console.log('Torrent downloaded');
         rn_bridge.channel.send({
           name: 'torrent-done',
           callbackId: this.callbackId,
@@ -56,12 +58,14 @@ class TorrentClient {
 
   pause() {
     if (this.torrent && !this.torrent.paused) {
+      console.log('Pausing', this.callbackId);
       this.torrent.pause();
     }
   }
 
   resume() {
     if (this.torrent && this.torrent.paused) {
+      console.log('Resuming', this.callbackId);
       this.torrent.resume();
     }
   }
@@ -77,6 +81,7 @@ rn_bridge.channel.on('message', msg => {
     torrentObjects[msg.callbackId] = torrentClient;
   } else if (msg.name === 'pause') {
     if (torrentObjects[msg.callbackId]) {
+      console.log('Pasuing', msg.callbackId);
       torrentObjects[msg.callbackId].pause();
     }
   } else if (msg.name === 'resume') {
