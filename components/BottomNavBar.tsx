@@ -9,6 +9,7 @@ import {ReleasesTab} from './ReleasesTab';
 import {WatchListTab} from './WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ShowInfo} from '../models/models';
+import {SettingsTab} from './SettingsTab';
 
 const Tab = createMaterialBottomTabNavigator();
 export const BottomNavBar = () => {
@@ -29,7 +30,7 @@ export const BottomNavBar = () => {
   );
 
   const WatchListRoute = () => <WatchListTab />;
-  const RecentsRoute = () => <Text>Recents</Text>;
+  const SettingsRoute = () => <SettingsTab />;
 
   const refreshShowData = React.useCallback(async () => {
     setRefreshingReleasesList(true);
@@ -114,12 +115,12 @@ export const BottomNavBar = () => {
         }}
       />
       <Tab.Screen
-        name="Recents"
-        component={RecentsRoute}
+        name="Settings"
+        component={SettingsRoute}
         options={{
-          tabBarLabel: 'Recents',
+          tabBarLabel: 'Settings',
           tabBarIcon: ({color}) => (
-            <Icon name="mailbox-open-up-outline" color={color} size={25} />
+            <Icon name="settings" color={color} size={25} />
           ),
           tabBarColor: colors.tertiary,
         }}

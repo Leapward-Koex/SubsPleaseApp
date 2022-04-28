@@ -32,6 +32,12 @@ class TorrentClient {
       });
       this.torrent = torrent;
       console.log('Torrent client is downloading:', torrent.infoHash);
+      console.log(
+        'Torrent data, file path:',
+        torrent.files[0].path,
+        'file name:',
+        torrent.files[0].name,
+      );
       const throttledDownloadHandler = throttle(() => {
         console.log('Torrent update', torrent.progress);
         rn_bridge.channel.send({
@@ -51,6 +57,8 @@ class TorrentClient {
         rn_bridge.channel.send({
           name: 'torrent-done',
           callbackId: this.callbackId,
+          sourceFilePath: torrent.files[0].path,
+          sourceFileName: torrent.files[0].name,
         });
       });
     });
@@ -75,19 +83,23 @@ const torrentObjects = {};
 
 // Echo every message received from react-native.
 rn_bridge.channel.on('message', msg => {
-  if (msg.name === 'download-torrent') {
-    const torrentClient = new TorrentClient(msg.callbackId);
-    torrentClient.downloadTorrent(msg.magnetUri, msg.location);
-    torrentObjects[msg.callbackId] = torrentClient;
-  } else if (msg.name === 'pause') {
-    if (torrentObjects[msg.callbackId]) {
-      console.log('Pasuing', msg.callbackId);
-      torrentObjects[msg.callbackId].pause();
+  try {
+    if (msg.name === 'download-torrent') {
+      const torrentClient = new TorrentClient(msg.callbackId);
+      torrentClient.downloadTorrent(msg.magnetUri, msg.location);
+      torrentObjects[msg.callbackId] = torrentClient;
+    } else if (msg.name === 'pause') {
+      if (torrentObjects[msg.callbackId]) {
+        console.log('Pasuing', msg.callbackId);
+        torrentObjects[msg.callbackId].pause();
+      }
+    } else if (msg.name === 'resume') {
+      if (torrentObjects[msg.callbackId]) {
+        torrentObjects[msg.callbackId].resume();
+      }
     }
-  } else if (msg.name === 'resume') {
-    if (torrentObjects[msg.callbackId]) {
-      torrentObjects[msg.callbackId].resume();
-    }
+  } catch (ex) {
+    console.log('ERROR in node process:', JSON.stringify(ex));
   }
 });
 

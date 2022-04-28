@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TorrentPackage implements ReactPackage {
+public class YorhaPackage implements ReactPackage {
 
    @Override
    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
@@ -20,7 +20,7 @@ public class TorrentPackage implements ReactPackage {
            ReactApplicationContext reactContext) {
        List<NativeModule> modules = new ArrayList<>();
 
-       modules.add(new TorrentModule(reactContext));
+       modules.add(new FilePathModule(reactContext));
 
        return modules;
    }

@@ -1,8 +1,17 @@
 package com.yorha;
 
-import com.facebook.react.ReactActivity;
+import static android.os.Build.VERSION.SDK_INT;
+
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Environment;
+
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+
+import com.facebook.react.ReactActivity;
 
 public class MainActivity extends ReactActivity {
 
@@ -22,5 +31,15 @@ public class MainActivity extends ReactActivity {
     Intent intent = new Intent("onConfigurationChanged");
     intent.putExtra("newConfig", newConfig);
     sendBroadcast(intent);
+  }
+
+  @Override
+  protected void onCreate(@Nullable Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    if (SDK_INT >= Build.VERSION_CODES.R) {
+      FilePathModule.manageFileLauncher = registerForActivityResult(
+              new ActivityResultContracts.StartActivityForResult(),
+              result -> FilePathModule.manageFileLauncherCallback.invoke(Environment.isExternalStorageManager()));
+    }
   }
 }

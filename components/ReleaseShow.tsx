@@ -31,14 +31,10 @@ const {TorrentDownloader} = NativeModules;
 import nodejs from 'nodejs-mobile-react-native';
 import {DownloadDirectoryPath} from 'react-native-fs';
 import * as Progress from 'react-native-progress';
-
-enum DownloadingStatus {
-  NotDownloading,
-  DownloadStarting,
-  Downloading,
-  Seeding,
-  Completed,
-}
+import {
+  DownloadingStatus,
+  DownloadTorrentButton,
+} from './DownloadTorrentButton';
 
 type releaseShowProps = {
   showInfo: ShowInfo;
@@ -116,50 +112,6 @@ export const ReleaseShow = ({
       fontSize: 20,
     },
   });
-
-  const getMagnetButton = (resolution: ShowResolution) => {
-    const desiredResoltion = showInfo.downloads.find(
-      showDownload => showDownload.res === resolution,
-    );
-    if (desiredResoltion) {
-      const openTorrent = () => {
-        // check if we can download it in the app here?
-        Linking.openURL(desiredResoltion.magnet);
-      };
-      const downloadTorrent = () => {
-        setDownloadingStatus(DownloadingStatus.DownloadStarting);
-        nodejs.channel.addListener('message', msg => {
-          if (msg.callbackId === callbackId) {
-            if (msg.name === 'torrent-metadata') {
-              setDownloadingStatus(DownloadingStatus.Downloading);
-              setFileSize(msg.size);
-            } else if (msg.name === 'torrent-progress') {
-              setDownloadProgress(msg.progress);
-              setDownloaded(msg.downloaded);
-              setDownloadSpeed(msg.downloadSpeed);
-              setUploadSpeed(msg.uploadSpeed);
-            } else if (msg.name === 'torrent-done') {
-              setDownloadingStatus(DownloadingStatus.Seeding);
-            }
-          }
-        });
-        nodejs.channel.send({
-          name: 'download-torrent',
-          callbackId,
-          magnetUri: desiredResoltion.magnet,
-          location: DownloadDirectoryPath,
-        });
-      };
-      return (
-        <Button
-          mode="text"
-          onPress={() => openTorrent()}
-          onLongPress={() => downloadTorrent()}>
-          {`${resolution}p`}
-        </Button>
-      );
-    }
-  };
 
   const cardStyle = {
     marginLeft: 5,
@@ -261,8 +213,30 @@ export const ReleaseShow = ({
     if (downloadingStatus === DownloadingStatus.NotDownloading) {
       return (
         <View style={{flexDirection: 'row'}}>
-          {getMagnetButton('720')}
-          {getMagnetButton('1080')}
+          <DownloadTorrentButton
+            resolution={'720'}
+            availableDownloads={showInfo.downloads}
+            showName={showInfo.show}
+            callbackId={callbackId}
+            onDownloadStatusChange={status => setDownloadingStatus(status)}
+            onDownloadSpeed={newDownloadSpeed =>
+              setDownloadSpeed(newDownloadSpeed)
+            }
+            onDownloadProgress={newProgress => setDownloadProgress(newProgress)}
+            onUploadSpeed={newUploadSpeed => setUploadSpeed(newUploadSpeed)}
+          />
+          <DownloadTorrentButton
+            resolution={'1080'}
+            availableDownloads={showInfo.downloads}
+            showName={showInfo.show}
+            callbackId={callbackId}
+            onDownloadStatusChange={status => setDownloadingStatus(status)}
+            onDownloadSpeed={newDownloadSpeed =>
+              setDownloadSpeed(newDownloadSpeed)
+            }
+            onDownloadProgress={newProgress => setDownloadProgress(newProgress)}
+            onUploadSpeed={newUploadSpeed => setUploadSpeed(newUploadSpeed)}
+          />
         </View>
       );
     }
