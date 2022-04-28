@@ -4,6 +4,7 @@ This is a React native app that gets the latest releases from the SubsPlease API
 Only built with Android in mind.
 It includes
 - The magnet links to download the torrents (720p and 1080p)
+- Downloading the episodes within the app to a user specified location (remembers locations for subsequent episodes)
 - The Synopsis + image of the show
 - A watchlist feature to keep track of the shows you're watching and what days they come out on
 - A search feature that uses the SubsPlease search API to find any shows that are available on the website
