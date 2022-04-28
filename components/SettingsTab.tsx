@@ -63,6 +63,8 @@ export const SettingsTab = () => {
       </Appbar.Header>
       <ScrollView style={backgroundStyle}>
         <SavedShowLocationSettings />
+        <SettingsDivider />
+        <ImportExportListItem type="Import" />
         <ImportExportListItem type="Export" />
         <SettingsDivider />
         <TouchableRipple

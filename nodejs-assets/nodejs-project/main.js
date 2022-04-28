@@ -1,6 +1,7 @@
 const rn_bridge = require('rn-bridge');
 const WebTorrent = require('webtorrent');
 const throttle = require('lodash.throttle');
+const jsonfile = require('jsonfile');
 
 function log(...args) {
   rn_bridge.channel.send({
@@ -97,6 +98,25 @@ rn_bridge.channel.on('message', msg => {
       if (torrentObjects[msg.callbackId]) {
         torrentObjects[msg.callbackId].resume();
       }
+    } else if (msg.name === 'write-json') {
+      console.log('Writing backup for', JSON.stringify(msg));
+      jsonfile.writeFile(msg.fileName, JSON.parse(msg.payload), err => {
+        rn_bridge.channel.send({
+          name: 'write-json-callback',
+          callbackId: msg.callbackId,
+          error: err,
+        });
+      });
+    } else if (msg.name === 'read-json') {
+      console.log('Reading backup for', JSON.stringify(msg));
+      jsonfile.readFile(msg.fileName, (err, object) => {
+        rn_bridge.channel.send({
+          name: 'read-json-callback',
+          callbackId: msg.callbackId,
+          error: err,
+          payload: JSON.stringify(object),
+        });
+      });
     }
   } catch (ex) {
     console.log('ERROR in node process:', JSON.stringify(ex));

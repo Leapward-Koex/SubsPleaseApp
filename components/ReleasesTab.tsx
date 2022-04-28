@@ -26,8 +26,6 @@ export const ReleasesTab = ({
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   
-  console.log('len', shows.length, refreshing)
-
   const backgroundStyle = {
     backgroundColor:
       Appearance.getColorScheme() !== 'light'

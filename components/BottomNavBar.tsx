@@ -119,7 +119,7 @@ export const BottomNavBar = () => {
         options={{
           tabBarLabel: 'Settings',
           tabBarIcon: ({color}) => (
-            <Icon name="settings" color={color} size={25} />
+            <Icon name="cog-outline" color={color} size={25} />
           ),
           tabBarColor: colors.tertiary,
         }}
