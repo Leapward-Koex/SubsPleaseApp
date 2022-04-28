@@ -9,12 +9,12 @@ import {
   useTheme,
 } from 'react-native-paper';
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
-import {promiseEach} from '../HelperFunctions';
-import {SubsPleaseApi} from '../SubsPleaseApi';
-import {ReleasesTab} from './ReleasesTab';
-import {WatchListTab} from './WatchListTab';
+import {promiseEach} from '../../HelperFunctions';
+import {SubsPleaseApi} from '../../SubsPleaseApi';
+import {ReleasesTab} from '../ReleasesTab';
+import {WatchListTab} from '../WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import {ShowInfo} from '../models/models';
+import {ShowInfo} from '../../models/models';
 import {
   FlatList,
   ScrollView,

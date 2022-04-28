@@ -24,19 +24,52 @@ import {
   View,
 } from 'react-native';
 import {Appbar} from 'react-native-paper';
-import {ImportExportListItem} from './ExportImportSettings';
+import {ImportExportListItem} from './settingsPageComponents/ExportImportSettings';
+import {SavedShowLocationSettings} from './settingsPageComponents/SavedShowLocationSettings';
+import {SettingsDivider} from './settingsPageComponents/SettingsDivider';
+import {Appearance} from 'react-native-appearance';
 
 export const SettingsTab = () => {
+  const {colors} = useTheme();
+
+  const backgroundStyle = {
+    backgroundColor:
+      Appearance.getColorScheme() === 'light'
+        ? colors.subsPleaseLight2
+        : colors.subsPleaseDark2,
+  };
+
+  const textStyle = {
+    color:
+      Appearance.getColorScheme() === 'light'
+        ? colors.subsPleaseDark3
+        : colors.subsPleaseLight1,
+  };
+
+  const touchableStyle = {
+    height: 60,
+    backgroundColor: colors.subsPleaseDark1,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 20,
+    borderRadius: 4,
+  };
+
   return (
     <>
       <Appbar.Header statusBarHeight={1}>
         <Appbar.Content title="Settings" />
       </Appbar.Header>
-      <ScrollView>
+      <ScrollView style={backgroundStyle}>
+        <SavedShowLocationSettings />
         <ImportExportListItem type="Export" />
-        <TouchableRipple onPress={() => AsyncStorage.clear()}>
+        <SettingsDivider />
+        <TouchableRipple
+          onPress={() => AsyncStorage.clear()}
+          style={touchableStyle}>
           <View>
-            <Title>Clear all data</Title>
+            <Title style={textStyle}>Clear all data</Title>
           </View>
         </TouchableRipple>
       </ScrollView>

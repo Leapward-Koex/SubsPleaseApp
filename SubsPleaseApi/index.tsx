@@ -12,10 +12,9 @@ export class SubsPleaseApi {
           .href,
         {cache: 'no-store'},
       );
-      console.log('Retrieved subsplease shows')
       if (response.ok) {
         const showData: SubsPleaseShowApiResult = await response.json();
-        console.log('Retrieved subsplease shows')
+        console.log('Retrieved subsplease shows');
         return Object.values(showData);
       } else {
         console.log(

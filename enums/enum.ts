@@ -1,3 +1,4 @@
 export enum StorageKeys {
-    WatchList = 'watchList'
+    WatchList = 'watchList',
+    ShowPaths = 'showPaths',
 }

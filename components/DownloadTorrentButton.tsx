@@ -10,6 +10,8 @@ import {
   requestStoragePermission,
 } from '../HelperFunctions';
 import {NativeModules} from 'react-native';
+import {StorageKeys} from '../enums/enum';
+import {SavedShowPaths} from './settingsPageComponents/SavedShowLocationSettings';
 
 const {FilePathModule} = NativeModules;
 
@@ -65,21 +67,40 @@ export const DownloadTorrentButton = ({
     Linking.openURL(desiredResoltion.magnet);
   };
 
+  const getStoredShowPaths = async () => {
+    return JSON.parse(
+      (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
+        JSON.stringify({shows: []}),
+    ) as SavedShowPaths;
+  };
+
   const downloadTorrent = async () => {
     // get stored location else
     let path: string | null | undefined = 'a';
     if (!(await requestStoragePermission())) {
       console.warn('Required permissions were not accepted.');
     }
-    path = await AsyncStorage.getItem(showDownloadPathKey);
-    if (!path) {
+
+    let storedShowPaths = await getStoredShowPaths();
+
+    const currentShow = storedShowPaths.shows.find(
+      show => show.showName === showName,
+    );
+
+    if (!currentShow?.showPath) {
       const fileLocation = await pickDirectory();
       if (!fileLocation) {
         console.log('No file location selected');
         return;
       } else {
         path = await getRealPathFromContentUri(fileLocation.uri);
-        await AsyncStorage.setItem(showDownloadPathKey, path);
+        storedShowPaths = await getStoredShowPaths();
+        storedShowPaths.shows.push({showName, showPath: path});
+
+        await AsyncStorage.setItem(
+          StorageKeys.ShowPaths,
+          JSON.stringify(storedShowPaths),
+        );
       }
     }
 

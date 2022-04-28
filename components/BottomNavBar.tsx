@@ -17,7 +17,7 @@ export const BottomNavBar = () => {
   const [mounted, setMounted] = React.useState(true);
   const [showList, setShowList] = React.useState<ShowInfo[]>([]);
   const [refreshingReleasesList, setRefreshingReleasesList] =
-    React.useState(true);
+    React.useState(false);
 
   const {colors, dark} = useTheme();
 
@@ -36,18 +36,17 @@ export const BottomNavBar = () => {
     setRefreshingReleasesList(true);
     const getLatestShowListPromise = SubsPleaseApi.getLatestShowList();
     const getSavedReleasesPromise = getSavedReleases();
-    promiseEach<ShowInfo[]>(
-      [getLatestShowListPromise, getSavedReleasesPromise],
-      showListRequest => {
-        if (mounted) {
-          setShowList(showListRequest);
-        }
-      },
-    );
+    let promisesFinished = false;
+    setTimeout(async () => {
+      if (mounted && !promisesFinished) {
+        setShowList(await getSavedReleasesPromise);
+      }
+    }, 5000);
     const [apiShowList, savedShowList] = await Promise.all([
       getLatestShowListPromise,
       getSavedReleasesPromise,
     ]);
+    promisesFinished = true;
     // Combine the showlist here
     const uniqueShows = uniqBy(
       apiShowList.concat(savedShowList),
@@ -56,8 +55,8 @@ export const BottomNavBar = () => {
     if (mounted) {
       setShowList(uniqueShows);
       saveReleases(uniqueShows);
+      setRefreshingReleasesList(false);
     }
-    setRefreshingReleasesList(false);
   }, [mounted]);
 
   // Release tab data
