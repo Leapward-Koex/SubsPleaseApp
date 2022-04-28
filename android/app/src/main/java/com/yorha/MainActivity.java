@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.facebook.react.ReactActivity;
 
 public class MainActivity extends ReactActivity {
+  public static String PACKAGE_NAME;
 
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
@@ -36,6 +37,7 @@ public class MainActivity extends ReactActivity {
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    PACKAGE_NAME = getApplicationContext().getPackageName();
     if (SDK_INT >= Build.VERSION_CODES.R) {
       FilePathModule.manageFileLauncher = registerForActivityResult(
               new ActivityResultContracts.StartActivityForResult(),

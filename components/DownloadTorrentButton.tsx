@@ -76,7 +76,7 @@ export const DownloadTorrentButton = ({
 
   const downloadTorrent = async () => {
     // get stored location else
-    let path: string | null | undefined = 'a';
+    let path: string | null | undefined = '';
     if (!(await requestStoragePermission())) {
       console.warn('Required permissions were not accepted.');
     }
@@ -102,6 +102,8 @@ export const DownloadTorrentButton = ({
           JSON.stringify(storedShowPaths),
         );
       }
+    } else {
+      path = currentShow.showPath;
     }
 
     onDownloadStatusChange(DownloadingStatus.DownloadStarting);

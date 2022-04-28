@@ -46,7 +46,7 @@ public class FilePathModule extends ReactContextBaseJavaModule {
         if (SDK_INT >= Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-                Uri uri = Uri.fromParts("package", "com.yorha", null);
+                Uri uri = Uri.fromParts("package", MainActivity.PACKAGE_NAME, null);
                 intent.setData(uri);
 
                 FilePathModule.manageFileLauncherCallback = callBack;
