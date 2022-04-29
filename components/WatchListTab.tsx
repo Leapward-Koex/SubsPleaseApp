@@ -201,6 +201,7 @@ export const WatchListTab = () => {
   const dayOfWeekIndex = daysOfWeek.indexOf(
     daysOfWeek.filter(dayOfWeek => dayOfWeek.dayName === currentDayName)[0],
   );
+
   return (
     <View
       style={{
@@ -215,13 +216,13 @@ export const WatchListTab = () => {
           data={daysOfWeek}
           renderItem={({item, index}) => <ShowDayInfo {...item} />}
           firstItem={dayOfWeekIndex}
-          decelerationRate={'fast'}
+          loop
           layoutCardOffset={18}
           inactiveSlideOpacity={0.7}
-          removeClippedSubviews
           sliderWidth={width}
           itemWidth={width}
-          itemHeight={height}
+          vertical={false}
+          useExperimentalSnap
         />
       </ImageBackground>
     </View>
