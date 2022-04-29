@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {View, Keyboard, Dimensions} from 'react-native';
+import {View, Keyboard, useWindowDimensions} from 'react-native';
 import {Appbar, Button, Searchbar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -9,6 +9,7 @@ interface ReleaseTabHeaderProps {
 }
 export const ReleaseTabHeader = (props: ReleaseTabHeaderProps) => {
   const {onSearchChanged, onSearchCancelled} = props;
+  const {width} = useWindowDimensions();
   const [searchQuery, setSearchQuery] = React.useState('');
 
   const onChangeText = (query: string) => {
@@ -37,7 +38,7 @@ export const ReleaseTabHeader = (props: ReleaseTabHeaderProps) => {
           placeholder="Search"
           onChangeText={onChangeText}
           value={searchQuery}
-          style={{flexGrow: 1, width: Dimensions.get('window').width - 50}}
+          style={{flexGrow: 1, width: width - 50}}
         />
       </View>
     </Appbar.Header>

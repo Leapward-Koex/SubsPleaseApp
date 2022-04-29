@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Animated, Dimensions, SafeAreaView, View} from 'react-native';
+import {Animated, SafeAreaView, useWindowDimensions, View} from 'react-native';
 import {Text, useTheme} from 'react-native-paper';
 import {ReleaseShow} from './ReleaseShow';
 import {Appearance} from 'react-native-appearance';
@@ -25,7 +25,8 @@ export const ReleasesTab = ({
   const [showList, setShowList] = React.useState(shows);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
-  
+  const {height} = useWindowDimensions();
+
   const backgroundStyle = {
     backgroundColor:
       Appearance.getColorScheme() !== 'light'
@@ -67,7 +68,7 @@ export const ReleasesTab = ({
       <View
         style={{
           flexDirection: 'column',
-          height: Dimensions.get('window').height - 50,
+          height: height - 50,
         }}>
         <ReleaseTabHeader
           onSearchChanged={debounceSearchHandler}

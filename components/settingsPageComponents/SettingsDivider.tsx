@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Animated, Dimensions, SafeAreaView, View} from 'react-native';
+import {Animated, SafeAreaView, useWindowDimensions, View} from 'react-native';
 import {Text, useTheme} from 'react-native-paper';
 import {ReleaseShow} from '../ReleaseShow';
 import {Appearance} from 'react-native-appearance';
@@ -12,6 +12,7 @@ import debounce from 'lodash.debounce';
 
 export const SettingsDivider = () => {
   const {colors} = useTheme();
+  const {width} = useWindowDimensions();
   const backgroundStyle = {
     backgroundColor:
       Appearance.getColorScheme() !== 'light'
@@ -32,7 +33,7 @@ export const SettingsDivider = () => {
         style={{
           borderBottomColor: 'black',
           borderBottomWidth: 1,
-          width: Dimensions.get('window').width - 4,
+          width: width - 4,
         }}
       />
     </View>

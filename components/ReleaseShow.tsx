@@ -9,7 +9,7 @@ import {
   Pressable,
   Modal,
   ScrollView,
-  Dimensions,
+  useWindowDimensions,
 } from 'react-native';
 import {Appearance} from 'react-native-appearance';
 import {
@@ -63,6 +63,7 @@ export const ReleaseShow = ({
     showInfo.show + showInfo.release_date + showInfo.episode,
     //(Math.random() + 1).toString(36).substring(7),
   );
+  const {height, width} = useWindowDimensions();
 
   const styles = StyleSheet.create({
     stretch: {
@@ -80,7 +81,7 @@ export const ReleaseShow = ({
       overflow: 'scroll',
     },
     modalView: {
-      maxHeight: Dimensions.get('window').height - 50,
+      maxHeight: height - 50,
       width: '90%',
       margin: 20,
       backgroundColor: 'white',
@@ -184,7 +185,7 @@ export const ReleaseShow = ({
             size={13}
             color={colors.subsPleaseDark1}
           />
-          {Dimensions.get('window').width > 500 ? (
+          {width > 500 ? (
             <Text style={{color: colors.subsPleaseDark1}}>Remove</Text>
           ) : (
             <></>
@@ -200,7 +201,7 @@ export const ReleaseShow = ({
           size={13}
           color={colors.subsPleaseLight1}
         />
-        {Dimensions.get('window').width > 500 ? (
+        {width > 500 ? (
           <Text style={{color: colors.subsPleaseLight1}}>Add</Text>
         ) : (
           <></>

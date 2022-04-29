@@ -17,12 +17,12 @@ import {WatchListTab} from '../WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ShowInfo} from '../../models/models';
 import {
-  Dimensions,
   FlatList,
   ScrollView,
   SectionList,
   StatusBar,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {Appbar} from 'react-native-paper';
@@ -40,6 +40,7 @@ export interface SavedShowPaths {
 export const SavedShowLocationSettings = () => {
   const {colors} = useTheme();
   const [savedShowPaths, setSavedShowPaths] = React.useState<SavedShowPaths>();
+  const {height, width} = useWindowDimensions();
 
   const backgroundStyle = {
     backgroundColor:
@@ -132,7 +133,7 @@ export const SavedShowLocationSettings = () => {
                   ? colors.subsPleaseLight2
                   : colors.subsPleaseDark1,
             }}>
-            <View style={{width: Dimensions.get('screen').width - 120}}>
+            <View style={{width: width - 120}}>
               <Text style={Object.assign({fontSize: 20}, textStyle)}>
                 {show.showName}
               </Text>

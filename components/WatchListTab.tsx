@@ -1,12 +1,12 @@
 import * as React from 'react';
 import {
   Animated,
-  Dimensions,
   FlatList,
   Image,
   ImageBackground,
   SafeAreaView,
   StyleSheet,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {Button, Card, Text, Title, useTheme} from 'react-native-paper';
@@ -20,7 +20,6 @@ import Carousel from 'react-native-snap-carousel';
 import {weekday} from '../HelperFunctions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const {height, width} = Dimensions.get('window');
 interface DayOfWeek {
   dayName: string;
 }
@@ -100,6 +99,7 @@ type ShowDayInfoProps = {
 const ShowDayInfo = (props: ShowDayInfoProps) => {
   const {dayName} = props;
   const {colors} = useTheme();
+  const {height} = useWindowDimensions();
   const [showsForCurrentDay, setShowsForCurrentDay] = React.useState<
     WatchListItem[]
   >([]);
@@ -197,6 +197,7 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
 export const WatchListTab = () => {
   const carouselRef = React.useRef(null);
   const currentDayName = weekday[new Date().getDay()];
+  const {height, width} = useWindowDimensions();
   const dayOfWeekIndex = daysOfWeek.indexOf(
     daysOfWeek.filter(dayOfWeek => dayOfWeek.dayName === currentDayName)[0],
   );
