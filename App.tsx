@@ -7,6 +7,7 @@ import {DefaultTheme, Provider as PaperProvider} from 'react-native-paper';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {BottomNavBar} from './components/BottomNavBar';
 import nodejs from 'nodejs-mobile-react-native';
+import Toast from 'react-native-toast-message';
 
 declare global {
   namespace ReactNativePaper {
@@ -67,6 +68,7 @@ const App = () => {
     <NavigationContainer>
       <PaperProvider theme={theme}>
         <BottomNavBar />
+        <Toast />
       </PaperProvider>
     </NavigationContainer>
   );

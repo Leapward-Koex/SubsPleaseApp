@@ -17,6 +17,7 @@
     "@types/react-native-snap-carousel": "^3.8.3",
     "expo": ">=43.0.0-* <44.0.0",
     "fast-html-parser": "^1.0.1",
+    "ffmpeg-kit-react-native": "^4.5.1",
     "lodash.debounce": "^4.0.8",
     "lodash.uniqby": "^4.7.0",
     "nodejs-mobile-react-native": "^0.8.0",
@@ -34,6 +35,7 @@
     "react-native-safe-area-context": "^3.2.0",
     "react-native-screens": "^3.3.0",
     "react-native-snap-carousel": "^4.0.0-beta.6",
+    "react-native-toast-message": "^2.1.5",
     "react-native-vector-icons": "^8.1.0",
     "util": "^0.12.4"
   },

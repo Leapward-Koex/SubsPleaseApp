@@ -59,6 +59,23 @@ public class FilePathModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @ReactMethod
+    public void fileExists(final String filePath, Callback callBack) {
+        File file = new File(filePath);
+        callBack.invoke(file.exists());
+    }
+
+    @ReactMethod
+    public void deleteFileIfExists(final String filePath, Callback callBack) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            callBack.invoke(file.delete());
+        }
+        else {
+            callBack.invoke(true);
+        }
+    }
+
     // Adapted from https://github.com/saparkhid/AndroidFileNamePicker
     @ReactMethod
     public void getFolderPathFromUri(final String uriString, Callback callBack) {

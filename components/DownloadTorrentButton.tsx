@@ -12,6 +12,8 @@ import {
 import {NativeModules} from 'react-native';
 import {StorageKeys} from '../enums/enum';
 import {SavedShowPaths} from './settingsPageComponents/SavedShowLocationSettings';
+import {convert} from '../services/converter';
+import {downloadedShows} from '../services/DownloadedShows';
 
 const {FilePathModule} = NativeModules;
 
@@ -26,6 +28,7 @@ type DownloadTorrentButtonProps = {
   onDownloaded?: (totalDownloaded: number) => void;
   onDownloadSpeed: (currentDownloadSpeed: number) => void;
   onUploadSpeed: (currentUploadSpeed: number) => void;
+  onShowDownloaded: () => void;
 };
 
 export enum DownloadingStatus {
@@ -47,9 +50,8 @@ export const DownloadTorrentButton = ({
   onDownloaded,
   onDownloadSpeed,
   onUploadSpeed,
+  onShowDownloaded,
 }: DownloadTorrentButtonProps) => {
-  const showDownloadPathKey = `${showName}-download-path`;
-
   const desiredResoltion = availableDownloads.find(
     showDownload => showDownload.res === resolution,
   );
@@ -82,6 +84,7 @@ export const DownloadTorrentButton = ({
     }
 
     let storedShowPaths = await getStoredShowPaths();
+    console.log('Stored show paths', storedShowPaths);
 
     const currentShow = storedShowPaths.shows.find(
       show => show.showName === showName,
@@ -119,6 +122,11 @@ export const DownloadTorrentButton = ({
           onDownloadSpeed(msg.downloadSpeed);
           onUploadSpeed(msg.uploadSpeed);
         } else if (msg.name === 'torrent-done') {
+          onShowDownloaded();
+          await downloadedShows.addDownloadedShow(
+            desiredResoltion.magnet,
+            msg.sourceFileName,
+          );
           onDownloadStatusChange(DownloadingStatus.Seeding);
         }
       }

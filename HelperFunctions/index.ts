@@ -55,6 +55,11 @@ interface FilePathModuleInterface {
     callback: (directoryPath: string) => void,
   ): void;
   verifyManageFilesPermission(callback: (granted: boolean) => void): void;
+  fileExists(filePath: string, callback: (fileExists: boolean) => void): void;
+  deleteFileIfExists(
+    filePath: string,
+    callback: (success: boolean) => void,
+  ): void;
 }
 
 const {FilePathModule} = NativeModules;
@@ -68,6 +73,22 @@ export const getRealPathFromContentUri = (contentUri: string) => {
         reject(`Content Uri ${contentUri} could not be mapped to directory`);
       }
     });
+  });
+};
+
+export const fileExists = (filePath: string) => {
+  return new Promise<boolean>(resolve => {
+    FilePathModuleTyped.fileExists(filePath, fileExistsOnDevice =>
+      resolve(fileExistsOnDevice),
+    );
+  });
+};
+
+export const deleteFileIfExists = (filePath: string) => {
+  return new Promise<boolean>(resolve => {
+    FilePathModuleTyped.deleteFileIfExists(filePath, success =>
+      resolve(success),
+    );
   });
 };
 
