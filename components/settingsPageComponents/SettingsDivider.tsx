@@ -1,14 +1,7 @@
 import * as React from 'react';
-import {Animated, SafeAreaView, useWindowDimensions, View} from 'react-native';
-import {Text, useTheme} from 'react-native-paper';
-import {ReleaseShow} from '../ReleaseShow';
+import {useWindowDimensions, View} from 'react-native';
+import {useTheme} from 'react-native-paper';
 import {Appearance} from 'react-native-appearance';
-import {ShowInfo, WatchList} from '../../models/models';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {StorageKeys} from '../../enums/enum';
-import {ReleaseTabHeader} from '../ReleaseHeader';
-import {SubsPleaseApi} from '../../SubsPleaseApi';
-import debounce from 'lodash.debounce';
 
 export const SettingsDivider = () => {
   const {colors} = useTheme();

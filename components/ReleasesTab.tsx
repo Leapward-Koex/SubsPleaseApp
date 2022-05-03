@@ -6,9 +6,11 @@ import {Appearance} from 'react-native-appearance';
 import {ShowInfo, WatchList} from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {StorageKeys} from '../enums/enum';
-import {ReleaseTabHeader} from './ReleaseHeader';
+import {ReleaseTabHeader, ShowFilter} from './ReleaseHeader';
 import {SubsPleaseApi} from '../SubsPleaseApi';
 import debounce from 'lodash.debounce';
+import {downloadedShows} from '../services/DownloadedShows';
+import {asyncFilter} from '../HelperFunctions';
 
 type ReleaseTabProps = {
   shows: ShowInfo[];
@@ -23,6 +25,8 @@ export const ReleasesTab = ({
   const {colors} = useTheme();
   const [watchList, setWatchList] = React.useState<WatchList>();
   const [showList, setShowList] = React.useState(shows);
+  const [filteredShowList, setFilteredShowList] = React.useState(shows);
+  const [showFilter, setShowFilter] = React.useState(ShowFilter.None);
 
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const {height} = useWindowDimensions();
@@ -43,6 +47,33 @@ export const ReleasesTab = ({
       setWatchList(storedWatchList);
     })();
   }, []);
+
+  React.useEffect(() => {
+    (async () => {
+      const getFilteredList = async () => {
+        if (showFilter === ShowFilter.Downloaded) {
+          return asyncFilter(showList, async show => {
+            const downloadedEpisodesForSeries = await asyncFilter(
+              show.downloads,
+              async download =>
+                (download.res === '720' || download.res === '1080') &&
+                (await downloadedShows.isShowDownloaded(
+                  show.show,
+                  download.magnet,
+                )),
+            );
+            return downloadedEpisodesForSeries.length > 0;
+          });
+        } else if (showFilter === ShowFilter.Watching) {
+          const watchingShowNames =
+            watchList?.shows.map(show => show.showName) ?? [];
+          return showList.filter(show => watchingShowNames.includes(show.show));
+        }
+        return showList;
+      };
+      setFilteredShowList(await getFilteredList());
+    })();
+  }, [showFilter, showList, watchList?.shows]);
 
   const onWatchListChanged = (updatedWatchList: WatchList) => {
     setWatchList({...updatedWatchList});
@@ -73,10 +104,11 @@ export const ReleasesTab = ({
         <ReleaseTabHeader
           onSearchChanged={debounceSearchHandler}
           onSearchCancelled={onSearchCancelled}
+          onFilterChanged={filterValue => setShowFilter(filterValue)}
         />
         <Animated.FlatList
           style={backgroundStyle}
-          data={showList}
+          data={filteredShowList}
           onScroll={Animated.event(
             [{nativeEvent: {contentOffset: {y: scrollY}}}],
             {useNativeDriver: true},
