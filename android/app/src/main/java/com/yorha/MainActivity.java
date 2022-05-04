@@ -10,6 +10,7 @@ import android.os.Environment;
 
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
+import com.google.android.gms.cast.framework.CastContext;
 
 import com.facebook.react.ReactActivity;
 
@@ -38,6 +39,7 @@ public class MainActivity extends ReactActivity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     PACKAGE_NAME = getApplicationContext().getPackageName();
+    CastContext.getSharedInstance(this);
     if (SDK_INT >= Build.VERSION_CODES.R) {
       FilePathModule.manageFileLauncher = registerForActivityResult(
               new ActivityResultContracts.StartActivityForResult(),

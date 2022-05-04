@@ -36,6 +36,7 @@ import {
 } from './DownloadTorrentButton';
 import {downloadedShows} from '../services/DownloadedShows';
 import {MakeCastableButton} from './MakeCastableButton';
+import {CustomCastButton} from './CastButton';
 
 type releaseShowProps = {
   showInfo: ShowInfo;
@@ -247,6 +248,10 @@ export const ReleaseShow = ({
           <MakeCastableButton
             showName={showInfo.show}
             fileMagnet={showDownloaded}
+          />
+          <CustomCastButton
+            showName={showInfo.show}
+            fileMagent={showDownloaded}
           />
         </View>
       );

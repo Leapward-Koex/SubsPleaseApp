@@ -12,7 +12,7 @@ class Converter {
         0,
         sourceFileName.length - 4,
       );
-      const subtitleFilePath = `${sourcePath}/${fileNameWithoutExtension}.srt`;
+      const subtitleFilePath = `${sourcePath}/${fileNameWithoutExtension}.vtt`;
       const deleteSubFileResult = await deleteFileIfExists(subtitleFilePath);
 
       const outputVideoFilePath = `${sourcePath}/${fileNameWithoutExtension}.mp4`;

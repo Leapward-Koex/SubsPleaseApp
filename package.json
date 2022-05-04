@@ -28,6 +28,8 @@
     "react-native-document-picker": "^8.1.0",
     "react-native-fs": "^2.19.0",
     "react-native-gesture-handler": "^1.10.3",
+    "react-native-google-cast": "^4.2.4",
+    "react-native-http-bridge": "^0.6.1",
     "react-native-paper": "^4.9.1",
     "react-native-progress": "^5.0.0",
     "react-native-push-notification": "^7.4.0",

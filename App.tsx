@@ -8,7 +8,10 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {BottomNavBar} from './components/BottomNavBar';
 import nodejs from 'nodejs-mobile-react-native';
 import Toast from 'react-native-toast-message';
+import {localWebServerManager} from './services/LocalWebServerManager';
+import {LogBox} from 'react-native';
 
+LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 declare global {
   namespace ReactNativePaper {
     interface ThemeColors {
@@ -62,6 +65,7 @@ const App = () => {
         console.log(msg.text);
       }
     });
+    localWebServerManager.startServer();
   }, []);
 
   return (

@@ -4,6 +4,7 @@ import {Appbar, Button, Dialog, Portal, Searchbar} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {RadioButton} from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {CastButton} from 'react-native-google-cast';
 
 interface ReleaseTabHeaderProps {
   onSearchChanged: (query: string) => void;
@@ -83,16 +84,19 @@ export const ReleaseTabHeader = ({
             placeholder="Search"
             onChangeText={onChangeText}
             value={searchQuery}
-            style={{flexGrow: 1, width: width - 100}}
+            style={{flexGrow: 1, width: width - 150}}
           />
           <Button
             mode="text"
             compact
             contentStyle={{flexDirection: 'row-reverse'}}
-            style={{paddingTop: 5}}
+            style={{paddingTop: 5, width: 50}}
             onPress={toggleFilterPanel}>
             <Icon name="filter-variant" size={24} color="#fff" />
           </Button>
+          <CastButton
+            style={{width: 50, height: 24, top: 12, tintColor: 'white'}}
+          />
         </View>
       </Appbar.Header>
       <Portal>

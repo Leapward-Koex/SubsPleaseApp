@@ -194,6 +194,10 @@ android {
     }
 }
 
+def safeExtGet(prop, fallback) {
+  rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     //noinspection GradleDynamicVersion
@@ -201,6 +205,7 @@ dependencies {
     implementation "androidx.activity:activity:1.4.0"
     implementation "androidx.fragment:fragment:1.4.1"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    implementation "com.google.android.gms:play-services-cast-framework:${safeExtGet('castFrameworkVersion', '+')}"
     implementation project(':react-native-fs')
     implementation project(':react-native-svg')
 

@@ -9,13 +9,10 @@ import {
   getRealPathFromContentUri,
   requestStoragePermission,
 } from '../HelperFunctions';
-import {NativeModules} from 'react-native';
 import {StorageKeys} from '../enums/enum';
 import {SavedShowPaths} from './settingsPageComponents/SavedShowLocationSettings';
 import {convert} from '../services/converter';
 import {downloadedShows} from '../services/DownloadedShows';
-
-const {FilePathModule} = NativeModules;
 
 type DownloadTorrentButtonProps = {
   resolution: string;
