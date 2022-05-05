@@ -9,4 +9,6 @@ It includes
 - A watchlist feature to keep track of the shows you're watching and what days they come out on
 - A search feature that uses the SubsPlease search API to find any shows that are available on the website
 
-Data such as the historical show list + synopsis are cached on the device so you can access more shows in chronological releases than the SubsPlease API will allow
+Data such as the historical show list + synopsis are cached on the device so you can access more shows in chronological releases than the SubsPlease API will allow.
+
+https://user-images.githubusercontent.com/30615050/166905778-30914cb7-941f-4ba3-ae6c-e45357367d76.mp4
