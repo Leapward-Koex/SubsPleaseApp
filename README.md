@@ -5,6 +5,7 @@ Only built with Android in mind.
 It includes
 - The magnet links to download the torrents (720p and 1080p)
 - Downloading the episodes within the app to a user specified location using longpress of resolution button (remembers locations for subsequent episodes)
+- Casting of downloaded episodes to Google Cast devices
 - The Synopsis + image of the show
 - A watchlist feature to keep track of the shows you're watching and what days they come out on
 - A search feature that uses the SubsPlease search API to find any shows that are available on the website
