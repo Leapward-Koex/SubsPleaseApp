@@ -12,6 +12,7 @@ import {
     deleteFileIfExists,
     getExtensionlessFilepath,
 } from '../HelperFunctions';
+import { NetworkInfo } from 'react-native-network-info';
 
 export type PlayButtonType = {
     showName: string;
@@ -69,11 +70,16 @@ export const PlayButton = ({ showName, fileMagnet }: PlayButtonType) => {
             return;
         }
 
+        const localIp = await NetworkInfo.getIPV4Address();
+        if (!localIp) {
+            console.error('Cannot cast if local IP address is not available!');
+        }
+        console.log('Going to serve assets on:', localIp);
         await localWebServerManager.registerFileToPlay(fileName);
         client
             .loadMedia({
                 mediaInfo: {
-                    contentUrl: 'http:/192.168.1.16:48839/video',
+                    contentUrl: `http:/${localIp}:48839/video`,
                     contentType: 'video/mp4',
                     mediaTracks: [
                         {
@@ -81,7 +87,7 @@ export const PlayButton = ({ showName, fileMagnet }: PlayButtonType) => {
                             type: 'text',
                             subtype: 'subtitles',
                             name: 'English Subtitle',
-                            contentId: 'http:/192.168.1.16:48839/vtt',
+                            contentId: `http:/${localIp}:48839/vtt`,
                             language: 'en-US',
                             contentType: 'text/vtt',
                         } as any,
