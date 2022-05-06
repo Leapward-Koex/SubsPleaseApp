@@ -1,147 +1,148 @@
 import * as React from 'react';
-import {Linking} from 'react-native';
-import {Button} from 'react-native-paper';
-import {ShowDownloadInfo} from '../models/models';
+import { Linking } from 'react-native';
+import { Button } from 'react-native-paper';
+import { ShowDownloadInfo } from '../models/models';
 import nodejs from 'nodejs-mobile-react-native';
-import {pickDirectory} from 'react-native-document-picker';
+import { pickDirectory } from 'react-native-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  getRealPathFromContentUri,
-  requestStoragePermission,
+    getRealPathFromContentUri,
+    requestStoragePermission,
 } from '../HelperFunctions';
-import {StorageKeys} from '../enums/enum';
-import {SavedShowPaths} from './settingsPageComponents/SavedShowLocationSettings';
-import {convert} from '../services/converter';
-import {downloadedShows} from '../services/DownloadedShows';
+import { StorageKeys } from '../enums/enum';
+import { SavedShowPaths } from './settingsPageComponents/SavedShowLocationSettings';
+import { convert } from '../services/converter';
+import { downloadedShows } from '../services/DownloadedShows';
 
 type DownloadTorrentButtonProps = {
-  resolution: string;
-  availableDownloads: ShowDownloadInfo[];
-  showName: string;
-  callbackId: string;
-  onDownloadStatusChange: (newStatus: DownloadingStatus) => void;
-  onFileSizeObtained?: (fileSize: number) => void;
-  onDownloadProgress?: (percentage: number) => void; // 0 -> 1
-  onDownloaded?: (totalDownloaded: number) => void;
-  onDownloadSpeed: (currentDownloadSpeed: number) => void;
-  onUploadSpeed: (currentUploadSpeed: number) => void;
-  onShowDownloaded: () => void;
+    resolution: string;
+    availableDownloads: ShowDownloadInfo[];
+    showName: string;
+    callbackId: string;
+    onDownloadStatusChange: (newStatus: DownloadingStatus) => void;
+    onFileSizeObtained?: (fileSize: number) => void;
+    onDownloadProgress?: (percentage: number) => void; // 0 -> 1
+    onDownloaded?: (totalDownloaded: number) => void;
+    onDownloadSpeed: (currentDownloadSpeed: number) => void;
+    onUploadSpeed: (currentUploadSpeed: number) => void;
+    onShowDownloaded: () => void;
 };
 
 export enum DownloadingStatus {
-  NotDownloading,
-  DownloadStarting,
-  Downloading,
-  Seeding,
-  Completed,
+    NotDownloading,
+    DownloadStarting,
+    Downloading,
+    Seeding,
+    Completed,
 }
 
 export const DownloadTorrentButton = ({
-  resolution,
-  availableDownloads,
-  showName,
-  callbackId,
-  onDownloadStatusChange,
-  onFileSizeObtained,
-  onDownloadProgress,
-  onDownloaded,
-  onDownloadSpeed,
-  onUploadSpeed,
-  onShowDownloaded,
+    resolution,
+    availableDownloads,
+    showName,
+    callbackId,
+    onDownloadStatusChange,
+    onFileSizeObtained,
+    onDownloadProgress,
+    onDownloaded,
+    onDownloadSpeed,
+    onUploadSpeed,
+    onShowDownloaded,
 }: DownloadTorrentButtonProps) => {
-  const desiredResoltion = availableDownloads.find(
-    showDownload => showDownload.res === resolution,
-  );
-  if (!desiredResoltion) {
-    console.error(
-      'Could not find specified resoultion for show',
-      JSON.stringify(availableDownloads),
-      'Requested resolution',
-      resolution,
+    const desiredResoltion = availableDownloads.find(
+        (showDownload) => showDownload.res === resolution,
     );
-    return <></>;
-  }
-  const openTorrent = () => {
-    // check if we can download it in the app here?
-    Linking.openURL(desiredResoltion.magnet);
-  };
-
-  const getStoredShowPaths = async () => {
-    return JSON.parse(
-      (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
-        JSON.stringify({shows: []}),
-    ) as SavedShowPaths;
-  };
-
-  const downloadTorrent = async () => {
-    // get stored location else
-    let path: string | null | undefined = '';
-    if (!(await requestStoragePermission())) {
-      console.warn('Required permissions were not accepted.');
-    }
-
-    let storedShowPaths = await getStoredShowPaths();
-    console.log('Stored show paths', storedShowPaths);
-
-    const currentShow = storedShowPaths.shows.find(
-      show => show.showName === showName,
-    );
-
-    if (!currentShow?.showPath) {
-      const fileLocation = await pickDirectory();
-      if (!fileLocation) {
-        console.log('No file location selected');
-        return;
-      } else {
-        path = await getRealPathFromContentUri(fileLocation.uri);
-        storedShowPaths = await getStoredShowPaths();
-        storedShowPaths.shows.push({showName, showPath: path});
-
-        await AsyncStorage.setItem(
-          StorageKeys.ShowPaths,
-          JSON.stringify(storedShowPaths),
+    if (!desiredResoltion) {
+        console.error(
+            'Could not find specified resoultion for show',
+            JSON.stringify(availableDownloads),
+            'Requested resolution',
+            resolution,
         );
-      }
-    } else {
-      path = currentShow.showPath;
+        return <></>;
     }
+    const openTorrent = () => {
+        // check if we can download it in the app here?
+        Linking.openURL(desiredResoltion.magnet);
+    };
 
-    onDownloadStatusChange(DownloadingStatus.DownloadStarting);
+    const getStoredShowPaths = async () => {
+        return JSON.parse(
+            (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
+                JSON.stringify({ shows: [] }),
+        ) as SavedShowPaths;
+    };
 
-    nodejs.channel.addListener('message', async msg => {
-      if (msg.callbackId === callbackId) {
-        if (msg.name === 'torrent-metadata') {
-          onDownloadStatusChange(DownloadingStatus.Downloading);
-          onFileSizeObtained?.(msg.size);
-        } else if (msg.name === 'torrent-progress') {
-          onDownloadProgress?.(msg.progress);
-          onDownloaded?.(msg.downloaded);
-          onDownloadSpeed(msg.downloadSpeed);
-          onUploadSpeed(msg.uploadSpeed);
-        } else if (msg.name === 'torrent-done') {
-          onShowDownloaded();
-          await downloadedShows.addDownloadedShow(
-            desiredResoltion.magnet,
-            msg.sourceFileName,
-          );
-          onDownloadStatusChange(DownloadingStatus.Seeding);
+    const downloadTorrent = async () => {
+        // get stored location else
+        let path: string | null | undefined = '';
+        if (!(await requestStoragePermission())) {
+            console.warn('Required permissions were not accepted.');
         }
-      }
-    });
-    nodejs.channel.send({
-      name: 'download-torrent',
-      callbackId,
-      magnetUri: desiredResoltion.magnet,
-      location: path,
-    });
-  };
 
-  return (
-    <Button
-      mode="text"
-      onPress={() => openTorrent()}
-      onLongPress={() => downloadTorrent()}>
-      {`${resolution}p`}
-    </Button>
-  );
+        let storedShowPaths = await getStoredShowPaths();
+        console.log('Stored show paths', storedShowPaths);
+
+        const currentShow = storedShowPaths.shows.find(
+            (show) => show.showName === showName,
+        );
+
+        if (!currentShow?.showPath) {
+            const fileLocation = await pickDirectory();
+            if (!fileLocation) {
+                console.log('No file location selected');
+                return;
+            } else {
+                path = await getRealPathFromContentUri(fileLocation.uri);
+                storedShowPaths = await getStoredShowPaths();
+                storedShowPaths.shows.push({ showName, showPath: path });
+
+                await AsyncStorage.setItem(
+                    StorageKeys.ShowPaths,
+                    JSON.stringify(storedShowPaths),
+                );
+            }
+        } else {
+            path = currentShow.showPath;
+        }
+
+        onDownloadStatusChange(DownloadingStatus.DownloadStarting);
+
+        nodejs.channel.addListener('message', async (msg) => {
+            if (msg.callbackId === callbackId) {
+                if (msg.name === 'torrent-metadata') {
+                    onDownloadStatusChange(DownloadingStatus.Downloading);
+                    onFileSizeObtained?.(msg.size);
+                } else if (msg.name === 'torrent-progress') {
+                    onDownloadProgress?.(msg.progress);
+                    onDownloaded?.(msg.downloaded);
+                    onDownloadSpeed(msg.downloadSpeed);
+                    onUploadSpeed(msg.uploadSpeed);
+                } else if (msg.name === 'torrent-done') {
+                    onShowDownloaded();
+                    await downloadedShows.addDownloadedShow(
+                        desiredResoltion.magnet,
+                        msg.sourceFileName,
+                    );
+                    onDownloadStatusChange(DownloadingStatus.Seeding);
+                }
+            }
+        });
+        nodejs.channel.send({
+            name: 'download-torrent',
+            callbackId,
+            magnetUri: desiredResoltion.magnet,
+            location: path,
+        });
+    };
+
+    return (
+        <Button
+            mode="text"
+            onPress={() => openTorrent()}
+            onLongPress={() => downloadTorrent()}
+        >
+            {`${resolution}p`}
+        </Button>
+    );
 };

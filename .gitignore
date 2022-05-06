@@ -60,3 +60,6 @@ buck-out/
 
 /.expo
 index.android.bundle
+.vscode/.react/index.bundle
+.vscode/.react/index.map
+.vscode/.react/debuggerWorker.js
