@@ -46,13 +46,11 @@ jobs:
             - name: Make Gradlew Executable
               run: cd android && chmod +x ./gradlew
 
-            - name: Run React Native
-              run: |
-                  npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
-
             - name: Generate App APK
               shell: pwsh
               run: |
+                  npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
+                  npx jetify
                   cd android
                   Remove-Item './app/src/main/res/drawable-*' -Recurse
                   ./gradlew assembleRelease --no-daemon
