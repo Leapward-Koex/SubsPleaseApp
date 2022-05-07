@@ -146,6 +146,10 @@ class LocalWebServer {
             res.sendFile(`${filePathWithoutExtension}.vtt`);
         });
     }
+
+    stopServer() {
+        this.app.close();
+    }
 }
 
 // Echo every message received from react-native.
@@ -196,6 +200,13 @@ rn_bridge.channel.on('message', (msg) => {
                 name: 'local-webserver-callback',
                 callbackId: msg.callbackId,
             });
+        } else if (msg.name === 'stop-server') {
+            console.log('Starting local webserver', JSON.stringify(msg));
+            if (localServer) {
+                console.log('No webserver, cant stop!');
+                return;
+            }
+            localServer.stopServer();
         } else if (msg.name === 'register-file') {
             console.log(
                 'Registering local file with local webserver',

@@ -69,6 +69,10 @@ export const tryParseInt = (string: string, defaultValue: number) => {
     return retValue;
 };
 
+export const formatSecondsToMinutesSeconds = (s: number) => {
+    return (s - (s %= 60)) / 60 + (s > 9 ? ':' : ':0') + s;
+};
+
 interface FilePathModuleInterface {
     getFolderPathFromUri(
         contentUri: string,

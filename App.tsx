@@ -71,6 +71,9 @@ const App = () => {
             await FileLogger.configure();
             localWebServerManager.startServer();
         })();
+        return () => {
+            localWebServerManager.stopServer();
+        };
     }, []);
 
     return (

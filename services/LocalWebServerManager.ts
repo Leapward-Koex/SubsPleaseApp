@@ -30,6 +30,13 @@ class LocalWebServerManager {
         });
     }
 
+    public stopServer() {
+        console.log('Going to stop local web server');
+        nodejs.channel.send({
+            name: 'stop-server',
+        });
+    }
+
     public registerFileToPlay(filePath: string) {
         const callbackId = this.generateCallbackId();
         return new Promise<void>((resolve, reject) => {

@@ -11,6 +11,7 @@
         "log": "adb logcat"
     },
     "dependencies": {
+        "@miblanchard/react-native-slider": "^2.1.0",
         "@react-native-async-storage/async-storage": "^1.15.5",
         "@react-navigation/material-bottom-tabs": "^6.2.1",
         "@react-navigation/native": "^6.0.10",

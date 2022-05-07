@@ -59,8 +59,11 @@ export const SettingsTab = () => {
 
     return (
         <>
-            <Appbar.Header statusBarHeight={1}>
-                <Appbar.Content title="Settings" />
+            <Appbar.Header
+                statusBarHeight={1}
+                style={{ backgroundColor: colors.tertiary }}
+            >
+                <Appbar.Content color={'white'} title="Settings" />
             </Appbar.Header>
             <ScrollView style={backgroundStyle}>
                 <SavedShowLocationSettings />
@@ -76,6 +79,7 @@ export const SettingsTab = () => {
                         <Title style={textStyle}>Clear all data</Title>
                     </View>
                 </TouchableRipple>
+                <SettingsDivider />
                 <TouchableRipple
                     onPress={() =>
                         FileLogger.sendLogFilesByEmail({
