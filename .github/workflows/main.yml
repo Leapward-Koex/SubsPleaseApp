@@ -25,7 +25,7 @@ jobs:
               run: npm ci
 
             - name: Install node-js application dependencies
-              run: cd node-js-assets/nodejs-project && npm ci && cd ../../
+              run: cd nodejs-assets/nodejs-project && npm ci && cd ../../
 
             ## configure cash for gradle : will help to reduce build time
             - name: Cache Gradle Wrapper
