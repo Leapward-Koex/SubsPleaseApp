@@ -14,9 +14,9 @@ jobs:
             - name: Setup Java JDK
               uses: actions/setup-java@v3.3.0
               with:
-                distribution: 'temurin'
-                # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
-                java-version: 11
+                  distribution: 'temurin'
+                  # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+                  java-version: 11
 
             - uses: actions/setup-node@v3
               with:
@@ -51,8 +51,11 @@ jobs:
                   npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
 
             - name: Generate App APK
+              shell: pwsh
               run: |
-                  cd android && ./gradlew assembleRelease --no-daemon
+                  cd android
+                  Remove-Item './app/src/main/res/drawable-*' -Recurse
+                  ./gradlew assembleRelease --no-daemon
 
             ## sign generated apk
             #      - name: Sign APK
