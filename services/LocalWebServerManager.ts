@@ -18,6 +18,7 @@ class LocalWebServerManager {
     }
 
     public startServer(port = 48839) {
+        console.log('Going to start local web server');
         const callbackId = this.generateCallbackId();
         return new Promise<void>((resolve, reject) => {
             this.callbacks[callbackId] = { resolve, reject };

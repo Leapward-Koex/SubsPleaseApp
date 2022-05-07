@@ -18,6 +18,7 @@ import GoogleCast from 'react-native-google-cast';
 
 export type PlayButtonType = {
     showName: string;
+    showImageUrl: string;
     episodeNumber: string;
     fileMagnet: string;
     releaseDate: string;
@@ -25,6 +26,7 @@ export type PlayButtonType = {
 
 export const PlayButton = ({
     showName,
+    showImageUrl,
     episodeNumber,
     releaseDate,
     fileMagnet,
@@ -93,6 +95,11 @@ export const PlayButton = ({
                     contentUrl: `http:/${localIp}:48839/video`,
                     contentType: 'video/mp4',
                     metadata: {
+                        images: [
+                            {
+                                url: showImageUrl,
+                            },
+                        ],
                         episodeNumber: parsedEpisodeNumber,
                         type: 'tvShow',
                         releaseDate,
@@ -121,11 +128,15 @@ export const PlayButton = ({
             })
             .then(() => {
                 client.setActiveTrackIds([1]);
+                setIsCastingFile(true);
             });
         client.onMediaPlaybackEnded(() => {
             const fileToDelete = `${getExtensionlessFilepath(fileName)}.vtt`;
             console.log('Deleting subtitle file:', fileToDelete);
             deleteFileIfExists(fileToDelete);
+        });
+        client.onMediaStatusUpdated((status) => {
+            console.log('Status', status);
         });
     };
 

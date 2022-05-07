@@ -61,6 +61,7 @@ const App = () => {
 
     useEffect(() => {
         (async () => {
+            console.log('Starting initialisation code.');
             nodejs.start('main.js');
             nodejs.channel.addListener('message', (msg) => {
                 if (msg.name === 'log') {

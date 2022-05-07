@@ -249,6 +249,10 @@ export const ReleaseShow = ({
             return (
                 <PlayButton
                     showName={showInfo.show}
+                    showImageUrl={
+                        new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl)
+                            .href
+                    }
                     episodeNumber={showInfo.episode}
                     releaseDate={showInfo.release_date}
                     fileMagnet={showDownloaded}
@@ -341,6 +345,12 @@ export const ReleaseShow = ({
                 {!!showDownloaded && (
                     <PlayButton
                         showName={showInfo.show}
+                        showImageUrl={
+                            new URL(
+                                showInfo.image_url,
+                                SubsPleaseApi.apiBaseUrl,
+                            ).href
+                        }
                         episodeNumber={showInfo.episode}
                         releaseDate={showInfo.release_date}
                         fileMagnet={showDownloaded}

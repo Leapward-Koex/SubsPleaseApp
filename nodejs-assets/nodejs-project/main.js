@@ -185,6 +185,12 @@ rn_bridge.channel.on('message', (msg) => {
             });
         } else if (msg.name === 'start-server') {
             console.log('Starting local webserver', JSON.stringify(msg));
+            if (localServer) {
+                console.log(
+                    'Already created a webserver, not creating a second one.',
+                );
+                return;
+            }
             localServer = new LocalWebServer(msg.port);
             rn_bridge.channel.send({
                 name: 'local-webserver-callback',
@@ -203,6 +209,10 @@ rn_bridge.channel.on('message', (msg) => {
     } catch (ex) {
         console.log('ERROR in node process:', JSON.stringify(ex));
     }
+});
+
+process.on('uncaughtException', (error) => {
+    console.log('Uncaught error:', JSON.stringify(error));
 });
 
 // Inform react-native node is initialized.
