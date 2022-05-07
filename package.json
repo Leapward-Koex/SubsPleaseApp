@@ -43,6 +43,7 @@
         "react-native-snap-carousel": "^4.0.0-beta.6",
         "react-native-toast-message": "^2.1.5",
         "react-native-vector-icons": "^8.1.0",
+        "react-native-wake-lock": "^1.0.1",
         "util": "^0.12.4"
     },
     "devDependencies": {

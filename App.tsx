@@ -11,6 +11,7 @@ import Toast from 'react-native-toast-message';
 import { localWebServerManager } from './services/LocalWebServerManager';
 import { LogBox } from 'react-native';
 import { FileLogger } from 'react-native-file-logger';
+import { WakeLockInterface } from 'react-native-wake-lock';
 
 LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
 declare global {
@@ -72,6 +73,7 @@ const App = () => {
             localWebServerManager.startServer();
         })();
         return () => {
+            WakeLockInterface.releaseWakeLock();
             localWebServerManager.stopServer();
         };
     }, []);

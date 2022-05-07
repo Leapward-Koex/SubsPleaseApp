@@ -49,6 +49,7 @@ export const CastSettingsTab = () => {
         MediaPlayerState.IDLE,
     );
     const { colors } = useTheme();
+    const { height } = useWindowDimensions();
     const client = useRemoteMediaClient();
     const percentComplete =
         streamDuration === 0 ? 0 : currentSeconds / streamDuration;
@@ -87,11 +88,13 @@ export const CastSettingsTab = () => {
                 setPlayState(status?.playerState || MediaPlayerState.IDLE);
             });
             mediaProgressListener = client.onMediaProgressUpdated(
-                (streamPosition) => {
+                async (streamPosition) => {
                     if (!draggingSlider) {
                         setSliderValue(streamPosition / streamDuration);
                         setCurrentSeconds(streamPosition);
                     }
+                    const status = await client.getMediaStatus();
+                    setPlayState(status?.playerState || MediaPlayerState.IDLE);
                 },
             );
         }
@@ -135,6 +138,8 @@ export const CastSettingsTab = () => {
         }
     };
 
+    const hasBackground = !!backgroundImageUrl;
+
     return (
         <View style={backgroundStyle}>
             <Appbar.Header
@@ -151,20 +156,35 @@ export const CastSettingsTab = () => {
                     }}
                 />
             </Appbar.Header>
-
-            <ImageBackground
-                style={{
-                    width: '100%',
-                    height: useWindowDimensions().height - 320,
-                }}
-                source={{ uri: backgroundImageUrl }}
-                blurRadius={2}
-            >
-                <View>
-                    {/* <Text>Show Title</Text>
-                    <Text>Episode Title</Text> */}
+            {hasBackground && (
+                <ImageBackground
+                    style={{
+                        width: '100%',
+                        height: height - 320,
+                    }}
+                    source={{ uri: backgroundImageUrl }}
+                    blurRadius={2}
+                >
+                    <View>
+                        {/* <Text>Show Title</Text>
+		<Text>Episode Title</Text> */}
+                    </View>
+                </ImageBackground>
+            )}
+            {!hasBackground && (
+                <View
+                    style={{
+                        width: '100%',
+                        height: height - 320,
+                    }}
+                >
+                    <View>
+                        {/* <Text>Show Title</Text>
+		<Text>Episode Title</Text> */}
+                    </View>
                 </View>
-            </ImageBackground>
+            )}
+
             <View style={{ backgroundColor: colors.subsPleaseDark2 }}>
                 <View
                     style={{

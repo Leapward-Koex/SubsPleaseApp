@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { Button } from 'react-native-paper';
 import { downloadedShows } from '../services/DownloadedShows';
-import { useRemoteMediaClient } from 'react-native-google-cast';
+import {
+    MediaPlayerIdleReason,
+    MediaPlayerState,
+    useRemoteMediaClient,
+} from 'react-native-google-cast';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { View } from 'react-native';
 import { localWebServerManager } from '../services/LocalWebServerManager';
@@ -15,6 +19,7 @@ import {
 } from '../HelperFunctions';
 import { NetworkInfo } from 'react-native-network-info';
 import GoogleCast from 'react-native-google-cast';
+import { WakeLockInterface } from 'react-native-wake-lock';
 
 export type PlayButtonType = {
     showName: string;
@@ -34,6 +39,7 @@ export const PlayButton = ({
     const [fileName, setFileName] = React.useState('');
     const [converting, setConverting] = React.useState(false);
     const client = useRemoteMediaClient();
+    const sessionManager = GoogleCast.getSessionManager();
     const [isCastingFile, setIsCastingFile] = React.useState(false);
 
     React.useEffect(() => {
@@ -47,8 +53,32 @@ export const PlayButton = ({
             const absolutePath = `${loadedFolderPath}/${loadedFileName}`;
             console.log('loading filename', absolutePath);
             setFileName(absolutePath);
+
+            if (sessionManager) {
+                sessionManager.onSessionStarting(() => {
+                    console.log('Acquiring wakelock');
+                    WakeLockInterface.setWakeLock();
+                    WakeLockInterface.isWakeLocked().then((wakeLocked) => {
+                        console.log('Is wake locked', wakeLocked);
+                    });
+                });
+
+                sessionManager.onSessionEnded(() => {
+                    console.log('Releasing wakelock due to ending session');
+                    WakeLockInterface.releaseWakeLock();
+                    setIsCastingFile(false);
+                });
+
+                sessionManager.onSessionStartFailed(() => {
+                    console.log(
+                        'Releasing wakelock due to failure to start session',
+                    );
+                    WakeLockInterface.releaseWakeLock();
+                    setIsCastingFile(false);
+                });
+            }
         })();
-    }, [fileMagnet, showName]);
+    }, [fileMagnet, sessionManager, showName]);
 
     const showToast = (result: { message: string; fileName: string }) => {
         Toast.show({
@@ -87,6 +117,12 @@ export const PlayButton = ({
             console.error('Cannot cast if local IP address is not available!');
         }
         console.log('Going to serve assets on:', localIp);
+        const isWakeLocked = await WakeLockInterface.isWakeLocked();
+        console.log('Is wake locked', isWakeLocked);
+        if (!isWakeLocked) {
+            console.log('Acquiring wakelock');
+            WakeLockInterface.setWakeLock();
+        }
         await localWebServerManager.registerFileToPlay(fileName);
         const parsedEpisodeNumber = tryParseInt(episodeNumber, 0);
         client
@@ -134,8 +170,20 @@ export const PlayButton = ({
             const fileToDelete = `${getExtensionlessFilepath(fileName)}.vtt`;
             console.log('Deleting subtitle file:', fileToDelete);
             deleteFileIfExists(fileToDelete);
+            WakeLockInterface.releaseWakeLock();
+            setIsCastingFile(false);
         });
         client.onMediaStatusUpdated((status) => {
+            if (
+                status?.playerState === MediaPlayerState.IDLE &&
+                (status?.idleReason === MediaPlayerIdleReason.CANCELLED ||
+                    status?.idleReason === MediaPlayerIdleReason.ERROR ||
+                    status?.idleReason === MediaPlayerIdleReason.FINISHED)
+            ) {
+                console.log('Releasing wakelock');
+                WakeLockInterface.releaseWakeLock();
+                setIsCastingFile(false);
+            }
             console.log('Status', status);
         });
     };
