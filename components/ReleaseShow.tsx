@@ -249,6 +249,8 @@ export const ReleaseShow = ({
             return (
                 <PlayButton
                     showName={showInfo.show}
+                    episodeNumber={showInfo.episode}
+                    releaseDate={showInfo.release_date}
                     fileMagnet={showDownloaded}
                 />
             );
@@ -339,6 +341,8 @@ export const ReleaseShow = ({
                 {!!showDownloaded && (
                     <PlayButton
                         showName={showInfo.show}
+                        episodeNumber={showInfo.episode}
+                        releaseDate={showInfo.release_date}
                         fileMagnet={showDownloaded}
                     />
                 )}

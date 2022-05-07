@@ -57,6 +57,18 @@ export async function asyncFilter<T>(
     return arr.filter((_v, index) => results[index]);
 }
 
+export const tryParseInt = (string: string, defaultValue: number) => {
+    let retValue = defaultValue;
+    if (string !== null) {
+        if (string.length > 0) {
+            if (!isNaN(string as any)) {
+                retValue = parseInt(string, 10);
+            }
+        }
+    }
+    return retValue;
+};
+
 interface FilePathModuleInterface {
     getFolderPathFromUri(
         contentUri: string,

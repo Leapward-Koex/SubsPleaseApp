@@ -11,18 +11,28 @@ import Toast from 'react-native-toast-message';
 import {
     deleteFileIfExists,
     getExtensionlessFilepath,
+    tryParseInt,
 } from '../HelperFunctions';
 import { NetworkInfo } from 'react-native-network-info';
+import GoogleCast from 'react-native-google-cast';
 
 export type PlayButtonType = {
     showName: string;
+    episodeNumber: string;
     fileMagnet: string;
+    releaseDate: string;
 };
 
-export const PlayButton = ({ showName, fileMagnet }: PlayButtonType) => {
+export const PlayButton = ({
+    showName,
+    episodeNumber,
+    releaseDate,
+    fileMagnet,
+}: PlayButtonType) => {
     const [fileName, setFileName] = React.useState('');
     const [converting, setConverting] = React.useState(false);
     const client = useRemoteMediaClient();
+    const [isCastingFile, setIsCastingFile] = React.useState(false);
 
     React.useEffect(() => {
         (async () => {
@@ -76,11 +86,19 @@ export const PlayButton = ({ showName, fileMagnet }: PlayButtonType) => {
         }
         console.log('Going to serve assets on:', localIp);
         await localWebServerManager.registerFileToPlay(fileName);
+        const parsedEpisodeNumber = tryParseInt(episodeNumber, 0);
         client
             .loadMedia({
                 mediaInfo: {
                     contentUrl: `http:/${localIp}:48839/video`,
                     contentType: 'video/mp4',
+                    metadata: {
+                        episodeNumber: parsedEpisodeNumber,
+                        type: 'tvShow',
+                        releaseDate,
+                        seriesTitle: showName,
+                        title: `${showName} - ${episodeNumber}`,
+                    },
                     mediaTracks: [
                         {
                             id: 1, // assign a unique numeric ID
@@ -112,10 +130,15 @@ export const PlayButton = ({ showName, fileMagnet }: PlayButtonType) => {
     };
 
     return (
-        <View>
+        <View style={{ display: 'flex', flexDirection: 'row' }}>
             <Button loading={converting} mode="text" onPress={() => playFile()}>
                 Play
             </Button>
+            {isCastingFile && (
+                <Button onPress={() => GoogleCast.showExpandedControls()}>
+                    Show constrols
+                </Button>
+            )}
         </View>
     );
 };
