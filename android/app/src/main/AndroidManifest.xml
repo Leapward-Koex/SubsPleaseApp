@@ -38,6 +38,7 @@
       <meta-data android:name="com.dieam.reactnativepushnotification.notification_color" android:resource=" @android:color/black" /> <!-- or @android:color/{name} to use a standard color -->
 
       <meta-data android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME" android:value="com.reactnative.googlecast.GoogleCastOptionsProvider" />
+	  <meta-data android:name="com.reactnative.googlecast.RECEIVER_APPLICATION_ID" android:value="6127EC90" />
       <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" />
       <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
       <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver"
