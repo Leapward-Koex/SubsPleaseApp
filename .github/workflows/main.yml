@@ -11,10 +11,12 @@ jobs:
             - name: Check out Git repository # clone the repo to local ci workspace
               uses: actions/checkout@v2
 
-            - name: Set up our JDK environment # setup JDK environment: mandatory as we need to build  android project
-              uses: actions/setup-java@v1.4.3
+            - name: Setup Java JDK
+              uses: actions/setup-java@v3.3.0
               with:
-                  java-version: 1.8
+                distribution: 'temurin'
+                # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+                java-version: 11
 
             - uses: actions/setup-node@v3
               with:
