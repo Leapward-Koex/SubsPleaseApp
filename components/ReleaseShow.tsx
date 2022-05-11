@@ -266,6 +266,7 @@ export const ReleaseShow = ({
                         resolution={'720'}
                         availableDownloads={showInfo.downloads}
                         showName={showInfo.show}
+                        episodeNumber={showInfo.episode}
                         callbackId={callbackId}
                         onDownloadStatusChange={(status) =>
                             setDownloadingStatus(status)
@@ -291,6 +292,7 @@ export const ReleaseShow = ({
                         resolution={'1080'}
                         availableDownloads={showInfo.downloads}
                         showName={showInfo.show}
+                        episodeNumber={showInfo.episode}
                         callbackId={callbackId}
                         onDownloadStatusChange={(status) =>
                             setDownloadingStatus(status)

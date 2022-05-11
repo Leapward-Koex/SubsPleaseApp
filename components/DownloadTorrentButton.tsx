@@ -13,11 +13,13 @@ import { StorageKeys } from '../enums/enum';
 import { SavedShowPaths } from './settingsPageComponents/SavedShowLocationSettings';
 import { convert } from '../services/converter';
 import { downloadedShows } from '../services/DownloadedShows';
+import { downloadNotificationManger } from '../services/DownloadNotificationManager';
 
 type DownloadTorrentButtonProps = {
     resolution: string;
     availableDownloads: ShowDownloadInfo[];
     showName: string;
+    episodeNumber: string;
     callbackId: string;
     onDownloadStatusChange: (newStatus: DownloadingStatus) => void;
     onFileSizeObtained?: (fileSize: number) => void;
@@ -40,6 +42,7 @@ export const DownloadTorrentButton = ({
     resolution,
     availableDownloads,
     showName,
+    episodeNumber,
     callbackId,
     onDownloadStatusChange,
     onFileSizeObtained,
@@ -78,6 +81,7 @@ export const DownloadTorrentButton = ({
         let path: string | null | undefined = '';
         if (!(await requestStoragePermission())) {
             console.warn('Required permissions were not accepted.');
+            return;
         }
 
         let storedShowPaths = await getStoredShowPaths();
@@ -113,11 +117,21 @@ export const DownloadTorrentButton = ({
                 if (msg.name === 'torrent-metadata') {
                     onDownloadStatusChange(DownloadingStatus.Downloading);
                     onFileSizeObtained?.(msg.size);
+                    downloadNotificationManger.addDownload(
+                        showName,
+                        episodeNumber,
+                        msg.size,
+                    );
                 } else if (msg.name === 'torrent-progress') {
                     onDownloadProgress?.(msg.progress);
                     onDownloaded?.(msg.downloaded);
                     onDownloadSpeed(msg.downloadSpeed);
                     onUploadSpeed(msg.uploadSpeed);
+                    downloadNotificationManger.onDataDownloaded(
+                        showName,
+                        episodeNumber,
+                        msg.downloaded,
+                    );
                 } else if (msg.name === 'torrent-done') {
                     onShowDownloaded();
                     await downloadedShows.addDownloadedShow(
@@ -125,6 +139,10 @@ export const DownloadTorrentButton = ({
                         msg.sourceFileName,
                     );
                     onDownloadStatusChange(DownloadingStatus.Seeding);
+                    downloadNotificationManger.completeDownload(
+                        showName,
+                        episodeNumber,
+                    );
                 }
             }
         });
