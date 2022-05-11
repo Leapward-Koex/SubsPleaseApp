@@ -131,6 +131,7 @@ export const DownloadTorrentButton = ({
                         showName,
                         episodeNumber,
                         msg.downloaded,
+                        msg.downloadSpeed,
                     );
                 } else if (msg.name === 'torrent-done') {
                     onShowDownloaded();
