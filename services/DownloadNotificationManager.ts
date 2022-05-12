@@ -48,12 +48,13 @@ class DownloadNotificationManger {
         totalSize: number,
     ) {
         try {
+            console.log('Showing notification for', showName, episodeNumber);
             const channelId = await notifee.createChannel({
                 id: 'Downloadnotifications',
                 name: 'Episode download notifications',
             });
+            console.log('Created or acquired a channel for notification');
             const notificationSortValue = (this.notificationIndex++).toString();
-            console.log('Showing notification for', showName, episodeNumber);
             const notificationId = await notifee.displayNotification({
                 id: showName + episodeNumber,
                 title: `${showName} ep: ${episodeNumber}`,
@@ -140,6 +141,11 @@ class DownloadNotificationManger {
     }
 
     public async completeDownload(showName: string, episodeNumber: string) {
+        console.log(
+            'Sending completed notification for',
+            showName,
+            episodeNumber,
+        );
         this.downloads = this.downloads.filter((download) => {
             if (download.showName === showName) {
                 return download.episodeNumber !== episodeNumber;
