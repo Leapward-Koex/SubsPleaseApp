@@ -123,16 +123,20 @@ export const DownloadTorrentButton = ({
                         msg.size,
                     );
                 } else if (msg.name === 'torrent-progress') {
+                    const bytesDownloadSpeed = msg.downloadSpeed / 8;
+                    const bytesUploadSpeed = msg.uploadSpeed / 8;
                     onDownloadProgress?.(msg.progress);
                     onDownloaded?.(msg.downloaded);
-                    onDownloadSpeed(msg.downloadSpeed);
-                    onUploadSpeed(msg.uploadSpeed);
-                    downloadNotificationManger.onDataDownloaded(
-                        showName,
-                        episodeNumber,
-                        msg.downloaded,
-                        msg.downloadSpeed,
-                    );
+                    onDownloadSpeed(bytesDownloadSpeed);
+                    onUploadSpeed(bytesUploadSpeed);
+                    if (msg.progress !== 1) {
+                        downloadNotificationManger.onDataDownloaded(
+                            showName,
+                            episodeNumber,
+                            msg.downloaded,
+                            bytesDownloadSpeed,
+                        );
+                    }
                 } else if (msg.name === 'torrent-done') {
                     onShowDownloaded();
                     await downloadedShows.addDownloadedShow(
