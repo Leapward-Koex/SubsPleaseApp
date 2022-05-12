@@ -96,7 +96,10 @@ export const PlayButton = ({
         }
         if (!client) {
             console.log('Starting video in intent');
-            ReactNativeBlobUtil.android.actionViewIntent(fileName, 'video/mp4');
+            await ReactNativeBlobUtil.android.actionViewIntent(
+                fileName,
+                'video/mp4',
+            );
             return;
         }
         console.log('Extracting subtitles for cast playback', fileName);
