@@ -187,7 +187,6 @@ export const PlayButton = ({
                 WakeLockInterface.releaseWakeLock();
                 setIsCastingFile(false);
             }
-            console.log('Status', status);
         });
     };
 

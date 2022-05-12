@@ -49,7 +49,7 @@ export const CastSettingsTab = () => {
         MediaPlayerState.IDLE,
     );
     const { colors } = useTheme();
-    const { height } = useWindowDimensions();
+    const { height, width } = useWindowDimensions();
     const client = useRemoteMediaClient();
     const percentComplete =
         streamDuration === 0 ? 0 : currentSeconds / streamDuration;
@@ -140,6 +140,12 @@ export const CastSettingsTab = () => {
 
     const hasBackground = !!backgroundImageUrl;
 
+    const buttonSizes = {
+        small: width * 0.06,
+        medium: width * 0.08,
+        large: width * 0.1,
+    };
+
     return (
         <View style={backgroundStyle}>
             <Appbar.Header
@@ -192,21 +198,21 @@ export const CastSettingsTab = () => {
                         flexDirection: 'row',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        marginLeft: 80,
-                        marginRight: 80,
+                        // marginLeft: 80,
+                        // marginRight: 80,
                     }}
                 >
                     <IconButton
                         color={colors.primary}
                         onPress={() => null}
-                        size={35}
+                        size={buttonSizes.small}
                         icon={'skip-previous-outline'}
                     />
                     <IconButton
                         color={colors.primary}
                         onPress={() => skip(-10)}
                         icon={'rewind-10'}
-                        size={40}
+                        size={buttonSizes.medium}
                     />
                     <IconButton
                         color={colors.primary}
@@ -217,19 +223,19 @@ export const CastSettingsTab = () => {
                                 ? 'pause'
                                 : 'play'
                         }
-                        size={60}
+                        size={buttonSizes.large}
                     />
                     <IconButton
                         color={colors.primary}
                         onPress={() => skip(10)}
                         icon={'fast-forward-10'}
-                        size={40}
+                        size={buttonSizes.medium}
                     />
                     <IconButton
                         color={colors.primary}
                         onPress={() => null}
                         icon={'skip-next-outline'}
-                        size={35}
+                        size={buttonSizes.medium}
                     />
                 </View>
                 <View style={{ marginLeft: 10, marginRight: 10 }}>

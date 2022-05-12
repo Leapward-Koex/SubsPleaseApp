@@ -13,7 +13,10 @@ import { LogBox } from 'react-native';
 import { FileLogger } from 'react-native-file-logger';
 import { WakeLockInterface } from 'react-native-wake-lock';
 
-LogBox.ignoreLogs(['new NativeEventEmitter']); // Ignore log notification by message
+LogBox.ignoreLogs([
+    'new NativeEventEmitter',
+    "EventEmitter.removeListener('keyboardDidHide', ...)",
+]); // Ignore log notification by message
 declare global {
     namespace ReactNativePaper {
         interface ThemeColors {
