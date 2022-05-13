@@ -8,7 +8,8 @@
         "start": "react-native start",
         "test": "jest",
         "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-        "log": "adb logcat"
+        "log": "adb logcat",
+        "showInAppDevMenu": "adb shell input keyevent 82"
     },
     "dependencies": {
         "@miblanchard/react-native-slider": "^2.1.0",
@@ -33,7 +34,6 @@
         "react-native-fs": "^2.19.0",
         "react-native-gesture-handler": "^1.10.3",
         "react-native-google-cast": "^4.2.4",
-        "react-native-http-bridge": "^0.6.1",
         "react-native-network-info": "^5.2.1",
         "react-native-paper": "^4.9.1",
         "react-native-progress": "^5.0.0",

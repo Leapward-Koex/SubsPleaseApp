@@ -123,8 +123,10 @@ export const DownloadTorrentButton = ({
                         msg.size,
                     );
                 } else if (msg.name === 'torrent-progress') {
-                    const bytesDownloadSpeed = msg.downloadSpeed / 8;
-                    const bytesUploadSpeed = msg.uploadSpeed / 8;
+                    const bytesDownloadSpeed = Math.round(
+                        msg.downloadSpeed / 8,
+                    );
+                    const bytesUploadSpeed = Math.round(msg.uploadSpeed / 8);
                     onDownloadProgress?.(msg.progress);
                     onDownloaded?.(msg.downloaded);
                     onDownloadSpeed(bytesDownloadSpeed);

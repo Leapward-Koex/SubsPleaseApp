@@ -23,8 +23,11 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 
 public class FilePathModule extends ReactContextBaseJavaModule {
@@ -56,6 +59,36 @@ public class FilePathModule extends ReactContextBaseJavaModule {
             else {
                 callBack.invoke(true);
             }
+        }
+    }
+
+    @ReactMethod
+    public void openVideoIntent(final String filePath, Callback callBack) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(filePath));
+        intent.setDataAndType(Uri.parse(filePath), "video/*");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getReactApplicationContext().startActivity(intent);
+        callBack.invoke(true);
+    }
+
+    @ReactMethod
+    public void readTextFile(final String filePath, Callback callBack) {
+        File file = new File(filePath);
+        StringBuilder text = new StringBuilder();
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+            br.close();
+            callBack.invoke(text.toString());
+        }
+        catch (IOException e) {
+            callBack.invoke("");
         }
     }
 

@@ -47,7 +47,6 @@ class TorrentClient {
                 torrent.files[0].name,
             );
             const throttledDownloadHandler = throttle(() => {
-                console.log('Torrent update', torrent.progress);
                 rn_bridge.channel.send({
                     callbackId: this.callbackId,
                     name: 'torrent-progress',

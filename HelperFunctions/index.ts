@@ -84,6 +84,11 @@ interface FilePathModuleInterface {
         filePath: string,
         callback: (success: boolean) => void,
     ): void;
+    readTextFile(filePath: string, callback: (text: string) => void): void;
+    openVideoIntent(
+        filePath: string,
+        callback: (success: boolean) => void,
+    ): void;
 }
 
 const { FilePathModule } = NativeModules;
@@ -116,6 +121,20 @@ export const fileExists = (filePath: string) => {
 export const deleteFileIfExists = (filePath: string) => {
     return new Promise<boolean>((resolve) => {
         FilePathModuleTyped.deleteFileIfExists(filePath, (success) =>
+            resolve(success),
+        );
+    });
+};
+
+export const readTextFile = (filePath: string) => {
+    return new Promise<string>((resolve) => {
+        FilePathModuleTyped.readTextFile(filePath, (text) => resolve(text));
+    });
+};
+
+export const openVideoIntent = (filePath: string) => {
+    return new Promise<boolean>((resolve) => {
+        FilePathModuleTyped.openVideoIntent(filePath, (success) =>
             resolve(success),
         );
     });

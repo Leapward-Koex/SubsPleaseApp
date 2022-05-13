@@ -1,5 +1,5 @@
 import { humanFileSize } from '../HelperFunctions';
-import notifee from '@notifee/react-native';
+import notifee, { EventType } from '@notifee/react-native';
 
 export interface EpisodeDownloadProgress {
     episodeNumber: string;
@@ -16,7 +16,15 @@ class DownloadNotificationManger {
     private notificationIndex = 0;
     private groupId = 'group-id';
     private summaryNotificationId = 'summary-notification-id';
-    constructor() {}
+    constructor() {
+        notifee.onBackgroundEvent(({ type, detail }) => {
+            // Todo open video here?
+            if (type === EventType.PRESS) {
+                console.log('Notification pressed!');
+            }
+            return Promise.resolve();
+        });
+    }
 
     public getInprogressDownloads() {
         const totalDownloaded = this.downloads.reduce(

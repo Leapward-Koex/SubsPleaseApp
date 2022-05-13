@@ -15,6 +15,7 @@ import Toast from 'react-native-toast-message';
 import {
     deleteFileIfExists,
     getExtensionlessFilepath,
+    openVideoIntent,
     tryParseInt,
 } from '../HelperFunctions';
 import { NetworkInfo } from 'react-native-network-info';
@@ -96,10 +97,12 @@ export const PlayButton = ({
         }
         if (!client) {
             console.log('Starting video in intent');
-            await ReactNativeBlobUtil.android.actionViewIntent(
-                fileName,
-                'video/mp4',
-            );
+            openVideoIntent(fileName);
+            // await ReactNativeBlobUtil.android.actionViewIntent(
+            //     fileName,
+            //     'video/mp4',
+            //     'Choose an app to play this video',
+            // );
             return;
         }
         console.log('Extracting subtitles for cast playback', fileName);

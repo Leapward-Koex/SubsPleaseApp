@@ -12,6 +12,7 @@ import { localWebServerManager } from './services/LocalWebServerManager';
 import { LogBox } from 'react-native';
 import { FileLogger } from 'react-native-file-logger';
 import { WakeLockInterface } from 'react-native-wake-lock';
+import notifee from '@notifee/react-native';
 
 LogBox.ignoreLogs([
     'new NativeEventEmitter',
@@ -74,9 +75,11 @@ const App = () => {
             });
             await FileLogger.configure();
             localWebServerManager.startServer();
+            await notifee.cancelAllNotifications();
         })();
         return () => {
             WakeLockInterface.releaseWakeLock();
+            notifee.cancelAllNotifications();
             localWebServerManager.stopServer();
         };
     }, []);
