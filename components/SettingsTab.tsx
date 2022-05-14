@@ -17,6 +17,7 @@ import { WatchListTab } from './WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ShowInfo } from '../models/models';
 import {
+    Alert,
     FlatList,
     Modal,
     ScrollView,
@@ -38,7 +39,6 @@ export const SettingsTab = () => {
     const [logViewOpen, setLogViewOpen] = React.useState(false);
     const [logText, setLogText] = React.useState('');
     const [logFileName, setFileName] = React.useState('');
-    const scrollViewRef = React.useRef();
     const { height } = useWindowDimensions();
 
     const backgroundStyle = {
@@ -138,7 +138,25 @@ export const SettingsTab = () => {
                 <ImportExportListItem type="Export" />
                 <SettingsDivider />
                 <TouchableRipple
-                    onPress={() => AsyncStorage.clear()}
+                    onPress={() => {
+                        Alert.alert(
+                            'Are you sure you want to clear all data?',
+                            'This action cannot be undone.',
+                            [
+                                {
+                                    text: 'Cancel',
+                                    style: 'cancel',
+                                },
+                                {
+                                    text: 'OK',
+                                    onPress: async () => {
+                                        console.log('Going to clear all data');
+                                        await AsyncStorage.clear();
+                                    },
+                                },
+                            ],
+                        );
+                    }}
                     style={styles.touchableStyle}
                 >
                     <View>
