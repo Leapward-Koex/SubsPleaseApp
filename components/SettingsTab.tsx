@@ -38,6 +38,7 @@ export const SettingsTab = () => {
     const [logViewOpen, setLogViewOpen] = React.useState(false);
     const [logText, setLogText] = React.useState('');
     const [logFileName, setFileName] = React.useState('');
+    const scrollViewRef = React.useRef();
     const { height } = useWindowDimensions();
 
     const backgroundStyle = {
@@ -52,16 +53,6 @@ export const SettingsTab = () => {
             Appearance.getColorScheme() === 'light'
                 ? colors.subsPleaseDark3
                 : colors.subsPleaseLight1,
-    };
-
-    const touchableStyle = {
-        height: 60,
-        backgroundColor: colors.subsPleaseDark1,
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingLeft: 20,
-        borderRadius: 4,
     };
 
     const displayLogs = async () => {
@@ -106,6 +97,15 @@ export const SettingsTab = () => {
             shadowRadius: 4,
             elevation: 5,
         },
+        touchableStyle: {
+            height: 60,
+            backgroundColor: colors.subsPleaseDark1,
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingLeft: 20,
+            borderRadius: 4,
+        },
         button: {
             borderRadius: 20,
             padding: 10,
@@ -139,7 +139,7 @@ export const SettingsTab = () => {
                 <SettingsDivider />
                 <TouchableRipple
                     onPress={() => AsyncStorage.clear()}
-                    style={touchableStyle}
+                    style={styles.touchableStyle}
                 >
                     <View>
                         <Title style={textStyle}>Clear all data</Title>
@@ -148,7 +148,7 @@ export const SettingsTab = () => {
                 <SettingsDivider />
                 <TouchableRipple
                     onPress={() => displayLogs()}
-                    style={touchableStyle}
+                    style={styles.touchableStyle}
                 >
                     <View>
                         <Title style={textStyle}>View logs</Title>
@@ -160,7 +160,7 @@ export const SettingsTab = () => {
                             subject: 'SubsPlease logs',
                         })
                     }
-                    style={touchableStyle}
+                    style={styles.touchableStyle}
                 >
                     <View>
                         <Title style={textStyle}>Send logs</Title>

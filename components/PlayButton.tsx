@@ -2,8 +2,10 @@ import * as React from 'react';
 import { Button } from 'react-native-paper';
 import { downloadedShows } from '../services/DownloadedShows';
 import {
+    CastState,
     MediaPlayerIdleReason,
     MediaPlayerState,
+    useCastState,
     useRemoteMediaClient,
 } from 'react-native-google-cast';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -40,6 +42,7 @@ export const PlayButton = ({
     const [fileName, setFileName] = React.useState('');
     const [converting, setConverting] = React.useState(false);
     const client = useRemoteMediaClient();
+    const castState = useCastState();
     const sessionManager = GoogleCast.getSessionManager();
     const [isCastingFile, setIsCastingFile] = React.useState(false);
 
@@ -95,7 +98,11 @@ export const PlayButton = ({
             console.log('No filename, cannot cast.', fileName);
             return;
         }
-        if (!client) {
+        if (
+            !client ||
+            castState === CastState.NOT_CONNECTED ||
+            castState === CastState.NO_DEVICES_AVAILABLE
+        ) {
             console.log('Starting video in intent');
             openVideoIntent(fileName);
             // await ReactNativeBlobUtil.android.actionViewIntent(
@@ -105,6 +112,7 @@ export const PlayButton = ({
             // );
             return;
         }
+        console.log('Found cast client client');
         console.log('Extracting subtitles for cast playback', fileName);
         setConverting(true);
         const result = await convert.extractSubtitles(

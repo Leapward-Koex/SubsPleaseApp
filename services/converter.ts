@@ -3,7 +3,7 @@ import {
     FFmpegKitConfig,
     ReturnCode,
 } from 'ffmpeg-kit-react-native';
-import { deleteFileIfExists } from '../HelperFunctions';
+import { deleteFileIfExists, fileExists } from '../HelperFunctions';
 
 class Converter {
     public async extractSubtitles(
@@ -18,13 +18,14 @@ class Converter {
                     sourceFileName.length - 4,
                 );
                 const subtitleFilePath = `${sourcePath}/${fileNameWithoutExtension}.vtt`;
-                const deleteSubFileResult = await deleteFileIfExists(
-                    subtitleFilePath,
-                );
+                const subtitleFileExists = await fileExists(subtitleFilePath);
 
-                if (!deleteSubFileResult) {
+                if (subtitleFileExists) {
+                    console.log(
+                        'Not extracting subtitles as they already exist',
+                    );
                     resolve({
-                        message: 'Could not delete existing file',
+                        message: 'Subtitle file already exists',
                         fileName: subtitleFilePath,
                     });
                 }
