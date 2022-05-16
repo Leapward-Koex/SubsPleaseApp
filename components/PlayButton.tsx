@@ -105,11 +105,6 @@ export const PlayButton = ({
         ) {
             console.log('Starting video in intent');
             openVideoIntent(fileName);
-            // await ReactNativeBlobUtil.android.actionViewIntent(
-            //     fileName,
-            //     'video/mp4',
-            //     'Choose an app to play this video',
-            // );
             return;
         }
         console.log('Found cast client client');
@@ -121,10 +116,15 @@ export const PlayButton = ({
         );
         setConverting(false);
 
-        if (result.message !== 'Success converting') {
+        if (
+            result.message === 'Error whilst converting' ||
+            result.message === 'Unknown error whilst converting'
+        ) {
             showToast(result);
             return;
         }
+
+        await convert.tidySubtitles(result.subtitleFile);
 
         const localIp = await NetworkInfo.getIPV4Address();
         if (!localIp) {

@@ -151,6 +151,104 @@ class LocalWebServer {
     }
 }
 
+class VttTidier {
+    callbackId;
+    constructor(callbackId) {
+        this.callbackId = callbackId;
+    }
+    splitEntries(subtitles) {
+        const dialogEntries = subtitles.split(/\n\n/);
+        dialogEntries.shift(); // Remove the WEBTTV line.
+        const keyedDialogEntries = dialogEntries
+            .map((entry) => {
+                return {
+                    time: entry.slice(0, entry.indexOf('\n')),
+                    text: entry.slice(entry.indexOf('\n') + 1),
+                };
+            })
+            .filter((entry) => entry.text && entry.time);
+        return keyedDialogEntries;
+    }
+    removeBackgrounds(keyedDialogEntries) {
+        return keyedDialogEntries.filter((keyedDialogEntry) => {
+            return !keyedDialogEntry.text.match(
+                /m 0 0 l 0 \d{1,3} l \d{1,3} \d{1,3} l \d{1,3} 0/gm,
+            );
+        });
+    }
+
+    removeDuplicateText(keyedDialogEntries) {
+        const dedupedDialogs = [];
+        keyedDialogEntries.forEach((keyedDialogEntry) => {
+            const duplicatedItem = dedupedDialogs.find((dialog) => {
+                const sameDialog = dialog.text === keyedDialogEntry.text;
+                const dialogEndTime = dialog.time.split(' --> ')[1];
+                const currentDialogStartTime =
+                    keyedDialogEntry.time.split(' --> ')[0];
+                return sameDialog && dialogEndTime === currentDialogStartTime;
+            });
+            if (duplicatedItem) {
+                // Update display duration of duplicatedItem
+                const firstInstanceStartTime =
+                    duplicatedItem.time.split(' --> ')[0];
+                const currentInstanceEndTime =
+                    keyedDialogEntry.time.split(' --> ')[1];
+                duplicatedItem.time = `${firstInstanceStartTime} --> ${currentInstanceEndTime}`;
+            } else {
+                dedupedDialogs.push(keyedDialogEntry);
+            }
+        });
+        return dedupedDialogs;
+    }
+
+    markSignText(keyedDialogEntries) {
+        keyedDialogEntries.forEach((entry) => {
+            entry.text = entry.text.replace(/{=\d+}/gm, '[Sign] ');
+        });
+        return keyedDialogEntries;
+    }
+
+    serializeDialogEntries(keyedDialogEntries) {
+        const dialogEntries = keyedDialogEntries.map((keyedEntry) => {
+            return `${keyedEntry.time}\n${keyedEntry.text}`;
+        });
+        let vttText = 'WEBVTT\n\n';
+        dialogEntries.forEach((dialogEntry) => {
+            vttText += dialogEntry;
+            vttText += '\n\n';
+        });
+        return vttText;
+    }
+
+    tidyVttFile(path) {
+        fs.readFile(path, 'utf8', (err, data) => {
+            if (err) {
+                console.error(err);
+                rn_bridge.channel.send({
+                    callbackId: this.callbackId,
+                });
+                return;
+            }
+            const processDialogEntries = this.markSignText(
+                this.removeDuplicateText(
+                    this.removeBackgrounds(this.splitEntries(data)),
+                ),
+            );
+            const vttText = this.serializeDialogEntries(processDialogEntries);
+            fs.writeFile(path, vttText, (writeerr) => {
+                if (writeerr) {
+                    console.error(writeerr);
+                } else {
+                    console.log('Successfully converted VTT');
+                }
+                rn_bridge.channel.send({
+                    callbackId: this.callbackId,
+                });
+            });
+        });
+    }
+}
+
 // Echo every message received from react-native.
 rn_bridge.channel.on('message', (msg) => {
     try {
@@ -215,6 +313,9 @@ rn_bridge.channel.on('message', (msg) => {
             rn_bridge.channel.send({
                 callbackId: msg.callbackId,
             });
+        } else if (msg.name === 'tidy-vtt') {
+            const vttTider = new VttTidier();
+            vttTider.tidyVttFile(msg.filePath);
         }
     } catch (ex) {
         console.log('ERROR in node process:', JSON.stringify(ex));
