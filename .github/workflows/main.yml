@@ -1,6 +1,6 @@
 name: Android Build ## name of the workflow
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
     android-build:
