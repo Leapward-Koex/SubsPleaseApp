@@ -8,6 +8,13 @@ jobs:
         runs-on: ubuntu-latest # using ubuntu latest version / or you can use a specific version
 
         steps:
+            - name: Decode Keystore
+              id: decode_keystore
+              uses: timheuer/base64-to-file@v1
+              with:
+                  fileName: 'android/app/my-upload-key.keystore'
+                  encodedString: ${{ secrets.KEYSTORE }}
+
             - name: Check out Git repository # clone the repo to local ci workspace
               uses: actions/checkout@v2
 
@@ -67,17 +74,21 @@ jobs:
                   Remove-Item './app/src/main/res/drawable-xxxhdpi/node_modules*' -Recurse
                   Remove-Item './app/src/main/res/drawable-xxxhdpi/resources*' -Recurse
                   ./gradlew assembleRelease --no-daemon
+              env:
+                  MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
             # sign generated apk
-            - name: Sign APK
-              id: sign_app
-              uses: r0adkll/sign-android-release@v1
-              with:
-                  releaseDirectory: android/app/build/outputs/apk/release
-                  signingKeyBase64: ${{ secrets.KEYSTORE }}
-                  alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
-                  keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+            # - name: Sign APK
+            #   id: sign_app
+            #   uses: r0adkll/sign-android-release@v1
+            #   with:
+            #       releaseDirectory: android/app/build/outputs/apk/release
+            #       signingKeyBase64: ${{ secrets.KEYSTORE }}
+            #       alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+            #       keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+            #       keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
             - name: Upload a Build Artifact
               uses: actions/upload-artifact@v3.0.0
