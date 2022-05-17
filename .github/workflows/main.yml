@@ -78,6 +78,7 @@ jobs:
                   MYAPP_UPLOAD_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
                   MYAPP_UPLOAD_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
                   MYAPP_UPLOAD_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  MYAPP_UPLOAD_STORE_FILE: my-upload-key.keystore
 
             # sign generated apk
             # - name: Sign APK
