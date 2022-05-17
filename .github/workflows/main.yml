@@ -70,7 +70,7 @@ jobs:
             - name: Rename apk
               shell: pwsh
               run: |
-                  Rename-Item -Path "android/app/build/outputs/apk/release/app-released-unsigned.apk" -NewName "android/app/build/outputs/apk/release/YoRHa.apk"
+                  Rename-Item -Path "$GITHUB_WORKSPACE/android/app/build/outputs/apk/release/app-released-unsigned.apk" -NewName "$GITHUB_WORKSPACE/android/app/build/outputs/apk/release/YoRHa.apk"
 
             # sign generated apk
             - name: Sign APK
