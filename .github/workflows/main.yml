@@ -69,7 +69,7 @@ jobs:
                   ./gradlew assembleRelease --no-daemon
             - name: Rename APK
               run: |
-                  mv "android/app/build/outputs/apk/release/app-released-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa.apk"
+                  mv "android/app/build/outputs/apk/release/app-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa.apk"
 
             # sign generated apk
             - name: Sign APK
