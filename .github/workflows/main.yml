@@ -1,6 +1,6 @@
 name: Android Build ## name of the workflow
 
-on: [push]
+on: [push, workflow_dispatch]
 
 jobs:
     android-build:
@@ -81,15 +81,15 @@ jobs:
                   MYAPP_UPLOAD_STORE_FILE: my-upload-key.keystore
 
             # sign generated apk
-            - name: Sign APK
-              id: sign_app
-              uses: r0adkll/sign-android-release@v1
-              with:
-                  releaseDirectory: android/app/build/outputs/apk/release
-                  signingKeyBase64: ${{ secrets.KEYSTORE }}
-                  alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
-                  keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+            # - name: Sign APK
+            #   id: sign_app
+            #   uses: r0adkll/sign-android-release@v1
+            #   with:
+            #       releaseDirectory: android/app/build/outputs/apk/release
+            #       signingKeyBase64: ${{ secrets.KEYSTORE }}
+            #       alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+            #       keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+            #       keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
             - name: Upload a Build Artifact
               uses: actions/upload-artifact@v3.0.0
