@@ -128,7 +128,7 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
     React.useEffect(() => {
         const init = async () => {
             const watchList: WatchList = JSON.parse(
-                (await AsyncStorage.getItem(StorageKeys.WatchList)) ??
+                (await AsyncStorage.getItem(StorageKeys.WatchList)) ||
                     '{shows: []}',
             );
             setShowsForCurrentDay(

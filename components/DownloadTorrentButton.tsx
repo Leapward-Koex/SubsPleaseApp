@@ -14,6 +14,7 @@ import { SavedShowPaths } from './settingsPageComponents/SavedShowLocationSettin
 import { convert } from '../services/converter';
 import { downloadedShows } from '../services/DownloadedShows';
 import { downloadNotificationManger } from '../services/DownloadNotificationManager';
+import { logger } from '../services/Logger';
 
 type DownloadTorrentButtonProps = {
     resolution: string;
@@ -70,10 +71,20 @@ export const DownloadTorrentButton = ({
     };
 
     const getStoredShowPaths = async () => {
-        return JSON.parse(
-            (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
-                JSON.stringify({ shows: [] }),
-        ) as SavedShowPaths;
+        try {
+            return JSON.parse(
+                (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ||
+                    JSON.stringify({ shows: [] }),
+            ) as SavedShowPaths;
+        } catch (ex) {
+            logger.error(
+                'Failed to parse stored show paths',
+                JSON.stringify(ex),
+            );
+            return {
+                shows: [],
+            };
+        }
     };
 
     const downloadTorrent = async () => {

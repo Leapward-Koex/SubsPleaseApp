@@ -11,6 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ShowInfo } from '../models/models';
 import { SettingsTab } from './SettingsTab';
 import { CastSettingsTab } from './CastSettingsTab';
+import { logger } from '../services/Logger';
 
 const Tab = createMaterialBottomTabNavigator();
 export const BottomNavBar = () => {
@@ -78,7 +79,7 @@ export const BottomNavBar = () => {
             }
             return [];
         } catch (e) {
-            // error reading value
+            logger.error('Failed to read saved releases', JSON.stringify(e));
         }
     };
 
