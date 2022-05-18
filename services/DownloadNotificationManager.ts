@@ -1,5 +1,6 @@
 import { humanFileSize } from '../HelperFunctions';
 import notifee, { EventType } from '@notifee/react-native';
+import { logger } from './Logger';
 
 export interface EpisodeDownloadProgress {
     episodeNumber: string;
@@ -89,7 +90,7 @@ class DownloadNotificationManger {
                 currentSpeed: 0,
             });
         } catch (ex) {
-            console.error(
+            logger.error(
                 'Failed to create notification for',
                 showName,
                 episodeNumber,

@@ -31,6 +31,7 @@ import { Appbar } from 'react-native-paper';
 import { Appearance } from 'react-native-appearance';
 import { pickDirectory } from 'react-native-document-picker';
 import nodejs from 'nodejs-mobile-react-native';
+import { logger } from '../../services/Logger';
 
 type ImportExportListItemProps = {
     type: 'Import' | 'Export';
@@ -75,7 +76,7 @@ export const ImportExportListItem = ({ type }: ImportExportListItemProps) => {
         nodejs.channel.addListener('message', async (msg) => {
             if (msg.callbackId === callbackId) {
                 if (msg.error) {
-                    console.error(msg.error);
+                    logger.error(msg.error);
                 } else {
                     const importedSettings = JSON.parse(msg.payload) as [
                         string,
