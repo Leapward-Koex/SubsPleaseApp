@@ -41,7 +41,7 @@ export const ReleasesTab = ({
         backgroundColor:
             Appearance.getColorScheme() !== 'light'
                 ? colors.subsPleaseDark2
-                : colors.subsPleaseLight2,
+                : colors.subsPleaseLight3,
     };
 
     React.useEffect(() => {

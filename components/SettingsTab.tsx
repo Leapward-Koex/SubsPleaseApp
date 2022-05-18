@@ -113,12 +113,16 @@ export const SettingsTab = () => {
         },
         touchableStyle: {
             height: 60,
-            backgroundColor: colors.subsPleaseDark1,
+            backgroundColor:
+                Appearance.getColorScheme() === 'light'
+                    ? colors.subsPleaseLight3
+                    : colors.subsPleaseDark1,
             display: 'flex',
             flexDirection: 'row',
             alignItems: 'center',
             paddingLeft: 20,
-            borderRadius: 4,
+            borderRadius: 0,
+            marginBottom: 3,
         },
         button: {
             borderRadius: 20,

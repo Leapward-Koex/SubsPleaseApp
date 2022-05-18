@@ -42,13 +42,16 @@ export const ImportExportListItem = ({ type }: ImportExportListItemProps) => {
     const backupFileName = 'subsPleaseBackup.json';
     const touchableStyle = {
         height: 60,
-        backgroundColor: colors.subsPleaseDark1,
+        backgroundColor:
+            Appearance.getColorScheme() === 'light'
+                ? colors.subsPleaseLight3
+                : colors.subsPleaseDark1,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         paddingLeft: 20,
-        borderRadius: 4,
-        marginBottom: 5,
+        borderRadius: 0,
+        marginBottom: 3,
     };
 
     const textStyle = {

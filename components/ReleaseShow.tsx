@@ -150,7 +150,7 @@ export const ReleaseShow = ({
         backgroundColor:
             Appearance.getColorScheme() !== 'light'
                 ? colors.subsPleaseDark1
-                : colors.subsPleaseLight1,
+                : colors.subsPleaseLight2,
     };
 
     const textColour =
