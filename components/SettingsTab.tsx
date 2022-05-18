@@ -33,6 +33,7 @@ import { SavedShowLocationSettings } from './settingsPageComponents/SavedShowLoc
 import { SettingsDivider } from './settingsPageComponents/SettingsDivider';
 import { Appearance } from 'react-native-appearance';
 import { FileLogger } from 'react-native-file-logger';
+import crashlytics from '@react-native-firebase/crashlytics';
 
 export const SettingsTab = () => {
     const { colors } = useTheme();
@@ -40,6 +41,9 @@ export const SettingsTab = () => {
     const [logText, setLogText] = React.useState('');
     const [logFileName, setFileName] = React.useState('');
     const { height } = useWindowDimensions();
+    const [crashReportingEnabled, setCrashReportingEnabled] = React.useState(
+        crashlytics().isCrashlyticsCollectionEnabled,
+    );
 
     const backgroundStyle = {
         backgroundColor:
@@ -63,6 +67,16 @@ export const SettingsTab = () => {
             setLogText(latestLogText);
             setLogViewOpen(true);
         }
+    };
+
+    const toggleCrashlytics = async () => {
+        await crashlytics()
+            .setCrashlyticsCollectionEnabled(!crashReportingEnabled)
+            .then(() =>
+                setCrashReportingEnabled(
+                    crashlytics().isCrashlyticsCollectionEnabled,
+                ),
+            );
     };
 
     const styles = StyleSheet.create({
@@ -164,6 +178,18 @@ export const SettingsTab = () => {
                     </View>
                 </TouchableRipple>
                 <SettingsDivider />
+                <TouchableRipple
+                    onPress={() => toggleCrashlytics()}
+                    style={styles.touchableStyle}
+                >
+                    <View>
+                        <Title style={textStyle}>
+                            {crashReportingEnabled
+                                ? 'Disable crash reporting'
+                                : 'Enable crash reporting'}
+                        </Title>
+                    </View>
+                </TouchableRipple>
                 <TouchableRipple
                     onPress={() => displayLogs()}
                     style={styles.touchableStyle}

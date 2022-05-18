@@ -126,6 +126,7 @@ export const PlayButton = ({
 
         await convert.tidySubtitles(result.subtitleFile);
 
+        await localWebServerManager.startServer();
         const localIp = await NetworkInfo.getIPV4Address();
         if (!localIp) {
             console.error('Cannot cast if local IP address is not available!');
@@ -142,7 +143,7 @@ export const PlayButton = ({
         client
             .loadMedia({
                 mediaInfo: {
-                    contentUrl: `http:/${localIp}:48839/video`,
+                    contentUrl: `http:/${localIp}:${localWebServerManager.openPort}/video`,
                     contentType: 'video/mp4',
                     metadata: {
                         images: [
@@ -162,7 +163,7 @@ export const PlayButton = ({
                             type: 'text',
                             subtype: 'subtitles',
                             name: 'English Subtitle',
-                            contentId: `http:/${localIp}:48839/vtt`,
+                            contentId: `http:/${localIp}:${localWebServerManager.openPort}/vtt`,
                             language: 'en-US',
                             contentType: 'text/vtt',
                         } as any,

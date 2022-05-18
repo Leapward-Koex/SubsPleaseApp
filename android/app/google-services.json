@@ -1,0 +1,68 @@
+{
+  "project_info": {
+    "project_number": "1022963402321",
+    "project_id": "subsplease-a73b8",
+    "storage_bucket": "subsplease-a73b8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022963402321:android:89163ea4cbd2be7e1d1a70",
+        "android_client_info": {
+          "package_name": "com.yorha"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1022963402321-i8f26uhaauutvpaljel8fnhr4f98gjel.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDuvcK8UEwITcNTKDFBLb3diZmVPUjZ68"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1022963402321-i8f26uhaauutvpaljel8fnhr4f98gjel.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022963402321:android:9ef288e91dfeebf71d1a70",
+        "android_client_info": {
+          "package_name": "com.yorha.release"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1022963402321-i8f26uhaauutvpaljel8fnhr4f98gjel.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDuvcK8UEwITcNTKDFBLb3diZmVPUjZ68"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1022963402321-i8f26uhaauutvpaljel8fnhr4f98gjel.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

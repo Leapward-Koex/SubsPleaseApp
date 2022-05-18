@@ -15,6 +15,8 @@
         "@miblanchard/react-native-slider": "^2.1.0",
         "@notifee/react-native": "^5.2.1",
         "@react-native-async-storage/async-storage": "^1.15.5",
+        "@react-native-firebase/app": "^14.9.4",
+        "@react-native-firebase/crashlytics": "^14.9.4",
         "@react-navigation/material-bottom-tabs": "^6.2.1",
         "@react-navigation/native": "^6.0.10",
         "@types/react-native-snap-carousel": "^3.8.3",

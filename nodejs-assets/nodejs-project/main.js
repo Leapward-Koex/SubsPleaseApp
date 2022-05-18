@@ -87,12 +87,18 @@ class TorrentClient {
 }
 
 class LocalWebServer {
+    port;
     constructor(port) {
-        console.log('Starting local webserver on port', port);
+        this.port = port;
+    }
+
+    startServer(callback) {
+        console.log('Starting local webserver on port', this.port);
         this.app = express();
         this.app.use(cors());
-        this.app.listen(port, () => {
-            console.log(`Local webserver listening on port ${port}`);
+        this.app.listen(this.port, () => {
+            console.log(`Local webserver listening on port ${this.port}`);
+            callback();
         });
 
         this.app.get('/video', function (req, res) {
@@ -154,6 +160,7 @@ class LocalWebServer {
 class VttTidier {
     callbackId;
     constructor(callbackId) {
+        console.log('Creating VTT Tidier with', callbackId);
         this.callbackId = callbackId;
     }
     splitEntries(subtitles) {
@@ -167,9 +174,15 @@ class VttTidier {
                 };
             })
             .filter((entry) => entry.text && entry.time);
+        console.log(
+            'Created keyed dialog entries with',
+            keyedDialogEntries.length,
+            'entries',
+        );
         return keyedDialogEntries;
     }
     removeBackgrounds(keyedDialogEntries) {
+        console.log('Removing backgrounds');
         return keyedDialogEntries.filter((keyedDialogEntry) => {
             return !keyedDialogEntry.text.match(
                 /m 0 0 l 0 \d{1,3} l \d{1,3} \d{1,3} l \d{1,3} 0/gm,
@@ -198,6 +211,12 @@ class VttTidier {
                 dedupedDialogs.push(keyedDialogEntry);
             }
         });
+        console.log(
+            'Removed duplicate dialog pieces',
+            keyedDialogEntries.length,
+            '->',
+            dedupedDialogs.length,
+        );
         return dedupedDialogs;
     }
 
@@ -205,6 +224,7 @@ class VttTidier {
         keyedDialogEntries.forEach((entry) => {
             entry.text = entry.text.replace(/{=\d+}/gm, '[Sign] ');
         });
+        console.log('Marked sign text');
         return keyedDialogEntries;
     }
 
@@ -223,23 +243,26 @@ class VttTidier {
     tidyVttFile(path) {
         fs.readFile(path, 'utf8', (err, data) => {
             if (err) {
-                console.error(err);
+                console.error('Failed to read text file', err);
                 rn_bridge.channel.send({
                     callbackId: this.callbackId,
                 });
                 return;
             }
+            console.log('Read data file with', data.length, 'lines');
             const processDialogEntries = this.markSignText(
                 this.removeDuplicateText(
                     this.removeBackgrounds(this.splitEntries(data)),
                 ),
             );
+            console.log('Finished processing subtitles, serializing...');
             const vttText = this.serializeDialogEntries(processDialogEntries);
+            console.log('Writing text length', vttText.length, 'to', path);
             fs.writeFile(path, vttText, (writeerr) => {
                 if (writeerr) {
                     console.error(writeerr);
                 } else {
-                    console.log('Successfully converted VTT');
+                    console.log('Successfully processed VTT');
                 }
                 rn_bridge.channel.send({
                     callbackId: this.callbackId,
@@ -290,12 +313,18 @@ rn_bridge.channel.on('message', (msg) => {
                 console.log(
                     'Already created a webserver, not creating a second one.',
                 );
+                rn_bridge.channel.send({
+                    name: 'local-webserver-callback',
+                    callbackId: msg.callbackId,
+                });
                 return;
             }
             localServer = new LocalWebServer(msg.port);
-            rn_bridge.channel.send({
-                name: 'local-webserver-callback',
-                callbackId: msg.callbackId,
+            localServer.startServer(() => {
+                rn_bridge.channel.send({
+                    name: 'local-webserver-callback',
+                    callbackId: msg.callbackId,
+                });
             });
         } else if (msg.name === 'stop-server') {
             console.log('Starting local webserver', JSON.stringify(msg));
@@ -314,7 +343,8 @@ rn_bridge.channel.on('message', (msg) => {
                 callbackId: msg.callbackId,
             });
         } else if (msg.name === 'tidy-vtt') {
-            const vttTider = new VttTidier();
+            const vttTider = new VttTidier(msg.callbackId);
+            console.log('Going to tidy VTT file', msg.filePath);
             vttTider.tidyVttFile(msg.filePath);
         }
     } catch (ex) {

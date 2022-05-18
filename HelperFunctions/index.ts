@@ -89,6 +89,7 @@ interface FilePathModuleInterface {
         filePath: string,
         callback: (success: boolean) => void,
     ): void;
+    getOpenPort(callback: (openPortNumber: number) => void): void;
 }
 
 const { FilePathModule } = NativeModules;
@@ -137,6 +138,12 @@ export const openVideoIntent = (filePath: string) => {
         FilePathModuleTyped.openVideoIntent(filePath, (success) =>
             resolve(success),
         );
+    });
+};
+
+export const getOpenPort = () => {
+    return new Promise<number>((resolve) => {
+        FilePathModuleTyped.getOpenPort((port) => resolve(port));
     });
 };
 

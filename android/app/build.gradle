@@ -1,5 +1,6 @@
 apply plugin: "com.android.application"
-
+apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.firebase.crashlytics'
 import com.android.build.OutputFile
 
 /**
@@ -173,6 +174,10 @@ android {
             applicationIdSuffix '.release'
             versionNameSuffix '-RELEASE'
             resValue "string", "app_name", "YoRHa 2B"
+            firebaseCrashlytics {
+                nativeSymbolUploadEnabled true
+                unstrippedNativeLibsDir 'build/intermediates/merged_native_libs/release/out/lib'
+            }
         }
     }
 

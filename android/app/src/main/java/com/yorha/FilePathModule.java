@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 
 public class FilePathModule extends ReactContextBaseJavaModule {
     FilePathModule(ReactApplicationContext context) {
@@ -90,6 +91,18 @@ public class FilePathModule extends ReactContextBaseJavaModule {
         catch (IOException e) {
             callBack.invoke("");
         }
+    }
+
+    @ReactMethod
+    public void getOpenPort(Callback callBack) {
+        int port = -1;
+        try {
+            ServerSocket socket = new ServerSocket(0);
+            port = socket.getLocalPort();
+            socket.close();
+        }
+        catch (IOException ioe) {}
+        callBack.invoke(port);
     }
 
     @ReactMethod

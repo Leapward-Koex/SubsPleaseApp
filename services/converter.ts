@@ -31,6 +31,7 @@ class Converter {
                     fileName: subtitleFilePath,
                     subtitleFile: subtitleFilePath,
                 });
+                return;
             }
 
             console.log(sourcePath, sourceFileName);
@@ -75,6 +76,7 @@ class Converter {
             nodejs.channel.send({
                 name: 'tidy-vtt',
                 callbackId,
+                filePath,
             });
         });
     }

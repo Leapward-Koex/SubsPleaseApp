@@ -74,7 +74,6 @@ const App = () => {
                 }
             });
             await FileLogger.configure();
-            localWebServerManager.startServer();
             await notifee.cancelAllNotifications();
         })();
         return () => {
