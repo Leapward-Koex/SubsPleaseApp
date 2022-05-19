@@ -11,7 +11,7 @@ import android.os.Environment;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import com.google.android.gms.cast.framework.CastContext;
-
+import io.invertase.firebase.crashlytics.ReactNativeFirebaseCrashlyticsNativeHelper;
 import com.facebook.react.ReactActivity;
 
 public class MainActivity extends ReactActivity {
@@ -39,7 +39,12 @@ public class MainActivity extends ReactActivity {
   protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     PACKAGE_NAME = getApplicationContext().getPackageName();
-    CastContext.getSharedInstance(this);
+    try {
+      CastContext.getSharedInstance(this);
+    } catch (Exception exception) {
+      ReactNativeFirebaseCrashlyticsNativeHelper.log("Failed to initialize cast context");
+      ReactNativeFirebaseCrashlyticsNativeHelper.recordNativeException(exception);
+    }
     if (SDK_INT >= Build.VERSION_CODES.R) {
       FilePathModule.manageFileLauncher = registerForActivityResult(
               new ActivityResultContracts.StartActivityForResult(),
