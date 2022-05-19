@@ -67,6 +67,9 @@ jobs:
                   Remove-Item './app/src/main/res/drawable-xxxhdpi/node_modules*' -Recurse
                   Remove-Item './app/src/main/res/drawable-xxxhdpi/resources*' -Recurse
                   ./gradlew assembleRelease --no-daemon
+              env:
+                  Build_Id: ${{github.run_number}}
+
             - name: Rename APK
               run: |
                   mv "android/app/build/outputs/apk/release/app-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa.apk"

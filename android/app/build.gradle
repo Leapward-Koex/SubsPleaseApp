@@ -134,8 +134,8 @@ android {
         applicationId "com.yorha"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode System.getenv()["Build_Id"].toInteger() ?: 1
+        versionName "1.0." +  System.getenv()["Build_Id"]
     }
     splits {
         abi {
