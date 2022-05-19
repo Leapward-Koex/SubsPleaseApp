@@ -16,6 +16,7 @@ import com.facebook.react.ReactActivity;
 
 public class MainActivity extends ReactActivity {
   public static String PACKAGE_NAME;
+  public static boolean CastingAvailable = false;
 
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
@@ -41,6 +42,7 @@ public class MainActivity extends ReactActivity {
     PACKAGE_NAME = getApplicationContext().getPackageName();
     try {
       CastContext.getSharedInstance(this);
+      MainActivity.CastingAvailable = true;
     } catch (Exception exception) {
       ReactNativeFirebaseCrashlyticsNativeHelper.log("Failed to initialize cast context");
       ReactNativeFirebaseCrashlyticsNativeHelper.recordNativeException(exception);

@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GoogleCast, { CastButton } from 'react-native-google-cast';
+import { isCastingAvailable } from '../HelperFunctions';
 
 interface ReleaseTabHeaderProps {
     onSearchChanged: (query: string) => void;
@@ -27,6 +28,7 @@ export const ReleaseTabHeader = ({
     const [searchQuery, setSearchQuery] = React.useState('');
     const [filterPanelShown, setFilterPanelShown] = React.useState(false);
     const [checked, setChecked] = React.useState(ShowFilter.None);
+    const [castingAvailable, setCastingAvailable] = React.useState(false);
 
     const onChangeText = (query: string) => {
         onSearchChanged(query);
@@ -58,6 +60,12 @@ export const ReleaseTabHeader = ({
 
     React.useEffect(() => {
         (async () => {
+            setCastingAvailable(await isCastingAvailable());
+        })();
+    }, []);
+
+    React.useEffect(() => {
+        (async () => {
             const lastFilter = (await AsyncStorage.getItem(
                 'headerFilter',
             )) as ShowFilter | null;
@@ -67,6 +75,22 @@ export const ReleaseTabHeader = ({
             }
         })();
     }, [onFilterChanged]);
+
+    const getCastButton = () => {
+        if (castingAvailable) {
+            return (
+                <CastButton
+                    style={{
+                        width: 50,
+                        height: 24,
+                        top: 12,
+                        tintColor: 'white',
+                    }}
+                />
+            );
+        }
+        return <></>;
+    };
 
     return (
         <>
@@ -96,14 +120,7 @@ export const ReleaseTabHeader = ({
                     >
                         <Icon name="filter-variant" size={24} color="#fff" />
                     </Button>
-                    <CastButton
-                        style={{
-                            width: 50,
-                            height: 24,
-                            top: 12,
-                            tintColor: 'white',
-                        }}
-                    />
+                    {getCastButton()}
                 </View>
             </Appbar.Header>
             <Portal>

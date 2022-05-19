@@ -90,6 +90,7 @@ interface FilePathModuleInterface {
         callback: (success: boolean) => void,
     ): void;
     getOpenPort(callback: (openPortNumber: number) => void): void;
+    isCastingAvailable(callback: (castingAvailable: boolean) => void): void;
 }
 
 const { FilePathModule } = NativeModules;
@@ -144,6 +145,14 @@ export const openVideoIntent = (filePath: string) => {
 export const getOpenPort = () => {
     return new Promise<number>((resolve) => {
         FilePathModuleTyped.getOpenPort((port) => resolve(port));
+    });
+};
+
+export const isCastingAvailable = () => {
+    return new Promise<boolean>((resolve) => {
+        FilePathModuleTyped.isCastingAvailable((castingAvailable) =>
+            resolve(castingAvailable),
+        );
     });
 };
 

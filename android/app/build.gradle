@@ -176,7 +176,6 @@ android {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             applicationIdSuffix '.release'
-            versionNameSuffix '-RELEASE'
             resValue "string", "app_name", "YoRHa 2B"
             firebaseCrashlytics {
                 nativeSymbolUploadEnabled true

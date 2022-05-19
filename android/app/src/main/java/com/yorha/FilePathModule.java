@@ -64,6 +64,12 @@ public class FilePathModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void isCastingAvailable(Callback callBack) {
+		// Some devices may not have google play services so this allows for conditional rendering
+        callBack.invoke(MainActivity.CastingAvailable);
+    }
+
+    @ReactMethod
     public void openVideoIntent(final String filePath, Callback callBack) {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(filePath));
         intent.setDataAndType(Uri.parse(filePath), "video/*");

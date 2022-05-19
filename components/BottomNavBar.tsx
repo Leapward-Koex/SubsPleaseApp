@@ -3,7 +3,7 @@ import uniqBy from 'lodash.uniqby';
 import * as React from 'react';
 import { BottomNavigation, Text, useTheme } from 'react-native-paper';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { promiseEach } from '../HelperFunctions';
+import { isCastingAvailable, promiseEach } from '../HelperFunctions';
 import { SubsPleaseApi } from '../SubsPleaseApi';
 import { ReleasesTab } from './ReleasesTab';
 import { WatchListTab } from './WatchListTab';
@@ -18,6 +18,7 @@ export const BottomNavBar = () => {
     const [index, setIndex] = React.useState(0);
     const [mounted, setMounted] = React.useState(true);
     const [showList, setShowList] = React.useState<ShowInfo[]>([]);
+    const [castingAvailable, setCastingAvailable] = React.useState(false);
     const [refreshingReleasesList, setRefreshingReleasesList] =
         React.useState(false);
 
@@ -62,6 +63,12 @@ export const BottomNavBar = () => {
         }
     }, [mounted]);
 
+    React.useEffect(() => {
+        (async () => {
+            setCastingAvailable(await isCastingAvailable());
+        })();
+    }, []);
+
     // Release tab data
     React.useEffect(() => {
         refreshShowData();
@@ -92,6 +99,25 @@ export const BottomNavBar = () => {
         }
     };
 
+    const getCastSettingsTab = () => {
+        if (castingAvailable) {
+            return (
+                <Tab.Screen
+                    name="Cast Settings"
+                    component={CastSettingsRoute}
+                    options={{
+                        tabBarLabel: 'Cast Settings',
+                        tabBarIcon: ({ color }) => (
+                            <Icon name="cast" color={color} size={25} />
+                        ),
+                        tabBarColor: colors.secondary,
+                    }}
+                />
+            );
+        }
+        return <></>;
+    };
+
     return (
         <Tab.Navigator shifting>
             <Tab.Screen
@@ -105,17 +131,7 @@ export const BottomNavBar = () => {
                     tabBarColor: colors.primary,
                 }}
             />
-            <Tab.Screen
-                name="Cast Settings"
-                component={CastSettingsRoute}
-                options={{
-                    tabBarLabel: 'Cast Settings',
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="cast" color={color} size={25} />
-                    ),
-                    tabBarColor: colors.secondary,
-                }}
-            />
+            {getCastSettingsTab()}
             <Tab.Screen
                 name="Watch list"
                 component={WatchListRoute}
