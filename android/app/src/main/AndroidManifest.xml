@@ -16,6 +16,7 @@
       android:icon="@mipmap/subsplease_icon"
       android:roundIcon="@mipmap/subsplease_icon_round"
       android:allowBackup="true"
+	  android:requestLegacyExternalStorage="true"
       android:theme="@style/AppTheme">
       <activity
         android:name=".MainActivity"
