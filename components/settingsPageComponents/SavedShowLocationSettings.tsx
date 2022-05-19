@@ -24,10 +24,10 @@ import {
     StyleSheet,
     useWindowDimensions,
     View,
+    Appearance,
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { ImportExportListItem } from './ExportImportSettings';
-import { Appearance } from 'react-native-appearance';
 import { StorageKeys } from '../../enums/enum';
 
 export interface SavedShowPaths {

@@ -26,12 +26,12 @@ import {
     StyleSheet,
     useWindowDimensions,
     View,
+    Appearance,
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { ImportExportListItem } from './settingsPageComponents/ExportImportSettings';
 import { SavedShowLocationSettings } from './settingsPageComponents/SavedShowLocationSettings';
 import { SettingsDivider } from './settingsPageComponents/SettingsDivider';
-import { Appearance } from 'react-native-appearance';
 import {
     CastButton,
     MediaPlayerState,

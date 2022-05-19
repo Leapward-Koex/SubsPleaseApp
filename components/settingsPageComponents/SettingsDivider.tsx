@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { Appearance, useWindowDimensions, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Appearance } from 'react-native-appearance';
 
 export const SettingsDivider = () => {
     const { colors } = useTheme();

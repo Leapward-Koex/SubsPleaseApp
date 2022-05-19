@@ -10,8 +10,8 @@ import {
     Modal,
     ScrollView,
     useWindowDimensions,
+    Appearance,
 } from 'react-native';
-import { Appearance } from 'react-native-appearance';
 import {
     Avatar,
     Button,

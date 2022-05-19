@@ -26,9 +26,9 @@ import {
     StatusBar,
     StyleSheet,
     View,
+    Appearance,
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
-import { Appearance } from 'react-native-appearance';
 import { pickDirectory } from 'react-native-document-picker';
 import nodejs from 'nodejs-mobile-react-native';
 import { logger } from '../../services/Logger';

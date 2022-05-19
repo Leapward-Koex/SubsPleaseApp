@@ -63,3 +63,5 @@ index.android.bundle
 .vscode/.react/index.bundle
 .vscode/.react/index.map
 .vscode/.react/debuggerWorker.js
+nodejs-assets/nodejs-project/sample-package.json
+nodejs-assets/nodejs-project/sample-main.js
