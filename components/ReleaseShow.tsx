@@ -23,7 +23,11 @@ import {
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { StorageKeys } from '../enums/enum';
-import { getDayOfWeek, humanFileSize } from '../HelperFunctions';
+import {
+    getDayOfWeek,
+    humanFileSize,
+    isCastingAvailable,
+} from '../HelperFunctions';
 import { ShowInfo, ShowResolution, WatchList } from '../models/models';
 import { SubsPleaseApi } from '../SubsPleaseApi';
 import { NativeModules } from 'react-native';
@@ -36,6 +40,7 @@ import {
 } from './DownloadTorrentButton';
 import { downloadedShows } from '../services/DownloadedShows';
 import { PlayButton } from './PlayButton';
+import { CastPlayButton } from './CastPlayButton';
 
 type releaseShowProps = {
     showInfo: ShowInfo;
@@ -60,11 +65,18 @@ export const ReleaseShow = ({
     const [uploadSpeed, setUploadSpeed] = React.useState(0);
     const [downloaded, setDownloaded] = React.useState(0);
     const [torrentPaused, setTorrentPaused] = React.useState(false);
+    const [castingAvailable, setCastingAvailable] = React.useState(false);
     const [showDownloaded, setShowDownloaded] = React.useState(''); // Contains the magnet (key) of the downloaded show.
     const [callbackId] = React.useState(
         showInfo.show + showInfo.release_date + showInfo.episode,
     );
     const { height, width } = useWindowDimensions();
+
+    React.useEffect(() => {
+        (async () => {
+            setCastingAvailable(await isCastingAvailable());
+        })();
+    }, []);
 
     React.useEffect(() => {
         (async () => {
@@ -241,13 +253,13 @@ export const ReleaseShow = ({
         );
     };
 
-    const getActionInfoSection = () => {
-        if (
-            showDownloaded &&
-            downloadingStatus === DownloadingStatus.NotDownloading
-        ) {
+    const getPlayButton = () => {
+        if (!showDownloaded) {
+            return <></>;
+        }
+        if (castingAvailable) {
             return (
-                <PlayButton
+                <CastPlayButton
                     showName={showInfo.show}
                     showImageUrl={
                         new URL(showInfo.image_url, SubsPleaseApi.apiBaseUrl)
@@ -258,6 +270,18 @@ export const ReleaseShow = ({
                     fileMagnet={showDownloaded}
                 />
             );
+        }
+        return (
+            <PlayButton showName={showInfo.show} fileMagnet={showDownloaded} />
+        );
+    };
+
+    const getActionInfoSection = () => {
+        if (
+            showDownloaded &&
+            downloadingStatus === DownloadingStatus.NotDownloading
+        ) {
+            return getPlayButton();
         }
         if (downloadingStatus === DownloadingStatus.NotDownloading) {
             return (
@@ -325,9 +349,20 @@ export const ReleaseShow = ({
                             name="arrow-up"
                             style={{ marginRight: 5, marginTop: 2 }}
                             size={13}
-                            color={colors.subsPleaseLight3}
+                            color={
+                                Appearance.getColorScheme() === 'light'
+                                    ? colors.subsPleaseDark3
+                                    : colors.subsPleaseLight3
+                            }
                         />
-                        <Text style={{ color: colors.subsPleaseLight3 }}>
+                        <Text
+                            style={{
+                                color:
+                                    Appearance.getColorScheme() === 'light'
+                                        ? colors.subsPleaseDark3
+                                        : colors.subsPleaseLight3,
+                            }}
+                        >
                             {humanFileSize(uploadSpeed)}/S
                         </Text>
                     </View>
@@ -336,28 +371,26 @@ export const ReleaseShow = ({
                             name="arrow-down"
                             style={{ marginRight: 5, marginTop: 2 }}
                             size={13}
-                            color={colors.subsPleaseLight3}
+                            color={
+                                Appearance.getColorScheme() === 'light'
+                                    ? colors.subsPleaseDark3
+                                    : colors.subsPleaseLight3
+                            }
                         />
-                        <Text style={{ color: colors.subsPleaseLight3 }}>
+                        <Text
+                            style={{
+                                color:
+                                    Appearance.getColorScheme() === 'light'
+                                        ? colors.subsPleaseDark3
+                                        : colors.subsPleaseLight3,
+                            }}
+                        >
                             {humanFileSize(downloadSpeed)}/S
                         </Text>
                     </View>
                 </View>
 
-                {!!showDownloaded && (
-                    <PlayButton
-                        showName={showInfo.show}
-                        showImageUrl={
-                            new URL(
-                                showInfo.image_url,
-                                SubsPleaseApi.apiBaseUrl,
-                            ).href
-                        }
-                        episodeNumber={showInfo.episode}
-                        releaseDate={showInfo.release_date}
-                        fileMagnet={showDownloaded}
-                    />
-                )}
+                {getPlayButton()}
             </View>
         );
     };

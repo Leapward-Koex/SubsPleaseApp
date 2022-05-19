@@ -57,7 +57,7 @@ export const ReleasesTab = ({
         return () => {
             setMounted(false);
         };
-    }, []);
+    }, [mounted]);
 
     React.useEffect(() => {
         (async () => {

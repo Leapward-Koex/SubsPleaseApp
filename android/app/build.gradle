@@ -134,8 +134,8 @@ android {
         applicationId "com.yorha"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode System.getenv()["Build_Id"].toInteger() ?: 1
-        versionName "1.0." +  System.getenv()["Build_Id"]
+        versionCode System.getenv()["Build_Id"] ? System.getenv()["Build_Id"].toInteger() : 1
+        versionName "1.0." +  System.getenv()["Build_Id"] ?: "Manual"
     }
     splits {
         abi {
@@ -172,7 +172,7 @@ android {
             resValue "string", "app_name", "YoRHa"
         }
         release {
-            // signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             applicationIdSuffix '.release'

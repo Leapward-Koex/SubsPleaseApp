@@ -61,6 +61,9 @@ public class FilePathModule extends ReactContextBaseJavaModule {
                 callBack.invoke(true);
             }
         }
+        else {
+            callBack.invoke(true);
+        }
     }
 
     @ReactMethod
