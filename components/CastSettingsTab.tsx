@@ -11,7 +11,11 @@ import {
     useTheme,
 } from 'react-native-paper';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { formatSecondsToMinutesSeconds, promiseEach } from '../HelperFunctions';
+import {
+    formatSecondsToMinutesSeconds,
+    getRealPathFromContentUri,
+    promiseEach,
+} from '../HelperFunctions';
 import { SubsPleaseApi } from '../SubsPleaseApi';
 import { ReleasesTab } from './ReleasesTab';
 import { WatchListTab } from './WatchListTab';
@@ -38,6 +42,8 @@ import {
     useRemoteMediaClient,
 } from 'react-native-google-cast';
 import { Slider } from '@miblanchard/react-native-slider';
+import { pick } from 'react-native-document-picker';
+import { CastQueue } from './CastQueue';
 
 export const CastSettingsTab = () => {
     const [currentSeconds, setCurrentSeconds] = React.useState(0);
@@ -45,6 +51,9 @@ export const CastSettingsTab = () => {
     const [backgroundImageUrl, setBackgroundImageUrl] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
     const [draggingSlider, setDraggingSlider] = React.useState(false);
+    const [videoPathsToCast, setVideoPathsToCast] = React.useState<string[]>(
+        [],
+    );
     const [playState, setPlayState] = React.useState<MediaPlayerState>(
         MediaPlayerState.IDLE,
     );
@@ -64,10 +73,7 @@ export const CastSettingsTab = () => {
     };
 
     const textStyle = {
-        color:
-            Appearance.getColorScheme() === 'light'
-                ? colors.subsPleaseDark3
-                : colors.subsPleaseLight1,
+        color: colors.subsPleaseLight1,
     };
 
     React.useEffect(() => {
@@ -146,52 +152,66 @@ export const CastSettingsTab = () => {
         large: width * 0.1,
     };
 
-    return (
-        <View style={backgroundStyle}>
-            <Appbar.Header
-                statusBarHeight={1}
-                style={{ backgroundColor: colors.secondary }}
-            >
-                <Appbar.Content color={'white'} title="Casting" />
-                <CastButton
-                    style={{
-                        width: 50,
-                        height: 24,
-                        top: 0,
-                        tintColor: 'white',
-                    }}
-                />
-            </Appbar.Header>
-            {hasBackground && (
+    const openFileSelector = async () => {
+        try {
+            const pickResults = await pick({
+                allowMultiSelection: true,
+                type: 'video/*',
+            });
+            const filePaths: string[] = [];
+            for (const pickResult of pickResults) {
+                filePaths.push(await getRealPathFromContentUri(pickResult.uri));
+            }
+            console.log('Queue of filepaths:', filePaths);
+            setVideoPathsToCast(filePaths);
+        } catch {}
+    };
+
+    const getBackground = () => {
+        if (hasBackground) {
+            return (
                 <ImageBackground
                     style={{
                         width: '100%',
-                        height: height - 320,
                     }}
                     source={{ uri: backgroundImageUrl }}
                     blurRadius={2}
                 >
-                    <View>
-                        {/* <Text>Show Title</Text>
-		<Text>Episode Title</Text> */}
-                    </View>
+                    <CastQueue />
+                    {getControls()}
                 </ImageBackground>
-            )}
-            {!hasBackground && (
-                <View
-                    style={{
-                        width: '100%',
-                        height: height - 320,
-                    }}
-                >
-                    <View>
-                        {/* <Text>Show Title</Text>
-		<Text>Episode Title</Text> */}
-                    </View>
-                </View>
-            )}
+            );
+        }
+        return (
+            <View
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor:
+                        Appearance.getColorScheme() === 'light'
+                            ? colors.subsPleaseLight2
+                            : colors.subsPleaseDark2,
+                }}
+            >
+                <CastQueue />
+                {getControls()}
+            </View>
+        );
+    };
 
-            <View style={{ backgroundColor: colors.subsPleaseDark2 }}>
+    const getControls = () => {
+        return (
+            <View
+                style={{
+                    backgroundColor: '#333333AA',
+                    position: 'absolute',
+                    bottom: 55,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1,
+                    elevation: 1,
+                }}
+            >
                 <View
                     style={{
                         display: 'flex',
@@ -295,6 +315,31 @@ export const CastSettingsTab = () => {
                     </Text>
                 </View>
             </View>
+        );
+    };
+
+    return (
+        <View style={backgroundStyle}>
+            <Appbar.Header
+                statusBarHeight={1}
+                style={{ backgroundColor: colors.secondary, zIndex: 2 }}
+            >
+                <Appbar.Content color={'white'} title="Casting" />
+                <IconButton
+                    color={colors.subsPleaseLight1}
+                    onPress={() => openFileSelector()}
+                    icon={'folder-open'}
+                />
+                <CastButton
+                    style={{
+                        width: 50,
+                        height: 24,
+                        top: 0,
+                        tintColor: 'white',
+                    }}
+                />
+            </Appbar.Header>
+            {getBackground()}
         </View>
     );
 };

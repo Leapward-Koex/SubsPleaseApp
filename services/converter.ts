@@ -4,7 +4,13 @@ import {
     ReturnCode,
 } from 'ffmpeg-kit-react-native';
 import nodejs from 'nodejs-mobile-react-native';
-import { deleteFileIfExists, fileExists } from '../HelperFunctions';
+import {
+    deleteFileIfExists,
+    fileExists,
+    getExtensionlessFilepath,
+    getFileNameFromFilePath,
+} from '../HelperFunctions';
+import { TemporaryDirectoryPath } from 'react-native-fs';
 
 class Converter {
     public async extractSubtitles(
@@ -61,6 +67,43 @@ class Converter {
                     fileName: sourceFileName,
                     subtitleFile: '',
                 });
+            }
+        });
+    }
+
+    public async getB64VideoThumbnail(videoPath: string) {
+        return new Promise<string>(async (resolve) => {
+            const fileName = getFileNameFromFilePath(videoPath);
+            const outputFileName = `${getExtensionlessFilepath(fileName)}.jpg`;
+            const outputFilePath = `${TemporaryDirectoryPath}/${outputFileName}`;
+            const convertArguments = `-ss 30 -i ${videoPath} -qscale:v 4 -frames:v 1 ${outputFilePath}`;
+            console.log(
+                'Going to extract thumbnail with arguments:',
+                convertArguments,
+            );
+            const session = await FFmpegKit.execute(convertArguments);
+            const returnCode = await session.getReturnCode();
+            if (ReturnCode.isSuccess(returnCode)) {
+                console.log('Success getting thumbnail');
+                // now read file and convert to base64;
+                const callbackId = outputFilePath + 'thumbnail';
+                nodejs.channel.addListener('message', async (msg) => {
+                    if (msg.callbackId === callbackId) {
+                        await deleteFileIfExists(outputFilePath);
+                        resolve(msg.b64String);
+                    }
+                });
+                nodejs.channel.send({
+                    name: 'base64-image',
+                    callbackId,
+                    outputFilePath,
+                });
+            } else if (ReturnCode.isCancel(returnCode)) {
+                console.log('Error getting thumbnail');
+                resolve('');
+            } else {
+                console.log('Unknown error getting thumbnail');
+                resolve('');
             }
         });
     }

@@ -135,189 +135,158 @@ public class FilePathModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getFolderPathFromUri(final String uriString, Callback callBack) {
         // check here to KITKAT or new version
-        final boolean isKitKat = SDK_INT >= Build.VERSION_CODES.KITKAT;
-        final Uri uri =  DocumentsContract.buildDocumentUriUsingTree(Uri.parse(uriString), DocumentsContract.getTreeDocumentId(Uri.parse(uriString)));
+        final Uri uri = uriString.indexOf("documents/tree") != -1 ? DocumentsContract.buildDocumentUriUsingTree(Uri.parse(uriString), DocumentsContract.getTreeDocumentId(Uri.parse(uriString))) : Uri.parse(uriString);
 
         String selection = null;
         String[] selectionArgs = null;
-        // DocumentProvider
-        if (isKitKat) {
-            // ExternalStorageProvider
+        if (isExternalStorageDocument(uri)) {
+            final String docId = DocumentsContract.getDocumentId(uri);
+            final String[] split = docId.split(":");
+            final String type = split[0];
 
-            if (isExternalStorageDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-
-                String fullPath = getPathFromExtSD(split);
-                if (fullPath != "") {
-                    callBack.invoke(fullPath);
-                } else {
-                    callBack.invoke();
-                }
-                return;
+            String fullPath = getPathFromExtSD(split);
+            if (fullPath != "") {
+                callBack.invoke(fullPath);
+            } else {
+                callBack.invoke();
             }
+            return;
+        }
 
 
-            // DownloadsProvider
+        // DownloadsProvider
 
-            if (isDownloadsDocument(uri)) {
+        if (isDownloadsDocument(uri)) {
 
-                if (SDK_INT >= Build.VERSION_CODES.M) {
-                    final String id;
-                    Cursor cursor = null;
-                    try {
-                        cursor = this.getReactApplicationContext().getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DISPLAY_NAME}, null, null, null);
-                        if (cursor != null && cursor.moveToFirst()) {
-                            String fileName = cursor.getString(0);
-                            String path = Environment.getExternalStorageDirectory().toString() + "/Download/" + fileName;
-                            if (!TextUtils.isEmpty(path)) {
-                                callBack.invoke(path);
-                                return;
-                            }
-                        }
-                    }
-                    finally {
-                        if (cursor != null)
-                            cursor.close();
-                    }
-                    id = DocumentsContract.getDocumentId(uri);
-                    if (!TextUtils.isEmpty(id)) {
-                        if (id.startsWith("raw:")) {
-                            callBack.invoke(id.replaceFirst("raw:", ""));
+            if (SDK_INT >= Build.VERSION_CODES.M) {
+                final String id;
+                Cursor cursor = null;
+                try {
+                    cursor = this.getReactApplicationContext().getContentResolver().query(uri, new String[]{MediaStore.MediaColumns.DISPLAY_NAME}, null, null, null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        String fileName = cursor.getString(0);
+                        String path = Environment.getExternalStorageDirectory().toString() + "/Download/" + fileName;
+                        if (!TextUtils.isEmpty(path)) {
+                            callBack.invoke(path);
                             return;
                         }
-                        String[] contentUriPrefixesToTry = new String[]{
-                                "content://downloads/public_downloads",
-                                "content://downloads/my_downloads"
-                        };
-                        for (String contentUriPrefix : contentUriPrefixesToTry) {
-                            try {
-                                final Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), Long.valueOf(id));
-
-
-                                callBack.invoke(getDataColumn(this.getReactApplicationContext(), contentUri, null, null));
-                                return;
-                            } catch (NumberFormatException e) {
-                                //In Android 8 and Android P the id is not a number
-                                callBack.invoke(uri.getPath().replaceFirst("^/document/raw:", "").replaceFirst("^raw:", ""));
-                                return;
-                            }
-                        }
-
-
                     }
                 }
-                else {
-                    final String id = DocumentsContract.getDocumentId(uri);
-
+                finally {
+                    if (cursor != null)
+                        cursor.close();
+                }
+                id = DocumentsContract.getDocumentId(uri);
+                if (!TextUtils.isEmpty(id)) {
                     if (id.startsWith("raw:")) {
                         callBack.invoke(id.replaceFirst("raw:", ""));
                         return;
                     }
-                    try {
-                        contentUri = ContentUris.withAppendedId(
-                                Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                    String[] contentUriPrefixesToTry = new String[]{
+                            "content://downloads/public_downloads",
+                            "content://downloads/my_downloads"
+                    };
+                    for (String contentUriPrefix : contentUriPrefixesToTry) {
+                        try {
+                            final Uri contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), Long.valueOf(id));
+
+
+                            callBack.invoke(getDataColumn(this.getReactApplicationContext(), contentUri, null, null));
+                            return;
+                        } catch (NumberFormatException e) {
+                            //In Android 8 and Android P the id is not a number
+                            callBack.invoke(uri.getPath().replaceFirst("^/document/raw:", "").replaceFirst("^raw:", ""));
+                            return;
+                        }
                     }
-                    catch (NumberFormatException e) {
-                        e.printStackTrace();
-                    }
-                    if (contentUri != null) {
-                         callBack.invoke(getDataColumn(this.getReactApplicationContext(), contentUri, null, null));
-                         return;
-                    }
+
+
                 }
             }
+            else {
+                final String id = DocumentsContract.getDocumentId(uri);
 
-
-            // MediaProvider
-            if (isMediaDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-
-                Uri contentUri = null;
-
-                if ("image".equals(type)) {
-                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                } else if ("video".equals(type)) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                } else if ("audio".equals(type)) {
-                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                if (id.startsWith("raw:")) {
+                    callBack.invoke(id.replaceFirst("raw:", ""));
+                    return;
                 }
-                selection = "_id=?";
-                selectionArgs = new String[]{split[1]};
+                try {
+                    contentUri = ContentUris.withAppendedId(
+                            Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                }
+                catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+                if (contentUri != null) {
+                     callBack.invoke(getDataColumn(this.getReactApplicationContext(), contentUri, null, null));
+                     return;
+                }
+            }
+        }
 
 
-                callBack.invoke(getDataColumn(this.getReactApplicationContext(), contentUri, selection,
-                        selectionArgs));
+        // MediaProvider
+        if (isMediaDocument(uri)) {
+            final String docId = DocumentsContract.getDocumentId(uri);
+            final String[] split = docId.split(":");
+            final String type = split[0];
+
+            Uri contentUri = null;
+
+            if ("image".equals(type)) {
+                contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            } else if ("video".equals(type)) {
+                contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+            } else if ("audio".equals(type)) {
+                contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+            }
+            selection = "_id=?";
+            selectionArgs = new String[]{split[1]};
+
+
+            callBack.invoke(getDataColumn(this.getReactApplicationContext(), contentUri, selection,
+                    selectionArgs));
+            return;
+        }
+
+        if (isGoogleDriveUri(uri)) {
+            callBack.invoke(getDriveFilePath(uri));
+            return;
+        }
+
+        if (isWhatsAppFile(uri)){
+            callBack.invoke(getFilePathForWhatsApp(uri));
+            return;
+        }
+
+
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+
+            if (isGooglePhotosUri(uri)) {
+                callBack.invoke(uri.getLastPathSegment());
                 return;
             }
-
             if (isGoogleDriveUri(uri)) {
                 callBack.invoke(getDriveFilePath(uri));
                 return;
             }
-
-            if (isWhatsAppFile(uri)){
-                callBack.invoke(getFilePathForWhatsApp(uri));
+            if (SDK_INT >= Build.VERSION_CODES.Q)
+            {
+                // return getFilePathFromURI(context,uri);
+                callBack.invoke(copyFileToInternalStorage(uri,"userfiles"));
+                // return getRealPathFromURI(context,uri);
+                return;
+            }
+            else
+            {
+                callBack.invoke(getDataColumn(this.getReactApplicationContext(), uri, null, null));
                 return;
             }
 
-
-            if ("content".equalsIgnoreCase(uri.getScheme())) {
-
-                if (isGooglePhotosUri(uri)) {
-                    callBack.invoke(uri.getLastPathSegment());
-                    return;
-                }
-                if (isGoogleDriveUri(uri)) {
-                    callBack.invoke(getDriveFilePath(uri));
-                    return;
-                }
-                if (SDK_INT >= Build.VERSION_CODES.Q)
-                {
-                    // return getFilePathFromURI(context,uri);
-                    callBack.invoke(copyFileToInternalStorage(uri,"userfiles"));
-                    // return getRealPathFromURI(context,uri);
-                    return;
-                }
-                else
-                {
-                    callBack.invoke(getDataColumn(this.getReactApplicationContext(), uri, null, null));
-                    return;
-                }
-
-            }
-            if ("file".equalsIgnoreCase(uri.getScheme())) {
-                callBack.invoke(uri.getPath());
-                return;
-            }
         }
-        else {
-
-            if (isWhatsAppFile(uri)){
-                callBack.invoke(getFilePathForWhatsApp(uri));
-                return;
-            }
-
-            if ("content".equalsIgnoreCase(uri.getScheme())) {
-                String[] projection = {
-                        MediaStore.Images.Media.DATA
-                };
-                Cursor cursor = null;
-                try {
-                    cursor = this.getReactApplicationContext().getContentResolver()
-                            .query(uri, projection, selection, selectionArgs, null);
-                    int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                    if (cursor.moveToFirst()) {
-                        callBack.invoke(cursor.getString(column_index));
-                        return;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+        if ("file".equalsIgnoreCase(uri.getScheme())) {
+            callBack.invoke(uri.getPath());
+            return;
         }
         callBack.invoke();
     }

@@ -346,6 +346,30 @@ rn_bridge.channel.on('message', (msg) => {
             const vttTider = new VttTidier(msg.callbackId);
             console.log('Going to tidy VTT file', msg.filePath);
             vttTider.tidyVttFile(msg.filePath);
+        } else if (msg.name === 'base64-image') {
+            fs.readFile(msg.outputFilePath, undefined, (err, data) => {
+                if (err) {
+                    console.error(
+                        'Error reading file to convert to B64',
+                        JSON.stringify(err),
+                    );
+                    rn_bridge.channel.send({
+                        callbackId: msg.callbackId,
+                        b64String: '',
+                    });
+                    return;
+                }
+                // eslint-disable-next-line no-undef
+                const b64String = Buffer.from(data.toString(), 'base64');
+                console.log(
+                    'Successfully created b64 strin, length: ',
+                    b64String.length,
+                );
+                rn_bridge.channel.send({
+                    callbackId: msg.callbackId,
+                    b64String,
+                });
+            });
         }
     } catch (ex) {
         console.log('ERROR in node process:', JSON.stringify(ex));

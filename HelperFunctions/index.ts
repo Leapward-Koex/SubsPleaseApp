@@ -157,7 +157,11 @@ export const isCastingAvailable = () => {
 };
 
 export const getExtensionlessFilepath = (filePath: string) => {
-    return filePath.substring(0, filePath.length - 4);
+    return filePath.split('.').slice(0, -1).join('.');
+};
+
+export const getFileNameFromFilePath = (filePath: string) => {
+    return filePath.split('\\').pop()!.split('/').pop() as string;
 };
 
 export async function requestStoragePermission() {
