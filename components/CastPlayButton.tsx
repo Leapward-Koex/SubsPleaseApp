@@ -139,12 +139,13 @@ export const CastPlayButton = ({
             console.log('Acquiring wakelock');
             WakeLockInterface.setWakeLock();
         }
-        await localWebServerManager.registerFileToPlay(fileName);
         const parsedEpisodeNumber = tryParseInt(episodeNumber, 0);
         client
             .loadMedia({
                 mediaInfo: {
-                    contentUrl: `http:/${localIp}:${localWebServerManager.openPort}/video`,
+                    contentUrl: `http:/${localIp}:${
+                        localWebServerManager.openPort
+                    }/video?file=${encodeURIComponent(fileName)}`,
                     contentType: 'video/mp4',
                     metadata: {
                         images: [
@@ -164,7 +165,9 @@ export const CastPlayButton = ({
                             type: 'text',
                             subtype: 'subtitles',
                             name: 'English Subtitle',
-                            contentId: `http:/${localIp}:${localWebServerManager.openPort}/vtt`,
+                            contentId: `http:/${localIp}:${
+                                localWebServerManager.openPort
+                            }/vtt?file=${encodeURIComponent(fileName)}`,
                             language: 'en-US',
                             contentType: 'text/vtt',
                         } as any,

@@ -172,11 +172,12 @@ export const CastShow = ({
             console.log('Acquiring wakelock');
             WakeLockInterface.setWakeLock();
         }
-        await localWebServerManager.registerFileToPlay(filePath);
         client
             .loadMedia({
                 mediaInfo: {
-                    contentUrl: `http:/${localIp}:${localWebServerManager.openPort}/video`,
+                    contentUrl: `http:/${localIp}:${
+                        localWebServerManager.openPort
+                    }/video?file=${encodeURIComponent(filePath)}`,
                     contentType: 'video/mp4',
                     metadata: {
                         type: 'tvShow',
@@ -187,7 +188,9 @@ export const CastShow = ({
                             type: 'text',
                             subtype: 'subtitles',
                             name: 'English Subtitle',
-                            contentId: `http:/${localIp}:${localWebServerManager.openPort}/vtt`,
+                            contentId: `http:/${localIp}:${
+                                localWebServerManager.openPort
+                            }/vtt?file=${encodeURIComponent(filePath)}`,
                             language: 'en-US',
                             contentType: 'text/vtt',
                         } as any,

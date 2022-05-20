@@ -163,7 +163,8 @@ export const CastSettingsTab = () => {
                 filePaths.push(await getRealPathFromContentUri(pickResult.uri));
             }
             console.log('Queue of filepaths:', filePaths);
-            setVideoPathsToCast(filePaths);
+            const joinedVideoPaths = videoPathsToCast.concat(filePaths);
+            setVideoPathsToCast(uniqBy(joinedVideoPaths, (path) => path));
         } catch {}
     };
 

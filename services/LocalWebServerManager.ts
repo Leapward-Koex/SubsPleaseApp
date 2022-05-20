@@ -52,18 +52,6 @@ class LocalWebServerManager {
             name: 'stop-server',
         });
     }
-
-    public registerFileToPlay(filePath: string) {
-        const callbackId = this.generateCallbackId();
-        return new Promise<void>((resolve, reject) => {
-            this.callbacks[callbackId] = { resolve, reject };
-            nodejs.channel.send({
-                name: 'register-file',
-                callbackId,
-                filePath,
-            });
-        });
-    }
 }
 const localWebServerManager = new LocalWebServerManager();
 

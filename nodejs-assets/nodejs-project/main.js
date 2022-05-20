@@ -18,7 +18,6 @@ console.error = log;
 
 const torrentObjects = {};
 let localServer = null;
-let localFilePathToPlay = null;
 
 class TorrentClient {
     client;
@@ -102,6 +101,7 @@ class LocalWebServer {
         });
 
         this.app.get('/video', function (req, res) {
+            const localFilePathToPlay = decodeURIComponent(req.query.file);
             console.log('Handling video route', localFilePathToPlay);
             if (!localFilePathToPlay) {
                 console.error('No local file to play setup!');
@@ -138,15 +138,12 @@ class LocalWebServer {
         });
 
         this.app.get('/vtt', function (req, res) {
+            const localFilePathToPlay = decodeURIComponent(req.query.file);
             console.log('Handling vtt subtitle route');
-            if (!localFilePathToPlay) {
-                console.err('No local file to play setup!');
-                return;
-            }
-            const filePathWithoutExtension = localFilePathToPlay.substring(
-                0,
-                localFilePathToPlay.length - 4,
-            );
+            const filePathWithoutExtension = localFilePathToPlay
+                .split('.')
+                .slice(0, -1)
+                .join('.');
 
             res.sendFile(`${filePathWithoutExtension}.vtt`);
         });
@@ -333,15 +330,6 @@ rn_bridge.channel.on('message', (msg) => {
                 return;
             }
             localServer.stopServer();
-        } else if (msg.name === 'register-file') {
-            console.log(
-                'Registering local file with local webserver',
-                JSON.stringify(msg),
-            );
-            localFilePathToPlay = msg.filePath;
-            rn_bridge.channel.send({
-                callbackId: msg.callbackId,
-            });
         } else if (msg.name === 'tidy-vtt') {
             const vttTider = new VttTidier(msg.callbackId);
             console.log('Going to tidy VTT file', msg.filePath);
