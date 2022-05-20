@@ -76,7 +76,7 @@ class Converter {
             const fileName = getFileNameFromFilePath(videoPath);
             const outputFileName = `${getExtensionlessFilepath(fileName)}.jpg`;
             const outputFilePath = `${TemporaryDirectoryPath}/${outputFileName}`;
-            const convertArguments = `-ss 30 -i ${videoPath} -qscale:v 4 -frames:v 1 ${outputFilePath}`;
+            const convertArguments = `-ss 30 -i "${videoPath}" -qscale:v 4 -frames:v 1 "${outputFilePath}"`;
             console.log(
                 'Going to extract thumbnail with arguments:',
                 convertArguments,
@@ -85,7 +85,7 @@ class Converter {
             const returnCode = await session.getReturnCode();
             if (ReturnCode.isSuccess(returnCode)) {
                 console.log('Success getting thumbnail');
-                // now read file and convert to base64;
+                // Now read file and convert to base64;
                 const callbackId = outputFilePath + 'thumbnail';
                 nodejs.channel.addListener('message', async (msg) => {
                     if (msg.callbackId === callbackId) {

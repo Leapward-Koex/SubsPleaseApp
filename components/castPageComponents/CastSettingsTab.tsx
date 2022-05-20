@@ -15,12 +15,12 @@ import {
     formatSecondsToMinutesSeconds,
     getRealPathFromContentUri,
     promiseEach,
-} from '../HelperFunctions';
-import { SubsPleaseApi } from '../SubsPleaseApi';
-import { ReleasesTab } from './ReleasesTab';
-import { WatchListTab } from './WatchListTab';
+} from '../../HelperFunctions';
+import { SubsPleaseApi } from '../../SubsPleaseApi';
+import { ReleasesTab } from '../ReleasesTab';
+import { WatchListTab } from '../WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ShowInfo } from '../models/models';
+import { ShowInfo } from '../../models/models';
 import {
     FlatList,
     ImageBackground,
@@ -33,9 +33,9 @@ import {
     Appearance,
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
-import { ImportExportListItem } from './settingsPageComponents/ExportImportSettings';
-import { SavedShowLocationSettings } from './settingsPageComponents/SavedShowLocationSettings';
-import { SettingsDivider } from './settingsPageComponents/SettingsDivider';
+import { ImportExportListItem } from '../settingsPageComponents/ExportImportSettings';
+import { SavedShowLocationSettings } from '../settingsPageComponents/SavedShowLocationSettings';
+import { SettingsDivider } from '../settingsPageComponents/SettingsDivider';
 import {
     CastButton,
     MediaPlayerState,
@@ -177,7 +177,16 @@ export const CastSettingsTab = () => {
                     source={{ uri: backgroundImageUrl }}
                     blurRadius={2}
                 >
-                    <CastQueue />
+                    <CastQueue
+                        files={videoPathsToCast}
+                        onItemRemoved={(fileName) =>
+                            setVideoPathsToCast(
+                                videoPathsToCast.filter(
+                                    (videoPath) => videoPath !== fileName,
+                                ),
+                            )
+                        }
+                    />
                     {getControls()}
                 </ImageBackground>
             );
@@ -193,7 +202,16 @@ export const CastSettingsTab = () => {
                             : colors.subsPleaseDark2,
                 }}
             >
-                <CastQueue />
+                <CastQueue
+                    files={videoPathsToCast}
+                    onItemRemoved={(fileName) =>
+                        setVideoPathsToCast(
+                            videoPathsToCast.filter(
+                                (videoPath) => videoPath !== fileName,
+                            ),
+                        )
+                    }
+                />
                 {getControls()}
             </View>
         );

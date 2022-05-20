@@ -10,7 +10,7 @@ import { WatchListTab } from './WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { ShowInfo } from '../models/models';
 import { SettingsTab } from './SettingsTab';
-import { CastSettingsTab } from './CastSettingsTab';
+import { CastSettingsTab } from './castPageComponents/CastSettingsTab';
 import { logger } from '../services/Logger';
 
 const Tab = createMaterialBottomTabNavigator();

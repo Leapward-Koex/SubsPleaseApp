@@ -13,14 +13,15 @@ import {
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import {
     formatSecondsToMinutesSeconds,
+    getFileNameFromFilePath,
     getRealPathFromContentUri,
     promiseEach,
-} from '../HelperFunctions';
-import { SubsPleaseApi } from '../SubsPleaseApi';
-import { ReleasesTab } from './ReleasesTab';
-import { WatchListTab } from './WatchListTab';
+} from '../../HelperFunctions';
+import { SubsPleaseApi } from '../../SubsPleaseApi';
+import { ReleasesTab } from '../ReleasesTab';
+import { WatchListTab } from '../WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ShowInfo } from '../models/models';
+import { ShowInfo } from '../../models/models';
 import {
     FlatList,
     ImageBackground,
@@ -35,9 +36,9 @@ import {
     Easing,
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
-import { ImportExportListItem } from './settingsPageComponents/ExportImportSettings';
-import { SavedShowLocationSettings } from './settingsPageComponents/SavedShowLocationSettings';
-import { SettingsDivider } from './settingsPageComponents/SettingsDivider';
+import { ImportExportListItem } from '../settingsPageComponents/ExportImportSettings';
+import { SavedShowLocationSettings } from '../settingsPageComponents/SavedShowLocationSettings';
+import { SettingsDivider } from '../settingsPageComponents/SettingsDivider';
 import {
     CastButton,
     MediaPlayerState,
@@ -45,12 +46,14 @@ import {
 } from 'react-native-google-cast';
 import { Slider } from '@miblanchard/react-native-slider';
 import { pick } from 'react-native-document-picker';
+import { CastShow } from './CastShow';
 
-type CastQueuType = {
-    Files: string[];
+type CastQueueType = {
+    files: string[];
+    onItemRemoved: (fileName: string) => void;
 };
 
-export const CastQueue = () => {
+export const CastQueue = ({ files, onItemRemoved }: CastQueueType) => {
     const [castQueueShown, setCastQueueShown] = React.useState(false);
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
@@ -64,6 +67,7 @@ export const CastQueue = () => {
             width: '100%',
             zIndex: 2,
             elevation: 3,
+            paddingTop: 25,
         },
     });
 
@@ -103,6 +107,17 @@ export const CastQueue = () => {
         <View style={{ elevation: 3, zIndex: 3 }}>
             <Animated.View style={transformStyle}>
                 <Text>My queue</Text>
+                {files.map((file, index) => {
+                    const fileName = getFileNameFromFilePath(file);
+                    return (
+                        <CastShow
+                            key={index}
+                            showName={fileName}
+                            filePath={file}
+                            onRemove={() => onItemRemoved(file)}
+                        />
+                    );
+                })}
             </Animated.View>
             <View
                 style={{
