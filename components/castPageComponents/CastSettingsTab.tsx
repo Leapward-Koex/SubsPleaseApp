@@ -87,8 +87,9 @@ export const CastSettingsTab = () => {
                         firstItemInQueue.mediaInfo.streamDuration ?? 0,
                     );
                     setBackgroundImageUrl(
-                        firstItemInQueue.mediaInfo.metadata?.images?.[0].url ||
-                            '',
+                        firstItemInQueue.mediaInfo.metadata?.images?.[0]
+                            ? firstItemInQueue.mediaInfo.metadata.images[0].url
+                            : '',
                     );
                 }
                 setPlayState(status?.playerState || MediaPlayerState.IDLE);
@@ -132,7 +133,7 @@ export const CastSettingsTab = () => {
     };
 
     const skip = (duration: number) => {
-        setSliderValue(currentSeconds + duration / streamDuration);
+        setSliderValue((currentSeconds + duration) / streamDuration);
         if (client) {
             client.seek({
                 position: duration,
@@ -305,10 +306,14 @@ export const CastSettingsTab = () => {
                             setDraggingSlider(false);
                             handleSlidingComplete(value as number);
                         }}
-                        onValueChange={(value) =>
-                            setSliderValue(value as number)
-                        }
-                        value={percentComplete}
+                        onValueChange={(value) => {
+                            if (Array.isArray(value)) {
+                                setSliderValue(value[0]);
+                            } else {
+                                setSliderValue(value);
+                            }
+                        }}
+                        value={sliderValue}
                     />
                 </View>
 
