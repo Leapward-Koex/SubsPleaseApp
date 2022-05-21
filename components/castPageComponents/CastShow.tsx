@@ -175,6 +175,9 @@ export const CastShow = ({
         client
             .loadMedia({
                 mediaInfo: {
+                    customData: {
+                        filePath,
+                    },
                     contentUrl: `http:/${localIp}:${
                         localWebServerManager.openPort
                     }/video?file=${encodeURIComponent(filePath)}`,

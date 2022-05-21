@@ -143,6 +143,9 @@ export const CastPlayButton = ({
         client
             .loadMedia({
                 mediaInfo: {
+                    customData: {
+                        filePath: fileName,
+                    },
                     contentUrl: `http:/${localIp}:${
                         localWebServerManager.openPort
                     }/video?file=${encodeURIComponent(fileName)}`,

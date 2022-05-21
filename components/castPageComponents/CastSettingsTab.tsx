@@ -51,6 +51,7 @@ export const CastSettingsTab = () => {
     const [backgroundImageUrl, setBackgroundImageUrl] = React.useState('');
     const [sliderValue, setSliderValue] = React.useState(0);
     const [draggingSlider, setDraggingSlider] = React.useState(false);
+    const [currentlyPlayingFile, setCurrentlyPlayingFile] = React.useState('');
     const [videoPathsToCast, setVideoPathsToCast] = React.useState<string[]>(
         [],
     );
@@ -91,6 +92,13 @@ export const CastSettingsTab = () => {
                             ? firstItemInQueue.mediaInfo.metadata.images[0].url
                             : '',
                     );
+                }
+                if ((status?.mediaInfo?.customData as any)?.filePath) {
+                    setCurrentlyPlayingFile(
+                        (status!.mediaInfo!.customData as any)!.filePath,
+                    );
+                } else {
+                    setCurrentlyPlayingFile('');
                 }
                 setPlayState(status?.playerState || MediaPlayerState.IDLE);
             });
@@ -188,6 +196,7 @@ export const CastSettingsTab = () => {
                                 ),
                             )
                         }
+                        currentlyPlayingFile={currentlyPlayingFile}
                     />
                     {getControls()}
                 </ImageBackground>
@@ -213,6 +222,7 @@ export const CastSettingsTab = () => {
                             ),
                         )
                     }
+                    currentlyPlayingFile={currentlyPlayingFile}
                 />
                 {getControls()}
             </View>

@@ -13,6 +13,7 @@ import {
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import {
     formatSecondsToMinutesSeconds,
+    getExtensionlessFilepath,
     getFileNameFromFilePath,
     getRealPathFromContentUri,
     promiseEach,
@@ -51,23 +52,29 @@ import { CastShow } from './CastShow';
 type CastQueueType = {
     files: string[];
     onItemRemoved: (fileName: string) => void;
+    currentlyPlayingFile: string;
 };
 
-export const CastQueue = ({ files, onItemRemoved }: CastQueueType) => {
+export const CastQueue = ({
+    files,
+    onItemRemoved,
+    currentlyPlayingFile,
+}: CastQueueType) => {
     const [castQueueShown, setCastQueueShown] = React.useState(false);
+
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
 
     const queueHeight = height - 120;
     const styles = StyleSheet.create({
         queue: {
-            backgroundColor: 'red',
+            backgroundColor: colors.subsPleaseDark3,
             height: queueHeight,
             position: 'absolute',
             width: '100%',
             zIndex: 2,
             elevation: 3,
-            paddingTop: 25,
+            paddingTop: 43,
         },
     });
 
@@ -103,10 +110,19 @@ export const CastQueue = ({ files, onItemRemoved }: CastQueueType) => {
         }).start();
         setCastQueueShown(!castQueueShown);
     };
+
+    const getCastQueueText = () => {
+        if (currentlyPlayingFile) {
+            const extensionlessFilePath =
+                getExtensionlessFilepath(currentlyPlayingFile);
+            const fileName = getFileNameFromFilePath(extensionlessFilePath);
+            return `Currently playing: ${fileName}`;
+        }
+        return 'No media playing';
+    };
     return (
         <View style={{ elevation: 3, zIndex: 3 }}>
             <Animated.View style={transformStyle}>
-                <Text>My queue</Text>
                 {files.map((file, index) => {
                     const fileName = getFileNameFromFilePath(file);
                     return (
@@ -125,11 +141,25 @@ export const CastQueue = ({ files, onItemRemoved }: CastQueueType) => {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     zIndex: 3,
-                    backgroundColor: colors.subsPleaseDark3,
+                    backgroundColor: colors.subsPleaseDark2,
                 }}
             >
-                <View>
-                    <Text>Show name/episode here</Text>
+                <View
+                    style={{
+                        display: 'flex',
+                        alignItems: 'baseline',
+                        paddingTop: 8,
+                        paddingLeft: 8,
+                    }}
+                >
+                    <Text
+                        style={{
+                            color: colors.subsPleaseLight1,
+                            fontSize: 20,
+                        }}
+                    >
+                        {getCastQueueText()}
+                    </Text>
                 </View>
                 <Animated.View
                     style={{
