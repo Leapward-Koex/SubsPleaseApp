@@ -81,6 +81,7 @@ class Converter {
                 'Going to extract thumbnail with arguments:',
                 convertArguments,
             );
+            await deleteFileIfExists(outputFilePath);
             const session = await FFmpegKit.execute(convertArguments);
             const returnCode = await session.getReturnCode();
             if (ReturnCode.isSuccess(returnCode)) {
