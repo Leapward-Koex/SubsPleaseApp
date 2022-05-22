@@ -91,7 +91,7 @@ export const CastSettingsTab = () => {
                     //    firstItemInQueue.mediaInfo.metadata?.images?.[0]
                       //      ? firstItemInQueue.mediaInfo.metadata.images[0].url
                      //       : '',
-                    );
+                  //  );
                 }
                 if ((status?.mediaInfo?.customData as any)?.filePath) {
                     setCurrentlyPlayingFile(
