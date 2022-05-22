@@ -87,10 +87,10 @@ export const CastSettingsTab = () => {
                     setStreamDuration(
                         firstItemInQueue.mediaInfo.streamDuration ?? 0,
                     );
-                    setBackgroundImageUrl(
-                        firstItemInQueue.mediaInfo.metadata?.images?.[0]
-                            ? firstItemInQueue.mediaInfo.metadata.images[0].url
-                            : '',
+                   // setBackgroundImageUrl(
+                    //    firstItemInQueue.mediaInfo.metadata?.images?.[0]
+                      //      ? firstItemInQueue.mediaInfo.metadata.images[0].url
+                     //       : '',
                     );
                 }
                 if ((status?.mediaInfo?.customData as any)?.filePath) {
