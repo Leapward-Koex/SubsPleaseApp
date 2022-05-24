@@ -135,7 +135,7 @@ public class FilePathModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void getFolderPathFromUri(final String uriString, Callback callBack) {
         // check here to KITKAT or new version
-        final Uri uri = uriString.indexOf("documents/tree") != -1 ? DocumentsContract.buildDocumentUriUsingTree(Uri.parse(uriString), DocumentsContract.getTreeDocumentId(Uri.parse(uriString))) : Uri.parse(uriString);
+        final Uri uri = uriString.contains("documents/tree") ? DocumentsContract.buildDocumentUriUsingTree(Uri.parse(uriString), DocumentsContract.getTreeDocumentId(Uri.parse(uriString))) : Uri.parse(uriString);
 
         String selection = null;
         String[] selectionArgs = null;

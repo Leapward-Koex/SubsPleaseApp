@@ -26,18 +26,22 @@ import {
 } from '../../HelperFunctions';
 import { convert } from '../../services/converter';
 import { localWebServerManager } from '../../services/LocalWebServerManager';
+import LottieView from 'lottie-react-native';
+import * as playAnimation from '../../resources/animations/playing-icon.json';
 
 type CastShowType = {
     showName: string; // Series name or file name.
     episodeNumber?: string;
     filePath: string;
     onRemove: () => void;
+    isCurrentlyPlayingMedia: boolean;
 };
 
 export const CastShow = ({
     showName,
     episodeNumber,
     filePath,
+    isCurrentlyPlayingMedia,
     onRemove,
 }: CastShowType) => {
     const [b64Image, setB64Image] = React.useState('');
@@ -91,15 +95,43 @@ export const CastShow = ({
         },
     });
 
+    const getPlayingAnimation = () => {
+        if (isCurrentlyPlayingMedia) {
+            return (
+                <View
+                    style={{
+                        backgroundColor: '#111111AA',
+                        width: 25,
+                        height: 25,
+                        bottom: 4,
+                        right: 10,
+                        position: 'absolute',
+                        borderRadius: 5,
+                    }}
+                >
+                    <LottieView
+                        autoPlay
+                        colorFilters={[{ keypath: 'bars', color: '#DDDDDD' }]}
+                        source={require('../../resources/animations/playing-icon.json')}
+                    />
+                </View>
+            );
+        }
+        return <></>;
+    };
+
     const getImage = () => {
         if (b64Image) {
             return (
-                <Image
-                    style={styles.stretch}
-                    source={{
-                        uri: b64Image,
-                    }}
-                />
+                <>
+                    <Image
+                        style={styles.stretch}
+                        source={{
+                            uri: b64Image,
+                        }}
+                    />
+                    {getPlayingAnimation()}
+                </>
             );
         }
         return <></>;

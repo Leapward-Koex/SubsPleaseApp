@@ -130,6 +130,9 @@ export const CastQueue = ({
                             key={index}
                             showName={fileName}
                             filePath={file}
+                            isCurrentlyPlayingMedia={
+                                currentlyPlayingFile === file
+                            }
                             onRemove={() => onItemRemoved(file)}
                         />
                     );
