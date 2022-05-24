@@ -13,6 +13,7 @@ import {
 import { TemporaryDirectoryPath } from 'react-native-fs';
 
 class Converter {
+    private imageCache: { [filePath: string]: string } = {};
     public async extractSubtitles(
         sourceFilePath: string,
         sourceFileName: string,
@@ -71,42 +72,52 @@ class Converter {
         });
     }
 
+    private async readB64FromFile(filePath: string) {
+        return new Promise<string>((resolve) => {
+            const callbackId = filePath + 'thumbnail';
+            nodejs.channel.addListener('message', async (msg) => {
+                if (msg.callbackId === callbackId) {
+                    this.imageCache[filePath] = msg.b64String;
+                    resolve(msg.b64String);
+                }
+            });
+            nodejs.channel.send({
+                name: 'base64-image',
+                callbackId,
+                outputFilePath: filePath,
+            });
+        });
+    }
+
     public async getB64VideoThumbnail(videoPath: string) {
-        return new Promise<string>(async (resolve) => {
-            const fileName = getFileNameFromFilePath(videoPath);
-            const outputFileName = `${getExtensionlessFilepath(fileName)}.jpg`;
-            const outputFilePath = `${TemporaryDirectoryPath}/${outputFileName}`;
-            const convertArguments = `-ss 30 -i "${videoPath}" -qscale:v 4 -frames:v 1 "${outputFilePath}"`;
+        const fileName = getFileNameFromFilePath(videoPath);
+        const outputFileName = `${getExtensionlessFilepath(fileName)}.jpg`;
+        const outputFilePath = `${TemporaryDirectoryPath}/${outputFileName}`;
+        const convertArguments = `-ss 30 -i "${videoPath}" -qscale:v 4 -frames:v 1 "${outputFilePath}"`;
+
+        if (this.imageCache[outputFilePath]) {
+            console.log('Found image in cache for', videoPath);
+            return this.imageCache[outputFilePath];
+        } else if (await fileExists(outputFilePath)) {
+            console.log('Reading image from file', outputFilePath);
+            return this.readB64FromFile(outputFilePath);
+        } else {
             console.log(
                 'Going to extract thumbnail with arguments:',
                 convertArguments,
             );
-            await deleteFileIfExists(outputFilePath);
             const session = await FFmpegKit.execute(convertArguments);
             const returnCode = await session.getReturnCode();
             if (ReturnCode.isSuccess(returnCode)) {
                 console.log('Success getting thumbnail');
-                // Now read file and convert to base64;
-                const callbackId = outputFilePath + 'thumbnail';
-                nodejs.channel.addListener('message', async (msg) => {
-                    if (msg.callbackId === callbackId) {
-                        await deleteFileIfExists(outputFilePath);
-                        resolve(msg.b64String);
-                    }
-                });
-                nodejs.channel.send({
-                    name: 'base64-image',
-                    callbackId,
-                    outputFilePath,
-                });
+                return this.readB64FromFile(outputFilePath);
             } else if (ReturnCode.isCancel(returnCode)) {
                 console.log('Error getting thumbnail');
-                resolve('');
             } else {
                 console.log('Unknown error getting thumbnail');
-                resolve('');
             }
-        });
+        }
+        return '';
     }
 
     public async tidySubtitles(filePath: string) {

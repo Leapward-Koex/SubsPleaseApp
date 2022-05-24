@@ -38,12 +38,14 @@ import { SavedShowLocationSettings } from '../settingsPageComponents/SavedShowLo
 import { SettingsDivider } from '../settingsPageComponents/SettingsDivider';
 import {
     CastButton,
+    MediaPlayerIdleReason,
     MediaPlayerState,
     useRemoteMediaClient,
 } from 'react-native-google-cast';
 import { Slider } from '@miblanchard/react-native-slider';
 import { pick } from 'react-native-document-picker';
 import { CastQueue } from './CastQueue';
+import { convert } from '../../services/converter';
 
 export const CastSettingsTab = () => {
     const [currentSeconds, setCurrentSeconds] = React.useState(0);
@@ -82,27 +84,58 @@ export const CastSettingsTab = () => {
         let mediaStatusListener: { remove: () => void } | undefined;
         let mediaProgressListener: { remove: () => void } | undefined;
         if (client) {
-            mediaStatusListener = client.onMediaStatusUpdated((status) => {
-                const firstItemInQueue = status?.queueItems[0];
-                if (firstItemInQueue) {
-                    setStreamDuration(
-                        firstItemInQueue.mediaInfo.streamDuration ?? 0,
-                    );
-                    // setBackgroundImageUrl(
-                    //    firstItemInQueue.mediaInfo.metadata?.images?.[0]
-                    //      ? firstItemInQueue.mediaInfo.metadata.images[0].url
-                    //       : '',
-                    //  );
-                }
-                if ((status?.mediaInfo?.customData as any)?.filePath) {
-                    setCurrentlyPlayingFile(
-                        (status!.mediaInfo!.customData as any)!.filePath,
-                    );
-                } else {
-                    setCurrentlyPlayingFile('');
-                }
-                setPlayState(status?.playerState || MediaPlayerState.IDLE);
-            });
+            mediaStatusListener = client.onMediaStatusUpdated(
+                async (status) => {
+                    const firstItemInQueue = status?.queueItems[0];
+                    if (firstItemInQueue) {
+                        setStreamDuration(
+                            firstItemInQueue.mediaInfo.streamDuration ?? 0,
+                        );
+                        if (
+                            firstItemInQueue.mediaInfo.metadata?.images &&
+                            firstItemInQueue.mediaInfo.metadata?.images?.[0]
+                        ) {
+                            // Getting image from series image from SubsPleaseApi
+                            setBackgroundImageUrl(
+                                firstItemInQueue.mediaInfo.metadata.images[0]
+                                    .url,
+                            );
+                        } else if (
+                            (status?.mediaInfo?.customData as any)?.filePath
+                        ) {
+                            // From extracted thumbnail in video
+                            const b64Thumnail =
+                                await convert.getB64VideoThumbnail(
+                                    (status!.mediaInfo!.customData as any)!
+                                        .filePath,
+                                );
+                            setBackgroundImageUrl(b64Thumnail);
+                        }
+                    }
+                    if ((status?.mediaInfo?.customData as any)?.filePath) {
+                        setCurrentlyPlayingFile(
+                            (status!.mediaInfo!.customData as any)!.filePath,
+                        );
+                    } else {
+                        setCurrentlyPlayingFile('');
+                    }
+
+                    if (
+                        status?.playerState === MediaPlayerState.IDLE &&
+                        (status?.idleReason ===
+                            MediaPlayerIdleReason.CANCELLED ||
+                            status?.idleReason ===
+                                MediaPlayerIdleReason.ERROR ||
+                            status?.idleReason ===
+                                MediaPlayerIdleReason.FINISHED)
+                    ) {
+                        setCurrentlyPlayingFile('');
+                        setBackgroundImageUrl('');
+                    }
+                    setPlayState(status?.playerState || MediaPlayerState.IDLE);
+                },
+            );
+
             mediaProgressListener = client.onMediaProgressUpdated(
                 async (streamPosition) => {
                     if (!draggingSlider) {
@@ -182,12 +215,16 @@ export const CastSettingsTab = () => {
     const getBackground = () => {
         if (hasBackground) {
             return (
-                <ImageBackground
+                <View
                     style={{
                         width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        backgroundColor:
+                            Appearance.getColorScheme() === 'light'
+                                ? colors.subsPleaseLight2
+                                : colors.subsPleaseDark2,
                     }}
-                    source={{ uri: backgroundImageUrl }}
-                    blurRadius={2}
                 >
                     <CastQueue
                         files={videoPathsToCast}
@@ -204,8 +241,17 @@ export const CastSettingsTab = () => {
                         }
                         currentlyPlayingFile={currentlyPlayingFile}
                     />
-                    {getControls()}
-                </ImageBackground>
+                    <ImageBackground
+                        style={{
+                            width: '100%',
+                            flexGrow: 1,
+                        }}
+                        source={{ uri: backgroundImageUrl }}
+                        blurRadius={2}
+                    >
+                        {getControls()}
+                    </ImageBackground>
+                </View>
             );
         }
         return (
@@ -366,7 +412,11 @@ export const CastSettingsTab = () => {
         <View style={backgroundStyle}>
             <Appbar.Header
                 statusBarHeight={1}
-                style={{ backgroundColor: colors.secondary, zIndex: 2 }}
+                style={{
+                    backgroundColor: colors.secondary,
+                    zIndex: 2,
+                    elevation: 2,
+                }}
             >
                 <Appbar.Content color={'white'} title="Casting" />
                 <IconButton

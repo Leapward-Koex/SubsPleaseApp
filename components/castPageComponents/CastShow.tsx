@@ -244,6 +244,7 @@ export const CastShow = ({
             });
             await client.setActiveTrackIds([1]);
         } catch (ex) {
+            console.error(ex);
         } finally {
             setItemTryingToPlay(false);
         }
@@ -297,14 +298,24 @@ export const CastShow = ({
                             mode="text"
                             loading={itemTryingToPlay}
                             onPress={() => {
-                                if (!itemTryingToPlay) {
+                                if (isCurrentlyPlayingMedia) {
+                                    client?.stop();
+                                } else if (!itemTryingToPlay) {
                                     playItemInQueue();
                                 }
                             }}
                         >
-                            Play
+                            {isCurrentlyPlayingMedia ? 'Stop' : 'Play'}
                         </Button>
-                        <Button mode="text" onPress={() => onRemove()}>
+                        <Button
+                            mode="text"
+                            onPress={() => {
+                                onRemove();
+                                if (isCurrentlyPlayingMedia) {
+                                    client?.stop();
+                                }
+                            }}
+                        >
                             Remove
                         </Button>
                     </View>

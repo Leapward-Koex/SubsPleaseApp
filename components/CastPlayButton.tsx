@@ -9,7 +9,7 @@ import {
     useRemoteMediaClient,
 } from 'react-native-google-cast';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { View } from 'react-native';
+import { EmitterSubscription, View } from 'react-native';
 import { localWebServerManager } from '../services/LocalWebServerManager';
 import ReactNativeBlobUtil from 'react-native-blob-util';
 import { convert } from '../services/converter';
@@ -48,6 +48,12 @@ export const CastPlayButton = ({
     const [isCastingFile, setIsCastingFile] = React.useState(false);
 
     React.useEffect(() => {
+        let sessionStartingEmitterSubscription: EmitterSubscription;
+        let sessionEndingEmitterSubscription: EmitterSubscription;
+        let sessionStartFailedEmitterSubscription: EmitterSubscription;
+
+        let clientOnMediaPlaybackEmitterSubscription: EmitterSubscription;
+        let clientOnMediaStatusEmitterSubscription: EmitterSubscription;
         (async () => {
             const loadedFolderPath = await downloadedShows.getShowDownloadPath(
                 showName,
@@ -60,30 +66,67 @@ export const CastPlayButton = ({
             setFileName(absolutePath);
 
             if (sessionManager) {
-                sessionManager.onSessionStarting(() => {
-                    console.log('Acquiring wakelock');
-                    WakeLockInterface.setWakeLock();
-                    WakeLockInterface.isWakeLocked().then((wakeLocked) => {
-                        console.log('Is wake locked', wakeLocked);
+                sessionStartingEmitterSubscription =
+                    sessionManager.onSessionStarting(() => {
+                        console.log('Acquiring wakelock');
+                        WakeLockInterface.setWakeLock();
+                        WakeLockInterface.isWakeLocked().then((wakeLocked) => {
+                            console.log('Is wake locked', wakeLocked);
+                        });
                     });
-                });
 
-                sessionManager.onSessionEnded(() => {
-                    console.log('Releasing wakelock due to ending session');
-                    WakeLockInterface.releaseWakeLock();
-                    setIsCastingFile(false);
-                });
+                sessionEndingEmitterSubscription =
+                    sessionManager.onSessionEnded(() => {
+                        console.log('Releasing wakelock due to ending session');
+                        WakeLockInterface.releaseWakeLock();
+                        setIsCastingFile(false);
+                    });
 
-                sessionManager.onSessionStartFailed(() => {
-                    console.log(
-                        'Releasing wakelock due to failure to start session',
-                    );
-                    WakeLockInterface.releaseWakeLock();
-                    setIsCastingFile(false);
-                });
+                sessionStartFailedEmitterSubscription =
+                    sessionManager.onSessionStartFailed(() => {
+                        console.log(
+                            'Releasing wakelock due to failure to start session',
+                        );
+                        WakeLockInterface.releaseWakeLock();
+                        setIsCastingFile(false);
+                    });
+            }
+            if (client) {
+                clientOnMediaPlaybackEmitterSubscription =
+                    client.onMediaPlaybackEnded(() => {
+                        const fileToDelete = `${getExtensionlessFilepath(
+                            fileName,
+                        )}.vtt`;
+                        console.log('Deleting subtitle file:', fileToDelete);
+                        deleteFileIfExists(fileToDelete);
+                        WakeLockInterface.releaseWakeLock();
+                        setIsCastingFile(false);
+                    });
+                clientOnMediaStatusEmitterSubscription =
+                    client.onMediaStatusUpdated((status) => {
+                        if (
+                            status?.playerState === MediaPlayerState.IDLE &&
+                            (status?.idleReason ===
+                                MediaPlayerIdleReason.CANCELLED ||
+                                status?.idleReason ===
+                                    MediaPlayerIdleReason.ERROR ||
+                                status?.idleReason ===
+                                    MediaPlayerIdleReason.FINISHED)
+                        ) {
+                            setIsCastingFile(false);
+                        }
+                    });
             }
         })();
-    }, [fileMagnet, sessionManager, showName]);
+        return () => {
+            sessionStartingEmitterSubscription?.remove();
+            sessionEndingEmitterSubscription?.remove();
+            sessionStartFailedEmitterSubscription?.remove();
+
+            clientOnMediaPlaybackEmitterSubscription?.remove();
+            clientOnMediaStatusEmitterSubscription?.remove();
+        };
+    }, [client, fileMagnet, fileName, sessionManager, showName]);
 
     const showToast = (result: { message: string; fileName: string }) => {
         Toast.show({
@@ -188,25 +231,6 @@ export const CastPlayButton = ({
                 client.setActiveTrackIds([1]);
                 setIsCastingFile(true);
             });
-        client.onMediaPlaybackEnded(() => {
-            const fileToDelete = `${getExtensionlessFilepath(fileName)}.vtt`;
-            console.log('Deleting subtitle file:', fileToDelete);
-            deleteFileIfExists(fileToDelete);
-            WakeLockInterface.releaseWakeLock();
-            setIsCastingFile(false);
-        });
-        client.onMediaStatusUpdated((status) => {
-            if (
-                status?.playerState === MediaPlayerState.IDLE &&
-                (status?.idleReason === MediaPlayerIdleReason.CANCELLED ||
-                    status?.idleReason === MediaPlayerIdleReason.ERROR ||
-                    status?.idleReason === MediaPlayerIdleReason.FINISHED)
-            ) {
-                console.log('Releasing wakelock');
-                WakeLockInterface.releaseWakeLock();
-                setIsCastingFile(false);
-            }
-        });
     };
 
     return (
