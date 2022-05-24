@@ -45,6 +45,7 @@ export const CastShow = ({
     onRemove,
 }: CastShowType) => {
     const [b64Image, setB64Image] = React.useState('');
+    const [itemTryingToPlay, setItemTryingToPlay] = React.useState(false);
     const { colors } = useTheme();
     const client = useRemoteMediaClient();
     const castState = useCastState();
@@ -177,6 +178,7 @@ export const CastShow = ({
         }
         console.log('Found cast client client');
         console.log('Extracting subtitles for cast playback', filePath);
+        setItemTryingToPlay(true);
         const result = await convert.extractSubtitles(
             filePath,
             getFileNameFromFilePath(filePath),
@@ -187,6 +189,7 @@ export const CastShow = ({
             result.message === 'Unknown error whilst converting'
         ) {
             showToast(result);
+            setItemTryingToPlay(false);
             return;
         }
 
@@ -204,8 +207,8 @@ export const CastShow = ({
             console.log('Acquiring wakelock');
             WakeLockInterface.setWakeLock();
         }
-        client
-            .loadMedia({
+        try {
+            await client.loadMedia({
                 mediaInfo: {
                     customData: {
                         filePath,
@@ -238,10 +241,13 @@ export const CastShow = ({
                         windowColor: '#00000000',
                     },
                 },
-            })
-            .then(() => {
-                client.setActiveTrackIds([1]);
             });
+            await client.setActiveTrackIds([1]);
+        } catch (ex) {
+        } finally {
+            setItemTryingToPlay(false);
+        }
+
         client.onMediaPlaybackEnded(() => {
             const fileToDelete = `${getExtensionlessFilepath(filePath)}.vtt`;
             console.log('Deleting subtitle file:', fileToDelete);
@@ -287,7 +293,15 @@ export const CastShow = ({
                             justifyContent: 'space-between',
                         }}
                     >
-                        <Button mode="text" onPress={() => playItemInQueue()}>
+                        <Button
+                            mode="text"
+                            loading={itemTryingToPlay}
+                            onPress={() => {
+                                if (!itemTryingToPlay) {
+                                    playItemInQueue();
+                                }
+                            }}
+                        >
                             Play
                         </Button>
                         <Button mode="text" onPress={() => onRemove()}>

@@ -101,7 +101,6 @@ export const CastQueue = ({
         Animated.timing(rotation, {
             toValue: 180,
             duration: 400,
-            easing: Easing.cubic,
             useNativeDriver: true,
         }).start();
 
@@ -109,7 +108,6 @@ export const CastQueue = ({
         Animated.timing(translation, {
             toValue: 1,
             duration: 400,
-            easing: Easing.cubic,
             useNativeDriver: true,
         }).start();
     }, [rotation, translation]);
