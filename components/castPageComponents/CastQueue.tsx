@@ -52,6 +52,8 @@ import { CastShow } from './CastShow';
 type CastQueueType = {
     files: string[];
     onItemRemoved: (fileName: string) => void;
+    castQueueShown: boolean;
+    onCastQueueShownChange: (castQueueShown: boolean) => void;
     currentlyPlayingFile: string;
 };
 
@@ -59,12 +61,13 @@ export const CastQueue = ({
     files,
     onItemRemoved,
     currentlyPlayingFile,
+    onCastQueueShownChange,
+    castQueueShown,
 }: CastQueueType) => {
-    const [castQueueShown, setCastQueueShown] = React.useState(false);
-
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
-
+    const [castQueueShownInternal, setCastQueueShownInternal] =
+        React.useState(false);
     const queueHeight = height - 120;
     const styles = StyleSheet.create({
         queue: {
@@ -92,24 +95,47 @@ export const CastQueue = ({
         ...styles.queue,
         transform: [{ translateY: translateMap }],
     };
-    const toggleCastQueueDropDown = () => {
-        rotation.setValue(castQueueShown ? 180 : 0);
+
+    const showCastQueue = React.useCallback(() => {
+        rotation.setValue(0);
         Animated.timing(rotation, {
-            toValue: castQueueShown ? 0 : 180,
+            toValue: 180,
             duration: 400,
             easing: Easing.cubic,
             useNativeDriver: true,
         }).start();
 
-        translation.setValue(castQueueShown ? 1 : 0);
+        translation.setValue(0);
         Animated.timing(translation, {
-            toValue: castQueueShown ? 0 : 1,
+            toValue: 1,
             duration: 400,
             easing: Easing.cubic,
             useNativeDriver: true,
         }).start();
-        setCastQueueShown(!castQueueShown);
-    };
+    }, [rotation, translation]);
+
+    const hideCastQueue = React.useCallback(() => {
+        rotation.setValue(180);
+        Animated.timing(rotation, {
+            toValue: 0,
+            duration: 400,
+            easing: Easing.cubic,
+            useNativeDriver: true,
+        }).start();
+
+        translation.setValue(1);
+        Animated.timing(translation, {
+            toValue: 0,
+            duration: 400,
+            easing: Easing.cubic,
+            useNativeDriver: true,
+        }).start();
+    }, [rotation, translation]);
+
+    if (castQueueShown !== castQueueShownInternal) {
+        castQueueShown ? showCastQueue() : hideCastQueue();
+        setCastQueueShownInternal(castQueueShown);
+    }
 
     const getCastQueueText = () => {
         if (currentlyPlayingFile) {
@@ -171,7 +197,9 @@ export const CastQueue = ({
                 >
                     <IconButton
                         color={colors.subsPleaseLight1}
-                        onPress={() => toggleCastQueueDropDown()}
+                        onPress={() => {
+                            onCastQueueShownChange(!castQueueShown);
+                        }}
                         icon={'chevron-down'}
                     />
                 </Animated.View>

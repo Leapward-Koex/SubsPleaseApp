@@ -52,6 +52,7 @@ export const CastSettingsTab = () => {
     const [sliderValue, setSliderValue] = React.useState(0);
     const [draggingSlider, setDraggingSlider] = React.useState(false);
     const [currentlyPlayingFile, setCurrentlyPlayingFile] = React.useState('');
+    const [castQueueShown, setCastQueueShown] = React.useState(false);
     const [videoPathsToCast, setVideoPathsToCast] = React.useState<string[]>(
         [],
     );
@@ -87,11 +88,11 @@ export const CastSettingsTab = () => {
                     setStreamDuration(
                         firstItemInQueue.mediaInfo.streamDuration ?? 0,
                     );
-                   // setBackgroundImageUrl(
+                    // setBackgroundImageUrl(
                     //    firstItemInQueue.mediaInfo.metadata?.images?.[0]
-                      //      ? firstItemInQueue.mediaInfo.metadata.images[0].url
-                     //       : '',
-                  //  );
+                    //      ? firstItemInQueue.mediaInfo.metadata.images[0].url
+                    //       : '',
+                    //  );
                 }
                 if ((status?.mediaInfo?.customData as any)?.filePath) {
                     setCurrentlyPlayingFile(
@@ -174,6 +175,7 @@ export const CastSettingsTab = () => {
             console.log('Queue of filepaths:', filePaths);
             const joinedVideoPaths = videoPathsToCast.concat(filePaths);
             setVideoPathsToCast(uniqBy(joinedVideoPaths, (path) => path));
+            setCastQueueShown(true);
         } catch {}
     };
 
@@ -195,6 +197,10 @@ export const CastSettingsTab = () => {
                                     (videoPath) => videoPath !== fileName,
                                 ),
                             )
+                        }
+                        castQueueShown={castQueueShown}
+                        onCastQueueShownChange={(newValue) =>
+                            setCastQueueShown(newValue)
                         }
                         currentlyPlayingFile={currentlyPlayingFile}
                     />
@@ -221,6 +227,10 @@ export const CastSettingsTab = () => {
                                 (videoPath) => videoPath !== fileName,
                             ),
                         )
+                    }
+                    castQueueShown={castQueueShown}
+                    onCastQueueShownChange={(newValue) =>
+                        setCastQueueShown(newValue)
                     }
                     currentlyPlayingFile={currentlyPlayingFile}
                 />
