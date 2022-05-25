@@ -8,6 +8,7 @@ import GoogleCast, { CastButton } from 'react-native-google-cast';
 import { isCastingAvailable } from '../HelperFunctions';
 
 interface ReleaseTabHeaderProps {
+    filter: ShowFilter;
     onSearchChanged: (query: string) => void;
     onSearchCancelled: () => void;
     onFilterChanged: (filter: ShowFilter) => void;
@@ -20,6 +21,7 @@ export enum ShowFilter {
 }
 
 export const ReleaseTabHeader = ({
+    filter,
     onSearchChanged,
     onSearchCancelled,
     onFilterChanged,
@@ -27,8 +29,8 @@ export const ReleaseTabHeader = ({
     const { width } = useWindowDimensions();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [filterPanelShown, setFilterPanelShown] = React.useState(false);
-    const [checked, setChecked] = React.useState(ShowFilter.None);
     const [castingAvailable, setCastingAvailable] = React.useState(false);
+    const [mounted, setMounted] = React.useState(true);
 
     const onChangeText = (query: string) => {
         onSearchChanged(query);
@@ -39,17 +41,10 @@ export const ReleaseTabHeader = ({
         onSearchCancelled();
         setSearchQuery('');
         Keyboard.dismiss();
-        const lastFilter = (await AsyncStorage.getItem(
-            'headerFilter',
-        )) as ShowFilter | null;
-        if (lastFilter) {
-            setChecked(lastFilter);
-            onFilterChanged(lastFilter);
-        }
     };
 
     const onFilterPressed = async (filterValue: ShowFilter) => {
-        setChecked(filterValue);
+        console.log('setting last checked');
         onFilterChanged(filterValue);
         await AsyncStorage.setItem('headerFilter', filterValue);
     };
@@ -62,19 +57,10 @@ export const ReleaseTabHeader = ({
         (async () => {
             setCastingAvailable(await isCastingAvailable());
         })();
+        return () => {
+            setMounted(false);
+        };
     }, []);
-
-    React.useEffect(() => {
-        (async () => {
-            const lastFilter = (await AsyncStorage.getItem(
-                'headerFilter',
-            )) as ShowFilter | null;
-            if (lastFilter) {
-                setChecked(lastFilter);
-                onFilterChanged(lastFilter);
-            }
-        })();
-    }, [onFilterChanged]);
 
     const getCastButton = () => {
         if (castingAvailable) {
@@ -131,10 +117,11 @@ export const ReleaseTabHeader = ({
                     <Dialog.Title>Filter</Dialog.Title>
                     <Dialog.Content>
                         <RadioButton.Group
-                            onValueChange={(value) =>
-                                onFilterPressed(value as ShowFilter)
-                            }
-                            value={checked}
+                            onValueChange={(value) => {
+                                onFilterPressed(value as ShowFilter);
+                                toggleFilterPanel();
+                            }}
+                            value={filter}
                         >
                             <RadioButton.Item
                                 label="No filter"

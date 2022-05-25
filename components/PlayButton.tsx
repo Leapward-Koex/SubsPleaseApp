@@ -21,7 +21,6 @@ export const PlayButton = ({ showName, fileMagnet }: PlayButtonType) => {
                 fileMagnet,
             );
             const absolutePath = `${loadedFolderPath}/${loadedFileName}`;
-            console.log('loading filename', absolutePath);
             setFileName(absolutePath);
         })();
     }, [fileMagnet, showName]);

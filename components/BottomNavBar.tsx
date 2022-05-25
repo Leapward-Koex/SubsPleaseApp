@@ -8,27 +8,34 @@ import { SubsPleaseApi } from '../SubsPleaseApi';
 import { ReleasesTab } from './ReleasesTab';
 import { WatchListTab } from './WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ShowInfo } from '../models/models';
+import { ShowInfo, WatchList } from '../models/models';
 import { SettingsTab } from './SettingsTab';
 import { CastSettingsTab } from './castPageComponents/CastSettingsTab';
 import { logger } from '../services/Logger';
+import { ShowFilter } from './ReleaseHeader';
+import { StorageKeys } from '../enums/enum';
 
 const Tab = createMaterialBottomTabNavigator();
 export const BottomNavBar = () => {
-    const [index, setIndex] = React.useState(0);
     const [mounted, setMounted] = React.useState(true);
+    const [watchList, setWatchList] = React.useState<WatchList>({ shows: [] });
     const [showList, setShowList] = React.useState<ShowInfo[]>([]);
+    const [showFilter, setShowFilter] = React.useState(ShowFilter.None);
     const [castingAvailable, setCastingAvailable] = React.useState(false);
     const [refreshingReleasesList, setRefreshingReleasesList] =
         React.useState(false);
 
-    const { colors, dark } = useTheme();
+    const { colors } = useTheme();
 
     const ReleasesRoute = () => (
         <ReleasesTab
+            showFilter={showFilter}
             shows={showList}
             refreshing={refreshingReleasesList}
             onPullToRefresh={refreshShowData}
+            onFilterChanged={onFilterChanged}
+            watchList={watchList}
+            onWatchListChanged={onWatchListChanged}
         />
     );
 
@@ -63,6 +70,18 @@ export const BottomNavBar = () => {
         }
     }, [mounted]);
 
+    const onFilterChanged = React.useCallback((filterValue) => {
+        setShowFilter(filterValue);
+    }, []);
+
+    const onWatchListChanged = (updatedWatchList: WatchList) => {
+        setWatchList({ ...updatedWatchList });
+        AsyncStorage.setItem(
+            StorageKeys.WatchList,
+            JSON.stringify(updatedWatchList),
+        );
+    };
+
     React.useEffect(() => {
         (async () => {
             setCastingAvailable(await isCastingAvailable());
@@ -71,8 +90,21 @@ export const BottomNavBar = () => {
 
     // Release tab data
     React.useEffect(() => {
-        refreshShowData();
-        (async () => {})();
+        (async () => {
+            const lastFilter = (await AsyncStorage.getItem(
+                'headerFilter',
+            )) as ShowFilter | null;
+            if (lastFilter) {
+                console.log('setting filter');
+                setShowFilter(lastFilter);
+            }
+            const storedWatchList = JSON.parse(
+                (await AsyncStorage.getItem(StorageKeys.WatchList)) ??
+                    JSON.stringify({ shows: [] }),
+            ) as WatchList;
+            setWatchList(storedWatchList);
+            refreshShowData();
+        })();
         return () => {
             setMounted(false);
         };

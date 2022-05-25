@@ -62,7 +62,6 @@ export const CastPlayButton = ({
                 fileMagnet,
             );
             const absolutePath = `${loadedFolderPath}/${loadedFileName}`;
-            console.log('loading filename', absolutePath);
             setFileName(absolutePath);
 
             if (sessionManager) {

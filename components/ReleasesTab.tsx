@@ -21,17 +21,25 @@ type ReleaseTabProps = {
     shows: ShowInfo[];
     onPullToRefresh: () => void;
     refreshing: boolean;
+    showFilter: ShowFilter;
+    onFilterChanged: (filter: ShowFilter) => void;
+    watchList: WatchList;
+    onWatchListChanged: (watchlist: WatchList) => void;
 };
 export const ReleasesTab = ({
     shows,
     onPullToRefresh,
     refreshing,
+    showFilter,
+    onFilterChanged,
+    watchList,
+    onWatchListChanged,
 }: ReleaseTabProps) => {
     const { colors } = useTheme();
-    const [watchList, setWatchList] = React.useState<WatchList>();
     const [showList, setShowList] = React.useState(shows);
-    const [filteredShowList, setFilteredShowList] = React.useState(shows);
-    const [showFilter, setShowFilter] = React.useState(ShowFilter.None);
+    const [filteredShowList, setFilteredShowList] = React.useState<ShowInfo[]>(
+        [],
+    );
     const [mounted, setMounted] = React.useState(true);
 
     const scrollY = React.useRef(new Animated.Value(0)).current;
@@ -43,21 +51,6 @@ export const ReleasesTab = ({
                 ? colors.subsPleaseDark2
                 : colors.subsPleaseLight3,
     };
-
-    React.useEffect(() => {
-        (async () => {
-            const storedWatchList = JSON.parse(
-                (await AsyncStorage.getItem(StorageKeys.WatchList)) ??
-                    JSON.stringify({ shows: [] }),
-            ) as WatchList;
-            if (mounted) {
-                setWatchList(storedWatchList);
-            }
-        })();
-        return () => {
-            setMounted(false);
-        };
-    }, [mounted]);
 
     React.useEffect(() => {
         (async () => {
@@ -85,17 +78,10 @@ export const ReleasesTab = ({
                 }
                 return showList;
             };
-            setFilteredShowList(await getFilteredList());
+            const retrievedFilteredShowList = await getFilteredList();
+            setFilteredShowList(retrievedFilteredShowList);
         })();
-    }, [showFilter, showList, watchList?.shows]);
-
-    const onWatchListChanged = (updatedWatchList: WatchList) => {
-        setWatchList({ ...updatedWatchList });
-        AsyncStorage.setItem(
-            StorageKeys.WatchList,
-            JSON.stringify(updatedWatchList),
-        );
-    };
+    }, [showFilter, showList, watchList.shows]);
 
     const onSearchChanged = async (query: string) => {
         const result = await SubsPleaseApi.getShowsFromSearch(query);
@@ -117,11 +103,10 @@ export const ReleasesTab = ({
                 }}
             >
                 <ReleaseTabHeader
+                    filter={showFilter}
                     onSearchChanged={debounceSearchHandler}
                     onSearchCancelled={onSearchCancelled}
-                    onFilterChanged={(filterValue) =>
-                        setShowFilter(filterValue)
-                    }
+                    onFilterChanged={onFilterChanged}
                 />
                 <Animated.FlatList
                     style={backgroundStyle}
@@ -165,7 +150,7 @@ export const ReleasesTab = ({
                             >
                                 <ReleaseShow
                                     showInfo={item}
-                                    watchList={watchList ?? { shows: [] }}
+                                    watchList={watchList}
                                     onWatchListChanged={(updatedWatchList) =>
                                         onWatchListChanged(updatedWatchList)
                                     }
