@@ -34,6 +34,8 @@ import { SavedShowLocationSettings } from './settingsPageComponents/SavedShowLoc
 import { SettingsDivider } from './settingsPageComponents/SettingsDivider';
 import { FileLogger } from 'react-native-file-logger';
 import crashlytics from '@react-native-firebase/crashlytics';
+import { firebase } from '@react-native-firebase/analytics';
+import { StorageKeys } from '../enums/enum';
 
 export const SettingsTab = () => {
     const { colors } = useTheme();
@@ -41,6 +43,7 @@ export const SettingsTab = () => {
     const [logText, setLogText] = React.useState('');
     const [logFileName, setFileName] = React.useState('');
     const { height } = useWindowDimensions();
+    const [analyticsEnabled, setAnalyticsEnabled] = React.useState(false);
     const [crashReportingEnabled, setCrashReportingEnabled] = React.useState(
         crashlytics().isCrashlyticsCollectionEnabled,
     );
@@ -59,6 +62,19 @@ export const SettingsTab = () => {
                 : colors.subsPleaseLight1,
     };
 
+    React.useEffect(() => {
+        console.log('reading analytics');
+        AsyncStorage.getItem(StorageKeys.AnalyticsEnabled).then((enabled) => {
+            const savedAnalyticsEnabled = JSON.parse(
+                enabled ?? 'true',
+            ) as boolean;
+            setAnalyticsEnabled(savedAnalyticsEnabled);
+            firebase
+                .analytics()
+                .setAnalyticsCollectionEnabled(savedAnalyticsEnabled);
+        });
+    }, []);
+
     const displayLogs = async () => {
         const latestLogPath = (await FileLogger.getLogFilePaths())[0];
         setFileName(latestLogPath);
@@ -67,6 +83,27 @@ export const SettingsTab = () => {
             setLogText(latestLogText);
             setLogViewOpen(true);
         }
+    };
+
+    const toggleAnalytics = async () => {
+        try {
+            if (analyticsEnabled) {
+                console.log('Disabling analytics..');
+                await firebase.analytics().logEvent('opt_out_analytics');
+            } else {
+                console.log('Enabling analytics..');
+            }
+        } catch (ex) {
+            console.error('Failed to change analytics state', ex);
+        }
+        await firebase
+            .analytics()
+            .setAnalyticsCollectionEnabled(!analyticsEnabled);
+        await AsyncStorage.setItem(
+            StorageKeys.AnalyticsEnabled,
+            JSON.stringify(!analyticsEnabled),
+        );
+        setAnalyticsEnabled(!analyticsEnabled);
     };
 
     const toggleCrashlytics = async () => {
@@ -182,6 +219,18 @@ export const SettingsTab = () => {
                     </View>
                 </TouchableRipple>
                 <SettingsDivider />
+                <TouchableRipple
+                    onPress={() => toggleAnalytics()}
+                    style={styles.touchableStyle}
+                >
+                    <View>
+                        <Title style={textStyle}>
+                            {analyticsEnabled
+                                ? 'Disable analytics'
+                                : 'Enable analytics'}
+                        </Title>
+                    </View>
+                </TouchableRipple>
                 <TouchableRipple
                     onPress={() => toggleCrashlytics()}
                     style={styles.touchableStyle}
