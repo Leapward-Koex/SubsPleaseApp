@@ -1,6 +1,7 @@
-import { humanFileSize } from '../HelperFunctions';
+import { humanFileSize, openVideoIntent } from '../HelperFunctions';
 import notifee, { EventType } from '@notifee/react-native';
 import { logger } from './Logger';
+import { WakeLockInterface } from 'react-native-wake-lock';
 
 export interface EpisodeDownloadProgress {
     episodeNumber: string;
@@ -18,12 +19,21 @@ class DownloadNotificationManger {
     private groupId = 'group-id';
     private summaryNotificationId = 'summary-notification-id';
     constructor() {
-        notifee.onBackgroundEvent(({ type, detail }) => {
-            // Todo open video here?
-            if (type === EventType.PRESS) {
-                console.log('Notification pressed!');
+        notifee.onBackgroundEvent(async ({ type, detail }) => {
+            if (
+                type === EventType.PRESS &&
+                detail.notification?.data?.filePath
+            ) {
+                await openVideoIntent(detail.notification.data.filePath);
             }
-            return Promise.resolve();
+        });
+        notifee.onForegroundEvent(({ type, detail }) => {
+            if (
+                type === EventType.PRESS &&
+                detail.notification?.data?.filePath
+            ) {
+                openVideoIntent(detail.notification.data.filePath);
+            }
         });
     }
 
@@ -71,6 +81,7 @@ class DownloadNotificationManger {
                     channelId,
                     onlyAlertOnce: true,
                     ongoing: true,
+                    autoCancel: false,
                     smallIcon: 'subsplease_notification_icon',
                     progress: {
                         max: totalSize,
@@ -79,6 +90,11 @@ class DownloadNotificationManger {
                     sortKey: notificationSortValue,
                     groupId: this.groupId,
                 },
+            });
+            WakeLockInterface.isWakeLocked().then((wakeLocked) => {
+                if (!wakeLocked) {
+                    WakeLockInterface.setWakeLock();
+                }
             });
             this.downloads.push({
                 showName,
@@ -137,6 +153,7 @@ class DownloadNotificationManger {
                 channelId,
                 onlyAlertOnce: true,
                 ongoing: true,
+                autoCancel: false,
                 smallIcon: 'subsplease_notification_icon',
                 progress: {
                     max: downloadingEpisode.totalSize,
@@ -149,7 +166,11 @@ class DownloadNotificationManger {
         await this.updateSummaryNotification(channelId);
     }
 
-    public async completeDownload(showName: string, episodeNumber: string) {
+    public async completeDownload(
+        showName: string,
+        episodeNumber: string,
+        destinationFileLocation: string,
+    ) {
         console.log(
             'Sending completed notification for',
             showName,
@@ -170,6 +191,9 @@ class DownloadNotificationManger {
             id: showName + episodeNumber,
             title: `${showName} ep: ${episodeNumber}`,
             body: 'Download complete',
+            data: {
+                filePath: destinationFileLocation,
+            },
             android: {
                 smallIcon: 'subsplease_notification_complete_icon',
                 channelId,
@@ -177,6 +201,13 @@ class DownloadNotificationManger {
             },
         });
         await this.updateSummaryNotification(channelId);
+        if (this.getInprogressDownloads().currentDownloadCount === 0) {
+            WakeLockInterface.isWakeLocked().then((wakeLocked) => {
+                if (wakeLocked) {
+                    WakeLockInterface.releaseWakeLock();
+                }
+            });
+        }
     }
 
     private async updateSummaryNotification(channelId: string) {

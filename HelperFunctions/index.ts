@@ -135,6 +135,7 @@ export const readTextFile = (filePath: string) => {
 };
 
 export const openVideoIntent = (filePath: string) => {
+    console.log('Going to open', filePath);
     return new Promise<boolean>((resolve) => {
         FilePathModuleTyped.openVideoIntent(filePath, (success) =>
             resolve(success),

@@ -172,6 +172,7 @@ export const DownloadTorrentButton = ({
                     downloadNotificationManger.completeDownload(
                         showName,
                         episodeNumber,
+                        msg.sourceFilePath,
                     );
                 }
             }
