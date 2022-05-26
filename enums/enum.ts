@@ -3,4 +3,5 @@ export enum StorageKeys {
     ShowPaths = 'showPaths',
     DownloadedShows = 'downloadedShows',
     AnalyticsEnabled = 'analyticsEnabled',
+    UseInbuiltTorrentClient = 'useInbuiltTorrentClient',
 }

@@ -15,6 +15,7 @@ import { convert } from '../services/converter';
 import { downloadedShows } from '../services/DownloadedShows';
 import { downloadNotificationManger } from '../services/DownloadNotificationManager';
 import { logger } from '../services/Logger';
+import { styledToast } from '../services/ToastService';
 
 type DownloadTorrentButtonProps = {
     resolution: string;
@@ -65,8 +66,19 @@ export const DownloadTorrentButton = ({
         );
         return <></>;
     }
-    const openTorrent = () => {
-        // check if we can download it in the app here?
+    const openTorrent = async () => {
+        const canOpenUrl = await Linking.canOpenURL(desiredResoltion.magnet);
+        if (!canOpenUrl) {
+            styledToast.showToast(
+                'error',
+                'Cannot start download',
+                'Please install a torrent client or enable in-app torrent downloading',
+            );
+            console.error(
+                'Cannot open the magnet URL as not associated programs are registered',
+            );
+            return;
+        }
         Linking.openURL(desiredResoltion.magnet);
     };
 
@@ -172,12 +184,16 @@ export const DownloadTorrentButton = ({
         });
     };
 
+    const onPress = async () => {
+        const downloadInApp = JSON.parse(
+            (await AsyncStorage.getItem(StorageKeys.UseInbuiltTorrentClient)) ??
+                'true',
+        );
+        downloadInApp ? downloadTorrent() : openTorrent();
+    };
+
     return (
-        <Button
-            mode="text"
-            onPress={() => openTorrent()}
-            onLongPress={() => downloadTorrent()}
-        >
+        <Button mode="text" onPress={() => onPress()}>
             {`${resolution}p`}
         </Button>
     );

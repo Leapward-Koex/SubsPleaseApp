@@ -27,6 +27,7 @@ import {
     useWindowDimensions,
     View,
     Appearance,
+    Linking,
 } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import { ImportExportListItem } from './settingsPageComponents/ExportImportSettings';
@@ -36,6 +37,8 @@ import { FileLogger } from 'react-native-file-logger';
 import crashlytics from '@react-native-firebase/crashlytics';
 import { firebase } from '@react-native-firebase/analytics';
 import { StorageKeys } from '../enums/enum';
+import { getVersion } from 'react-native-device-info';
+import { CheckBoxSettingsBox } from './settingsPageComponents/CheckBoxSettingBox';
 
 export const SettingsTab = () => {
     const { colors } = useTheme();
@@ -44,6 +47,8 @@ export const SettingsTab = () => {
     const [logFileName, setFileName] = React.useState('');
     const { height } = useWindowDimensions();
     const [analyticsEnabled, setAnalyticsEnabled] = React.useState(false);
+    const [useInbuildTorrentClient, setUseInbuildTorrentClient] =
+        React.useState(true);
     const [crashReportingEnabled, setCrashReportingEnabled] = React.useState(
         crashlytics().isCrashlyticsCollectionEnabled,
     );
@@ -63,7 +68,6 @@ export const SettingsTab = () => {
     };
 
     React.useEffect(() => {
-        console.log('reading analytics');
         AsyncStorage.getItem(StorageKeys.AnalyticsEnabled).then((enabled) => {
             const savedAnalyticsEnabled = JSON.parse(
                 enabled ?? 'true',
@@ -73,6 +77,12 @@ export const SettingsTab = () => {
                 .analytics()
                 .setAnalyticsCollectionEnabled(savedAnalyticsEnabled);
         });
+        AsyncStorage.getItem(StorageKeys.UseInbuiltTorrentClient).then(
+            (enabled) => {
+                const parsedEnabled = JSON.parse(enabled ?? 'true') as boolean;
+                setUseInbuildTorrentClient(parsedEnabled);
+            },
+        );
     }, []);
 
     const displayLogs = async () => {
@@ -85,9 +95,10 @@ export const SettingsTab = () => {
         }
     };
 
-    const toggleAnalytics = async () => {
+    const toggleAnalytics = async (newValue: boolean) => {
+        setAnalyticsEnabled(newValue);
         try {
-            if (analyticsEnabled) {
+            if (!newValue) {
                 console.log('Disabling analytics..');
                 await firebase.analytics().logEvent('opt_out_analytics');
             } else {
@@ -96,19 +107,16 @@ export const SettingsTab = () => {
         } catch (ex) {
             console.error('Failed to change analytics state', ex);
         }
-        await firebase
-            .analytics()
-            .setAnalyticsCollectionEnabled(!analyticsEnabled);
+        await firebase.analytics().setAnalyticsCollectionEnabled(newValue);
         await AsyncStorage.setItem(
             StorageKeys.AnalyticsEnabled,
-            JSON.stringify(!analyticsEnabled),
+            JSON.stringify(newValue),
         );
-        setAnalyticsEnabled(!analyticsEnabled);
     };
 
-    const toggleCrashlytics = async () => {
+    const toggleCrashlytics = async (newValue: boolean) => {
         await crashlytics()
-            .setCrashlyticsCollectionEnabled(!crashReportingEnabled)
+            .setCrashlyticsCollectionEnabled(newValue)
             .then(() =>
                 setCrashReportingEnabled(
                     crashlytics().isCrashlyticsCollectionEnabled,
@@ -189,6 +197,18 @@ export const SettingsTab = () => {
             <ScrollView style={backgroundStyle}>
                 <SavedShowLocationSettings />
                 <SettingsDivider />
+                <CheckBoxSettingsBox
+                    value={useInbuildTorrentClient}
+                    text="Use in-app torrent client"
+                    onChange={(newValue) => {
+                        setUseInbuildTorrentClient(newValue);
+                        AsyncStorage.setItem(
+                            StorageKeys.UseInbuiltTorrentClient,
+                            JSON.stringify(newValue),
+                        );
+                    }}
+                />
+                <SettingsDivider />
                 <ImportExportListItem type="Import" />
                 <ImportExportListItem type="Export" />
                 <SettingsDivider />
@@ -219,30 +239,20 @@ export const SettingsTab = () => {
                     </View>
                 </TouchableRipple>
                 <SettingsDivider />
-                <TouchableRipple
-                    onPress={() => toggleAnalytics()}
-                    style={styles.touchableStyle}
-                >
-                    <View>
-                        <Title style={textStyle}>
-                            {analyticsEnabled
-                                ? 'Disable analytics'
-                                : 'Enable analytics'}
-                        </Title>
-                    </View>
-                </TouchableRipple>
-                <TouchableRipple
-                    onPress={() => toggleCrashlytics()}
-                    style={styles.touchableStyle}
-                >
-                    <View>
-                        <Title style={textStyle}>
-                            {crashReportingEnabled
-                                ? 'Disable crash reporting'
-                                : 'Enable crash reporting'}
-                        </Title>
-                    </View>
-                </TouchableRipple>
+                <CheckBoxSettingsBox
+                    value={analyticsEnabled}
+                    text="App analytics"
+                    onChange={(newValue) => {
+                        toggleAnalytics(newValue);
+                    }}
+                />
+                <CheckBoxSettingsBox
+                    value={crashReportingEnabled}
+                    text="Crash reporting"
+                    onChange={(newValue) => {
+                        toggleCrashlytics(newValue);
+                    }}
+                />
                 <TouchableRipple
                     onPress={() => displayLogs()}
                     style={styles.touchableStyle}
@@ -263,6 +273,22 @@ export const SettingsTab = () => {
                         <Title style={textStyle}>Send logs</Title>
                     </View>
                 </TouchableRipple>
+                <SettingsDivider />
+                <TouchableRipple
+                    onPress={() =>
+                        Linking.openURL(
+                            'https://github.com/Leapward-Koex/SubsPleaseApp/releases',
+                        )
+                    }
+                    style={styles.touchableStyle}
+                >
+                    <View>
+                        <Title style={textStyle}>SubsPlease App Github</Title>
+                    </View>
+                </TouchableRipple>
+                <View style={Object.assign({ padding: 20 }, textStyle)}>
+                    <Text>Version {getVersion()}</Text>
+                </View>
             </ScrollView>
             <Modal
                 animationType="fade"
