@@ -1,41 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import uniqBy from 'lodash.uniqby';
 import * as React from 'react';
-import {
-    BottomNavigation,
-    Button,
-    IconButton,
-    Text,
-    Title,
-    TouchableRipple,
-    useTheme,
-} from 'react-native-paper';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
+import { IconButton, Text, useTheme } from 'react-native-paper';
 import {
     formatSecondsToMinutesSeconds,
     getRealPathFromContentUri,
-    promiseEach,
 } from '../../HelperFunctions';
-import { SubsPleaseApi } from '../../SubsPleaseApi';
-import { ReleasesTab } from '../ReleasesTab';
-import { WatchListTab } from '../WatchListTab';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ShowInfo } from '../../models/models';
-import {
-    FlatList,
-    ImageBackground,
-    ScrollView,
-    SectionList,
-    StatusBar,
-    StyleSheet,
-    useWindowDimensions,
-    View,
-    Appearance,
-} from 'react-native';
+import { ImageBackground, StyleSheet, View, Appearance } from 'react-native';
 import { Appbar } from 'react-native-paper';
-import { ImportExportListItem } from '../settingsPageComponents/ExportImportSettings';
-import { SavedShowLocationSettings } from '../settingsPageComponents/SavedShowLocationSettings';
-import { SettingsDivider } from '../settingsPageComponents/SettingsDivider';
 import {
     CastButton,
     MediaPlayerIdleReason,
@@ -46,6 +17,7 @@ import { Slider } from '@miblanchard/react-native-slider';
 import { pick } from 'react-native-document-picker';
 import { CastQueue } from './CastQueue';
 import { convert } from '../../services/converter';
+import { CastPlayerButtonControls } from './castPlayerButtonControls';
 
 export const CastSettingsTab = () => {
     const [currentSeconds, setCurrentSeconds] = React.useState(0);
@@ -62,23 +34,67 @@ export const CastSettingsTab = () => {
         MediaPlayerState.IDLE,
     );
     const { colors } = useTheme();
-    const { height, width } = useWindowDimensions();
     const client = useRemoteMediaClient();
-    const percentComplete =
-        streamDuration === 0 ? 0 : currentSeconds / streamDuration;
 
-    const backgroundStyle = {
-        backgroundColor:
-            Appearance.getColorScheme() === 'light'
-                ? colors.subsPleaseLight2
-                : colors.subsPleaseDark2,
-        height: '100%',
-        display: 'flex',
-    };
-
-    const textStyle = {
-        color: colors.subsPleaseLight1,
-    };
+    const styles = StyleSheet.create({
+        textStyle: {
+            color: colors.subsPleaseLight1,
+        },
+        backgroundStyle: {
+            backgroundColor:
+                Appearance.getColorScheme() === 'light'
+                    ? colors.subsPleaseLight2
+                    : colors.subsPleaseDark2,
+            height: '100%',
+            display: 'flex',
+        },
+        controlContainer: {
+            backgroundColor: '#333333AA',
+            position: 'absolute',
+            bottom: 55,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            elevation: 1,
+        },
+        playerImageBackground: {
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            backgroundColor:
+                Appearance.getColorScheme() === 'light'
+                    ? colors.subsPleaseLight2
+                    : colors.subsPleaseDark2,
+        },
+        playerNoImageBackgorund: {
+            width: '100%',
+            height: '100%',
+            backgroundColor:
+                Appearance.getColorScheme() === 'light'
+                    ? colors.subsPleaseLight2
+                    : colors.subsPleaseDark2,
+        },
+        appBar: {
+            backgroundColor: colors.secondary,
+            zIndex: 2,
+            elevation: 2,
+        },
+        castBar: {
+            width: 50,
+            height: 24,
+            top: 0,
+            tintColor: 'white',
+        },
+        timeStampContainer: {
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 15,
+            marginLeft: 5,
+            marginRight: 5,
+        },
+        timeRemainingContainer: { marginLeft: 10, marginRight: 10 },
+    });
 
     React.useEffect(() => {
         let mediaStatusListener: { remove: () => void } | undefined;
@@ -153,49 +169,49 @@ export const CastSettingsTab = () => {
         };
     }, [client, draggingSlider, streamDuration]);
 
-    const handleSlidingComplete = (value: number) => {
-        setSliderValue(value);
-        if (client) {
-            client.seek({
-                position: value * streamDuration,
-                /** Whether the time interval is relative to the current stream position (`true`) or to the beginning of the stream (`false`). The default value is `false`, indicating an absolute seek position. */
-                relative: false,
-                /** The action to take after the seek operation has finished. If not specified, it will preserve current play state. */
-                resumeState: 'play',
-            });
-        }
-    };
+    const handleSlidingComplete = React.useCallback(
+        (value: number) => {
+            setSliderValue(value);
+            if (client) {
+                client.seek({
+                    position: value * streamDuration,
+                    /** Whether the time interval is relative to the current stream position (`true`) or to the beginning of the stream (`false`). The default value is `false`, indicating an absolute seek position. */
+                    relative: false,
+                    /** The action to take after the seek operation has finished. If not specified, it will preserve current play state. */
+                    resumeState: 'play',
+                });
+            }
+        },
+        [client, streamDuration],
+    );
 
-    const handlePlayPause = () => {
+    const handlePlayPause = React.useCallback(() => {
         if (client) {
             playState === MediaPlayerState.PLAYING
                 ? client.pause()
                 : client.play();
         }
-    };
+    }, [client, playState]);
 
-    const skip = (duration: number) => {
-        setSliderValue((currentSeconds + duration) / streamDuration);
-        if (client) {
-            client.seek({
-                position: duration,
-                /** Whether the time interval is relative to the current stream position (`true`) or to the beginning of the stream (`false`). The default value is `false`, indicating an absolute seek position. */
-                relative: true,
-                /** The action to take after the seek operation has finished. If not specified, it will preserve current play state. */
-                resumeState: 'play',
-            });
-        }
-    };
+    const skip = React.useCallback(
+        (duration: number) => {
+            setSliderValue((currentSeconds + duration) / streamDuration);
+            if (client) {
+                client.seek({
+                    position: duration,
+                    /** Whether the time interval is relative to the current stream position (`true`) or to the beginning of the stream (`false`). The default value is `false`, indicating an absolute seek position. */
+                    relative: true,
+                    /** The action to take after the seek operation has finished. If not specified, it will preserve current play state. */
+                    resumeState: 'play',
+                });
+            }
+        },
+        [client, currentSeconds, streamDuration],
+    );
 
     const hasBackground = !!backgroundImageUrl;
 
-    const buttonSizes = {
-        small: width * 0.06,
-        medium: width * 0.08,
-        large: width * 0.1,
-    };
-
-    const openFileSelector = async () => {
+    const openFileSelector = React.useCallback(async () => {
         try {
             const pickResults = await pick({
                 allowMultiSelection: true,
@@ -210,22 +226,12 @@ export const CastSettingsTab = () => {
             setVideoPathsToCast(uniqBy(joinedVideoPaths, (path) => path));
             setCastQueueShown(true);
         } catch {}
-    };
+    }, [videoPathsToCast]);
 
     const getBackground = () => {
         if (hasBackground) {
             return (
-                <View
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                        display: 'flex',
-                        backgroundColor:
-                            Appearance.getColorScheme() === 'light'
-                                ? colors.subsPleaseLight2
-                                : colors.subsPleaseDark2,
-                    }}
-                >
+                <View style={styles.playerImageBackground}>
                     <CastQueue
                         files={videoPathsToCast}
                         onItemRemoved={(fileName) =>
@@ -236,9 +242,7 @@ export const CastSettingsTab = () => {
                             )
                         }
                         castQueueShown={castQueueShown}
-                        onCastQueueShownChange={(newValue) =>
-                            setCastQueueShown(newValue)
-                        }
+                        onCastQueueShownChange={setCastQueueShown}
                         currentlyPlayingFile={currentlyPlayingFile}
                     />
                     <ImageBackground
@@ -255,16 +259,7 @@ export const CastSettingsTab = () => {
             );
         }
         return (
-            <View
-                style={{
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor:
-                        Appearance.getColorScheme() === 'light'
-                            ? colors.subsPleaseLight2
-                            : colors.subsPleaseDark2,
-                }}
-            >
+            <View style={styles.playerNoImageBackgorund}>
                 <CastQueue
                     files={videoPathsToCast}
                     onItemRemoved={(fileName) =>
@@ -275,9 +270,7 @@ export const CastSettingsTab = () => {
                         )
                     }
                     castQueueShown={castQueueShown}
-                    onCastQueueShownChange={(newValue) =>
-                        setCastQueueShown(newValue)
-                    }
+                    onCastQueueShownChange={setCastQueueShown}
                     currentlyPlayingFile={currentlyPlayingFile}
                 />
                 {getControls()}
@@ -285,120 +278,73 @@ export const CastSettingsTab = () => {
         );
     };
 
+    const thumbComponent = React.useCallback(() => {
+        if (draggingSlider) {
+            return (
+                <View style={{ marginRight: 5 }}>
+                    <Text style={styles.textStyle}>
+                        {formatSecondsToMinutesSeconds(
+                            Math.round(sliderValue * streamDuration),
+                        )}
+                    </Text>
+                </View>
+            );
+        }
+        return <></>;
+    }, [draggingSlider, sliderValue, streamDuration, styles.textStyle]);
+
+    const onSlidingComplete = React.useCallback(
+        (value) => {
+            setDraggingSlider(false);
+            handleSlidingComplete(value as number);
+        },
+        [handleSlidingComplete],
+    );
+
+    const onSliderValueChanged = React.useCallback(
+        (value: number | number[]) => {
+            if (Array.isArray(value)) {
+                setSliderValue(value[0]);
+            } else {
+                setSliderValue(value);
+            }
+        },
+        [],
+    );
+
+    const onSlidingStart = React.useCallback(() => {
+        setDraggingSlider(true);
+    }, []);
+
     const getControls = () => {
         return (
-            <View
-                style={{
-                    backgroundColor: '#333333AA',
-                    position: 'absolute',
-                    bottom: 55,
-                    left: 0,
-                    right: 0,
-                    zIndex: 1,
-                    elevation: 1,
-                }}
-            >
-                <View
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        // marginLeft: 80,
-                        // marginRight: 80,
-                    }}
-                >
-                    <IconButton
-                        color={colors.primary}
-                        onPress={() => null}
-                        size={buttonSizes.small}
-                        icon={'skip-previous-outline'}
-                    />
-                    <IconButton
-                        color={colors.primary}
-                        onPress={() => skip(-10)}
-                        icon={'rewind-10'}
-                        size={buttonSizes.medium}
-                    />
-                    <IconButton
-                        color={colors.primary}
-                        onPress={() => handlePlayPause()}
-                        disabled={playState === MediaPlayerState.IDLE}
-                        icon={
-                            playState === MediaPlayerState.PLAYING
-                                ? 'pause'
-                                : 'play'
-                        }
-                        size={buttonSizes.large}
-                    />
-                    <IconButton
-                        color={colors.primary}
-                        onPress={() => skip(10)}
-                        icon={'fast-forward-10'}
-                        size={buttonSizes.medium}
-                    />
-                    <IconButton
-                        color={colors.primary}
-                        onPress={() => null}
-                        icon={'skip-next-outline'}
-                        size={buttonSizes.medium}
-                    />
-                </View>
-                <View style={{ marginLeft: 10, marginRight: 10 }}>
+            <View style={styles.controlContainer}>
+                <CastPlayerButtonControls
+                    skip={skip}
+                    playState={playState}
+                    handlePlayPause={handlePlayPause}
+                />
+                <View style={styles.timeRemainingContainer}>
                     <Slider
                         disabled={!client}
                         animateTransitions
                         minimumTrackTintColor={colors.primary}
                         thumbTintColor={colors.primary}
-                        renderAboveThumbComponent={(index) => {
-                            if (draggingSlider) {
-                                return (
-                                    <View style={{ marginRight: 5 }}>
-                                        <Text style={textStyle}>
-                                            {formatSecondsToMinutesSeconds(
-                                                Math.round(
-                                                    sliderValue *
-                                                        streamDuration,
-                                                ),
-                                            )}
-                                        </Text>
-                                    </View>
-                                );
-                            }
-                            return <></>;
-                        }}
-                        onSlidingStart={() => setDraggingSlider(true)}
-                        onSlidingComplete={(value) => {
-                            setDraggingSlider(false);
-                            handleSlidingComplete(value as number);
-                        }}
-                        onValueChange={(value) => {
-                            if (Array.isArray(value)) {
-                                setSliderValue(value[0]);
-                            } else {
-                                setSliderValue(value);
-                            }
-                        }}
+                        renderAboveThumbComponent={thumbComponent}
+                        onSlidingStart={onSlidingStart}
+                        onSlidingComplete={onSlidingComplete}
+                        onValueChange={onSliderValueChanged}
                         value={sliderValue}
                     />
                 </View>
 
-                <View
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginBottom: 15,
-                        marginLeft: 5,
-                        marginRight: 5,
-                    }}
-                >
-                    <Text style={textStyle}>
+                <View style={styles.timeStampContainer}>
+                    <Text style={styles.textStyle}>
                         {formatSecondsToMinutesSeconds(
                             Math.round(currentSeconds),
                         )}
                     </Text>
-                    <Text style={textStyle}>
+                    <Text style={styles.textStyle}>
                         {formatSecondsToMinutesSeconds(
                             Math.round(streamDuration),
                         )}
@@ -409,29 +355,15 @@ export const CastSettingsTab = () => {
     };
 
     return (
-        <View style={backgroundStyle}>
-            <Appbar.Header
-                statusBarHeight={1}
-                style={{
-                    backgroundColor: colors.secondary,
-                    zIndex: 2,
-                    elevation: 2,
-                }}
-            >
+        <View style={styles.backgroundStyle}>
+            <Appbar.Header statusBarHeight={1} style={styles.appBar}>
                 <Appbar.Content color={'white'} title="Casting" />
                 <IconButton
                     color={colors.subsPleaseLight1}
-                    onPress={() => openFileSelector()}
+                    onPress={openFileSelector}
                     icon={'folder-open'}
                 />
-                <CastButton
-                    style={{
-                        width: 50,
-                        height: 24,
-                        top: 0,
-                        tintColor: 'white',
-                    }}
-                />
+                <CastButton style={styles.castBar} />
             </Appbar.Header>
             {getBackground()}
         </View>
