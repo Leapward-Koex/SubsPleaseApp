@@ -1,16 +1,15 @@
 import * as React from 'react';
-import { View, Keyboard, useWindowDimensions } from 'react-native';
+import { View, Keyboard, useWindowDimensions, StyleSheet } from 'react-native';
 import { Appbar, Button, Dialog, Portal, Searchbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GoogleCast, { CastButton } from 'react-native-google-cast';
-import { isCastingAvailable } from '../HelperFunctions';
 
 interface ReleaseTabHeaderProps {
     filter: ShowFilter;
+    castingAvailable: boolean;
     onSearchChanged: (query: string) => void;
-    onSearchCancelled: () => void;
     onFilterChanged: (filter: ShowFilter) => void;
 }
 
@@ -22,25 +21,24 @@ export enum ShowFilter {
 
 export const ReleaseTabHeader = ({
     filter,
+    castingAvailable,
     onSearchChanged,
-    onSearchCancelled,
     onFilterChanged,
 }: ReleaseTabHeaderProps) => {
     const { width } = useWindowDimensions();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [filterPanelShown, setFilterPanelShown] = React.useState(false);
-    const [castingAvailable, setCastingAvailable] = React.useState(false);
-    const [mounted, setMounted] = React.useState(true);
+
+    const styles = StyleSheet.create({
+        header: { display: 'flex', flexDirection: 'row' },
+        searchbar: { flexGrow: 1, width: width - 150 },
+        showFilterButton: { paddingTop: 5, width: 50 },
+        showFilterButtonContent: { flexDirection: 'row-reverse' },
+    });
 
     const onChangeText = (query: string) => {
         onSearchChanged(query);
         setSearchQuery(query);
-    };
-
-    const onBackButtonPressed = async () => {
-        onSearchCancelled();
-        setSearchQuery('');
-        Keyboard.dismiss();
     };
 
     const onFilterPressed = async (filterValue: ShowFilter) => {
@@ -52,15 +50,6 @@ export const ReleaseTabHeader = ({
     const toggleFilterPanel = () => {
         setFilterPanelShown(!filterPanelShown);
     };
-
-    React.useEffect(() => {
-        (async () => {
-            setCastingAvailable(await isCastingAvailable());
-        })();
-        return () => {
-            setMounted(false);
-        };
-    }, []);
 
     const getCastButton = () => {
         if (castingAvailable) {
@@ -81,27 +70,18 @@ export const ReleaseTabHeader = ({
     return (
         <>
             <Appbar.Header statusBarHeight={1}>
-                <View style={{ display: 'flex', flexDirection: 'row' }}>
-                    <Button
-                        mode="text"
-                        compact
-                        contentStyle={{ flexDirection: 'row-reverse' }}
-                        style={{ paddingTop: 5 }}
-                        onPress={onBackButtonPressed}
-                    >
-                        <Icon name="arrow-left" size={24} color="#fff" />
-                    </Button>
+                <View style={styles.header}>
                     <Searchbar
                         placeholder="Search"
                         onChangeText={onChangeText}
                         value={searchQuery}
-                        style={{ flexGrow: 1, width: width - 150 }}
+                        style={styles.searchbar}
                     />
                     <Button
                         mode="text"
                         compact
-                        contentStyle={{ flexDirection: 'row-reverse' }}
-                        style={{ paddingTop: 5, width: 50 }}
+                        contentStyle={styles.showFilterButtonContent}
+                        style={styles.showFilterButton}
                         onPress={toggleFilterPanel}
                     >
                         <Icon name="filter-variant" size={24} color="#fff" />

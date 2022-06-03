@@ -1,56 +1,132 @@
 import * as React from 'react';
-import {
-    Animated,
-    SafeAreaView,
-    useWindowDimensions,
-    View,
-    Appearance,
-} from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
-import { ReleaseShow } from './ReleaseShow';
+import { useWindowDimensions, View, StyleSheet } from 'react-native';
 import { ShowInfo, WatchList } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
-import { ReleaseTabHeader, ShowFilter } from './ReleaseHeader';
+import {
+    ReleaseTabHeader,
+    ShowFilter,
+} from './releasePageComponents/ReleaseHeader';
 import { SubsPleaseApi } from '../SubsPleaseApi';
-import debounce from 'lodash.debounce';
 import { downloadedShows } from '../services/DownloadedShows';
-import { asyncFilter } from '../HelperFunctions';
+import { asyncFilter, isCastingAvailable } from '../HelperFunctions';
+import { ReleaseList } from './releasePageComponents/ReleaseList';
+import { logger } from '../services/Logger';
+import uniqBy from 'lodash.uniqby';
 
-type ReleaseTabProps = {
-    shows: ShowInfo[];
-    onPullToRefresh: () => void;
-    refreshing: boolean;
-    showFilter: ShowFilter;
-    onFilterChanged: (filter: ShowFilter) => void;
-    watchList: WatchList;
-    onWatchListChanged: (watchlist: WatchList) => void;
-};
-export const ReleasesTab = ({
-    shows,
-    onPullToRefresh,
-    refreshing,
-    showFilter,
-    onFilterChanged,
-    watchList,
-    onWatchListChanged,
-}: ReleaseTabProps) => {
-    const { colors } = useTheme();
-    const [showList, setShowList] = React.useState(shows);
+export const ReleasesTab = () => {
+    const [castingAvailable, setCastingAvailable] = React.useState(false);
+
+    const [showList, setShowList] = React.useState<ShowInfo[]>([]);
     const [filteredShowList, setFilteredShowList] = React.useState<ShowInfo[]>(
         [],
     );
-    const [mounted, setMounted] = React.useState(true);
+    const [watchList, setWatchList] = React.useState<WatchList>({ shows: [] });
+    const [showFilter, setShowFilter] = React.useState(ShowFilter.None);
 
-    const scrollY = React.useRef(new Animated.Value(0)).current;
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [refreshing, setRefreshing] = React.useState(false);
+
     const { height } = useWindowDimensions();
 
-    const backgroundStyle = {
-        backgroundColor:
-            Appearance.getColorScheme() !== 'light'
-                ? colors.subsPleaseDark2
-                : colors.subsPleaseLight3,
+    const styles = StyleSheet.create({
+        viewStyles: {
+            flexDirection: 'column',
+            height: height - 50,
+        },
+    });
+
+    React.useEffect(() => {
+        if (searchTerm) {
+            console.log('Searching for ', searchTerm);
+            SubsPleaseApi.getShowsFromSearch(searchTerm).then((result) => {
+                setShowList(result);
+            });
+        }
+    }, [searchTerm]);
+
+    const getSavedReleases: () => Promise<ShowInfo[]> = async () => {
+        try {
+            const value = await AsyncStorage.getItem('releases');
+            if (value !== null) {
+                return JSON.parse(value);
+            }
+            return [];
+        } catch (e) {
+            logger.error('Failed to read saved releases', JSON.stringify(e));
+        }
     };
+
+    const saveReleases = async (releases: ShowInfo[]) => {
+        try {
+            const jsonValue = JSON.stringify(releases);
+            await AsyncStorage.setItem('releases', jsonValue);
+        } catch (e) {
+            // saving error
+        }
+    };
+
+    const refreshShowData = React.useCallback(async () => {
+        setRefreshing(true);
+        const getLatestShowListPromise = SubsPleaseApi.getLatestShowList();
+        const getSavedReleasesPromise = getSavedReleases();
+        const [apiShowList, savedShowList] = await Promise.all([
+            getLatestShowListPromise,
+            getSavedReleasesPromise,
+        ]);
+        // Combine the showlist here
+        const uniqueShows = uniqBy(
+            apiShowList.concat(savedShowList),
+            (show) => `${show.page}${show.episode}`,
+        );
+
+        setRefreshing(false);
+        setShowList(uniqueShows);
+        saveReleases(uniqueShows);
+    }, []);
+
+    // Load initial page data
+    React.useEffect(() => {
+        (async () => {
+            console.log('Loading initial release page data');
+
+            const retrievedCastingAvailalbe = await isCastingAvailable();
+
+            refreshShowData();
+            const lastFilter = (await AsyncStorage.getItem(
+                'headerFilter',
+            )) as ShowFilter | null;
+            if (lastFilter) {
+                console.log('setting filter');
+                setShowFilter(lastFilter);
+            }
+            const storedWatchList = JSON.parse(
+                (await AsyncStorage.getItem(StorageKeys.WatchList)) ??
+                    JSON.stringify({ shows: [] }),
+            ) as WatchList;
+            setWatchList(storedWatchList);
+            setCastingAvailable(retrievedCastingAvailalbe);
+        })();
+    }, [refreshShowData]);
+
+    const onWatchListChanged = React.useCallback(
+        (updatedWatchList: WatchList) => {
+            setWatchList({ ...updatedWatchList });
+            AsyncStorage.setItem(
+                StorageKeys.WatchList,
+                JSON.stringify(updatedWatchList),
+            );
+        },
+        [],
+    );
+
+    console.log('rendering');
+    React.useEffect(() => {
+        console.log('mounting');
+        return () => {
+            console.log('unmounting!');
+        };
+    }, []);
 
     React.useEffect(() => {
         (async () => {
@@ -79,88 +155,43 @@ export const ReleasesTab = ({
                 return showList;
             };
             const retrievedFilteredShowList = await getFilteredList();
-            setFilteredShowList(retrievedFilteredShowList);
+            if (retrievedFilteredShowList.length !== filteredShowList.length) {
+                setFilteredShowList(retrievedFilteredShowList);
+            }
         })();
-    }, [showFilter, showList, watchList.shows]);
+    }, [filteredShowList.length, showFilter, showList, watchList?.shows]);
 
-    const onSearchChanged = async (query: string) => {
-        const result = await SubsPleaseApi.getShowsFromSearch(query);
-        setShowList(result);
-    };
+    const onSearchChanged = React.useCallback(
+        (newSearchTerm) => {
+            if (!newSearchTerm) {
+                console.log('Resetting search term');
+                refreshShowData();
+            }
+            setSearchTerm(newSearchTerm);
+        },
+        [refreshShowData],
+    );
 
-    const debounceSearchHandler = debounce(onSearchChanged, 500);
+    const onFilterChanged = React.useCallback((filterValue) => {
+        setShowFilter(filterValue);
+    }, []);
 
-    const onSearchCancelled = () => {
-        setShowList(shows);
-    };
-
+    console.log(filteredShowList.length);
     return (
-        <SafeAreaView>
-            <View
-                style={{
-                    flexDirection: 'column',
-                    height: height - 50,
-                }}
-            >
-                <ReleaseTabHeader
-                    filter={showFilter}
-                    onSearchChanged={debounceSearchHandler}
-                    onSearchCancelled={onSearchCancelled}
-                    onFilterChanged={onFilterChanged}
-                />
-                <Animated.FlatList
-                    style={backgroundStyle}
-                    data={filteredShowList}
-                    onScroll={Animated.event(
-                        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                        { useNativeDriver: true },
-                    )}
-                    refreshing={refreshing}
-                    onRefresh={onPullToRefresh}
-                    renderItem={({ item, index }) => {
-                        const itemHeight = 150;
-                        const inputRange = [
-                            -1,
-                            0,
-                            itemHeight * index,
-                            itemHeight * (index + 1.5),
-                        ];
-                        const opcaityInputRange = [
-                            -1,
-                            0,
-                            itemHeight * index,
-                            itemHeight * (index + 1),
-                        ];
-                        const scale = scrollY.interpolate({
-                            inputRange,
-                            outputRange: [1, 1, 1, 0],
-                        });
-                        const translateY = scrollY.interpolate({
-                            inputRange,
-                            outputRange: [0, 0, 0, itemHeight],
-                        });
-                        const opacity = scrollY.interpolate({
-                            inputRange: opcaityInputRange,
-                            outputRange: [1, 1, 1, 0],
-                        });
-
-                        return (
-                            <Animated.View
-                                style={{ transform: [{ translateY }], opacity }}
-                            >
-                                <ReleaseShow
-                                    showInfo={item}
-                                    watchList={watchList}
-                                    onWatchListChanged={(updatedWatchList) =>
-                                        onWatchListChanged(updatedWatchList)
-                                    }
-                                />
-                            </Animated.View>
-                        );
-                    }}
-                    keyExtractor={(show) => `${show.page}${show.episode}`}
-                />
-            </View>
-        </SafeAreaView>
+        <View style={styles.viewStyles}>
+            <ReleaseTabHeader
+                filter={showFilter}
+                castingAvailable={castingAvailable}
+                onSearchChanged={onSearchChanged}
+                onFilterChanged={onFilterChanged}
+            />
+            <ReleaseList
+                showList={filteredShowList}
+                onPullToRefresh={refreshShowData}
+                refreshing={refreshing}
+                watchList={watchList}
+                onWatchListChanged={onWatchListChanged}
+            />
+        </View>
     );
 };

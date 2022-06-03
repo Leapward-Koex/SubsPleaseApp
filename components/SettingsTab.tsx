@@ -1,28 +1,17 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import uniqBy from 'lodash.uniqby';
 import * as React from 'react';
 import {
-    BottomNavigation,
     Button,
     Text,
     Title,
     TouchableRipple,
     useTheme,
 } from 'react-native-paper';
-import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { promiseEach, readTextFile } from '../HelperFunctions';
-import { SubsPleaseApi } from '../SubsPleaseApi';
-import { ReleasesTab } from './ReleasesTab';
-import { WatchListTab } from './WatchListTab';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ShowInfo } from '../models/models';
+import { readTextFile } from '../HelperFunctions';
 import {
     Alert,
-    FlatList,
     Modal,
     ScrollView,
-    SectionList,
-    StatusBar,
     StyleSheet,
     useWindowDimensions,
     View,

@@ -151,19 +151,18 @@ export const ReleaseShow = ({
             marginBottom: 20,
             fontSize: 20,
         },
+        cardStyle: {
+            marginLeft: 5,
+            marginTop: 10,
+            marginBottom: 10,
+            marginRight: 5,
+            height: 130,
+            backgroundColor:
+                Appearance.getColorScheme() !== 'light'
+                    ? colors.subsPleaseDark1
+                    : colors.subsPleaseLight2,
+        },
     });
-
-    const cardStyle = {
-        marginLeft: 5,
-        marginTop: 10,
-        marginBottom: 10,
-        marginRight: 5,
-        height: 130,
-        backgroundColor:
-            Appearance.getColorScheme() !== 'light'
-                ? colors.subsPleaseDark1
-                : colors.subsPleaseLight2,
-    };
 
     const textColour =
         Appearance.getColorScheme() !== 'light'
@@ -222,7 +221,6 @@ export const ReleaseShow = ({
                 >
                     <Icon
                         name="minus"
-                        style={{ paddingRight: 4 }}
                         size={13}
                         color={colors.subsPleaseDark1}
                     />
@@ -237,13 +235,8 @@ export const ReleaseShow = ({
             );
         }
         return (
-            <Button mode="contained" onPress={() => addShowToList()}>
-                <Icon
-                    name="plus"
-                    style={{ paddingRight: 4 }}
-                    size={13}
-                    color={colors.subsPleaseLight1}
-                />
+            <Button mode="contained" onPress={addShowToList}>
+                <Icon name="plus" size={13} color={colors.subsPleaseLight1} />
                 {width > 500 ? (
                     <Text style={{ color: colors.subsPleaseLight1 }}>Add</Text>
                 ) : (
@@ -292,18 +285,10 @@ export const ReleaseShow = ({
                         showName={showInfo.show}
                         episodeNumber={showInfo.episode}
                         callbackId={callbackId}
-                        onDownloadStatusChange={(status) =>
-                            setDownloadingStatus(status)
-                        }
-                        onDownloadSpeed={(newDownloadSpeed) =>
-                            setDownloadSpeed(newDownloadSpeed)
-                        }
-                        onDownloadProgress={(newProgress) =>
-                            setDownloadProgress(newProgress)
-                        }
-                        onUploadSpeed={(newUploadSpeed) =>
-                            setUploadSpeed(newUploadSpeed)
-                        }
+                        onDownloadStatusChange={setDownloadingStatus}
+                        onDownloadSpeed={setDownloadSpeed}
+                        onDownloadProgress={setDownloadProgress}
+                        onUploadSpeed={setUploadSpeed}
                         onShowDownloaded={() =>
                             setShowDownloaded(
                                 showInfo.downloads.find(
@@ -318,18 +303,10 @@ export const ReleaseShow = ({
                         showName={showInfo.show}
                         episodeNumber={showInfo.episode}
                         callbackId={callbackId}
-                        onDownloadStatusChange={(status) =>
-                            setDownloadingStatus(status)
-                        }
-                        onDownloadSpeed={(newDownloadSpeed) =>
-                            setDownloadSpeed(newDownloadSpeed)
-                        }
-                        onDownloadProgress={(newProgress) =>
-                            setDownloadProgress(newProgress)
-                        }
-                        onUploadSpeed={(newUploadSpeed) =>
-                            setUploadSpeed(newUploadSpeed)
-                        }
+                        onDownloadStatusChange={setDownloadingStatus}
+                        onDownloadSpeed={setDownloadSpeed}
+                        onDownloadProgress={setDownloadProgress}
+                        onUploadSpeed={setUploadSpeed}
                         onShowDownloaded={() =>
                             setShowDownloaded(
                                 showInfo.downloads.find(
@@ -449,8 +426,17 @@ export const ReleaseShow = ({
         }
     };
 
+    const onTitlePress = () => {
+        setModalVisible(true);
+        getShowSynopsis();
+    };
+
+    const toggleModalVisible = () => {
+        setModalVisible(!modalVisible);
+    };
+
     return (
-        <Card style={cardStyle}>
+        <Card style={styles.cardStyle}>
             <View style={{ flexDirection: 'row', height: 130 }}>
                 <View style={{ flex: 0.3 }}>
                     <Text
@@ -481,10 +467,7 @@ export const ReleaseShow = ({
                     <Title
                         numberOfLines={2}
                         ellipsizeMode="tail"
-                        onPress={() => {
-                            setModalVisible(true);
-                            getShowSynopsis();
-                        }}
+                        onPress={onTitlePress}
                         style={{
                             flexGrow: 1,
                             color: textColour,
@@ -501,7 +484,6 @@ export const ReleaseShow = ({
                         }}
                     >
                         {getActionInfoSection()}
-
                         {getWatchlistActionButton()}
                     </View>
                 </View>
@@ -511,9 +493,7 @@ export const ReleaseShow = ({
                     animationType="fade"
                     transparent={true}
                     visible={modalVisible}
-                    onRequestClose={() => {
-                        setModalVisible(!modalVisible);
-                    }}
+                    onRequestClose={toggleModalVisible}
                 >
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
@@ -539,7 +519,7 @@ export const ReleaseShow = ({
                             <Button
                                 style={{ marginTop: 15 }}
                                 mode="contained"
-                                onPress={() => setModalVisible(!modalVisible)}
+                                onPress={toggleModalVisible}
                             >
                                 Close
                             </Button>
