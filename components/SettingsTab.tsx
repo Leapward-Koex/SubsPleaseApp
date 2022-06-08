@@ -28,6 +28,7 @@ import { firebase } from '@react-native-firebase/analytics';
 import { StorageKeys } from '../enums/enum';
 import { getVersion } from 'react-native-device-info';
 import { CheckBoxSettingsBox } from './settingsPageComponents/CheckBoxSettingBox';
+import { TextSettingsBox } from './settingsPageComponents/TextSettingsBox';
 
 export const SettingsTab = () => {
     const { colors } = useTheme();
@@ -38,6 +39,7 @@ export const SettingsTab = () => {
     const [analyticsEnabled, setAnalyticsEnabled] = React.useState(false);
     const [useInbuildTorrentClient, setUseInbuildTorrentClient] =
         React.useState(true);
+    const [cacheLength, setCacheLength] = React.useState(100);
     const [crashReportingEnabled, setCrashReportingEnabled] = React.useState(
         crashlytics().isCrashlyticsCollectionEnabled,
     );
@@ -70,6 +72,12 @@ export const SettingsTab = () => {
             (enabled) => {
                 const parsedEnabled = JSON.parse(enabled ?? 'true') as boolean;
                 setUseInbuildTorrentClient(parsedEnabled);
+            },
+        );
+        AsyncStorage.getItem(StorageKeys.ReleaseShowCacheLength).then(
+            (length) => {
+                const storedCacheLength = JSON.parse(length ?? '100') as number;
+                setCacheLength(storedCacheLength);
             },
         );
     }, []);
@@ -194,6 +202,20 @@ export const SettingsTab = () => {
                         AsyncStorage.setItem(
                             StorageKeys.UseInbuiltTorrentClient,
                             JSON.stringify(newValue),
+                        );
+                    }}
+                />
+                <TextSettingsBox
+                    value={cacheLength}
+                    text="Release list cache count"
+                    modalText="Number of release show items to cache (-1 for unlimited)"
+                    onChange={(newValue) => {
+                        newValue = newValue === '' ? '0' : newValue;
+                        const number = parseInt(newValue, 10);
+                        setCacheLength(number);
+                        AsyncStorage.setItem(
+                            StorageKeys.ReleaseShowCacheLength,
+                            JSON.stringify(number),
                         );
                     }}
                 />

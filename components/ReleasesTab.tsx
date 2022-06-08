@@ -93,6 +93,14 @@ export const ReleasesTab = () => {
                 springDamping: 0.9,
             },
         });
+
+        const cacheLength = JSON.parse(
+            (await AsyncStorage.getItem(StorageKeys.ReleaseShowCacheLength)) ??
+                '100',
+        ) as number;
+        if (cacheLength !== -1) {
+            uniqueShows.length = Math.min(uniqueShows.length, cacheLength);
+        }
         setRefreshing(false);
         setShowList(uniqueShows);
         saveReleases(uniqueShows);
