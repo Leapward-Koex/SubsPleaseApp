@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
-import { useColorScheme } from 'react-native';
+import {
+    LayoutAnimation,
+    Platform,
+    UIManager,
+    useColorScheme,
+} from 'react-native';
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -73,6 +78,12 @@ const App = () => {
                     console.log(msg.text);
                 }
             });
+            if (Platform.OS === 'android') {
+                if (UIManager.setLayoutAnimationEnabledExperimental) {
+                    console.log('Setting layout animations');
+                    UIManager.setLayoutAnimationEnabledExperimental(true);
+                }
+            }
             await FileLogger.configure();
             await notifee.cancelAllNotifications();
         })();

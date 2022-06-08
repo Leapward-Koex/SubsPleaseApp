@@ -58,12 +58,6 @@ export const DownloadTorrentButton = ({
         (showDownload) => showDownload.res === resolution,
     );
     if (!desiredResoltion) {
-        console.error(
-            'Could not find specified resoultion for show',
-            JSON.stringify(availableDownloads),
-            'Requested resolution',
-            resolution,
-        );
         return <></>;
     }
     const openTorrent = async () => {

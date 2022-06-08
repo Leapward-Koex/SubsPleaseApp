@@ -1,5 +1,10 @@
 import * as React from 'react';
-import { useWindowDimensions, View, StyleSheet } from 'react-native';
+import {
+    useWindowDimensions,
+    View,
+    StyleSheet,
+    LayoutAnimation,
+} from 'react-native';
 import { ShowInfo, WatchList } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
@@ -80,6 +85,14 @@ export const ReleasesTab = () => {
             (show) => `${show.page}${show.episode}`,
         );
 
+        LayoutAnimation.configureNext({
+            duration: 700,
+            update: {
+                delay: 350,
+                type: LayoutAnimation.Types.spring,
+                springDamping: 0.9,
+            },
+        });
         setRefreshing(false);
         setShowList(uniqueShows);
         saveReleases(uniqueShows);

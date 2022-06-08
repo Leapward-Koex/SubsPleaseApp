@@ -1,18 +1,14 @@
 import * as React from 'react';
 import {
-    Animated,
-    FlatList,
     Image,
     ImageBackground,
-    SafeAreaView,
     StyleSheet,
     useWindowDimensions,
     View,
     Appearance,
 } from 'react-native';
 import { Button, Card, Text, Title, useTheme } from 'react-native-paper';
-import { ReleaseShow } from './ReleaseShow';
-import { ShowInfo, WatchList, WatchListItem } from '../models/models';
+import { WatchList, WatchListItem } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
 import { SubsPleaseApi } from '../SubsPleaseApi';

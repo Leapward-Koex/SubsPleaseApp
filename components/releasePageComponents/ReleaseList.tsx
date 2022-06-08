@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {
-    Animated,
     Appearance,
     StyleSheet,
     ListRenderItemInfo,
@@ -25,7 +24,6 @@ export const ReleaseList = ({
     onWatchListChanged,
     onPullToRefresh,
 }: ReleaseListType) => {
-    const scrollY = React.useRef(new Animated.Value(0)).current;
     const { colors } = useTheme();
 
     const styles = StyleSheet.create({
@@ -40,6 +38,7 @@ export const ReleaseList = ({
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
         return (
             <ReleaseShow
+                index={index}
                 showInfo={item}
                 watchList={watchList}
                 onWatchListChanged={onWatchListChanged}
