@@ -176,9 +176,14 @@ export const ReleasesTab = () => {
                 return showList;
             };
             const retrievedFilteredShowList = await getFilteredList();
-            if (retrievedFilteredShowList.length !== filteredShowList.length) {
-                setFilteredShowList(retrievedFilteredShowList);
-            }
+            LayoutAnimation.configureNext({
+                duration: 1000,
+                update: {
+                    type: LayoutAnimation.Types.spring,
+                    springDamping: 0.9,
+                },
+            });
+            setFilteredShowList(retrievedFilteredShowList);
         })();
     }, [filteredShowList.length, showFilter, showList, watchList?.shows]);
 
@@ -207,7 +212,8 @@ export const ReleasesTab = () => {
                 onFilterChanged={onFilterChanged}
             />
             <ReleaseList
-                showList={filteredShowList}
+                filteredShowList={filteredShowList}
+                showList={showList}
                 onPullToRefresh={refreshShowData}
                 refreshing={refreshing}
                 watchList={watchList}

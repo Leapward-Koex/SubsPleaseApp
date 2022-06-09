@@ -30,6 +30,7 @@ import { PlayButton } from './PlayButton';
 import { CastPlayButton } from './CastPlayButton';
 
 type releaseShowProps = {
+    render: boolean;
     showInfo: ShowInfo;
     watchList: WatchList;
     onWatchListChanged: (updatedWatchList: WatchList) => void;
@@ -37,6 +38,7 @@ type releaseShowProps = {
 };
 
 export const ReleaseShow = ({
+    render,
     showInfo,
     watchList,
     onWatchListChanged,
@@ -58,7 +60,8 @@ export const ReleaseShow = ({
     const [callbackId] = React.useState(
         showInfo.show + showInfo.release_date + showInfo.episode,
     );
-    const [animatingEntry, setAnimatingEntry] = React.useState(true);
+    const [animatingEntry, setAnimatingEntry] = React.useState(false);
+    const [shouldRender, setShouldRender] = React.useState(true);
     const { height, width } = useWindowDimensions();
 
     React.useEffect(() => {
@@ -428,15 +431,27 @@ export const ReleaseShow = ({
     const animation = React.useRef(new Animated.Value(0)).current;
 
     React.useEffect(() => {
-        Animated.spring(animation, {
-            delay: index * 50 + 1,
-            toValue: 1,
-            speed: 8,
-            useNativeDriver: true,
-        }).start(() => {
-            setAnimatingEntry(false);
-        });
-    }, [animation, index]);
+        setAnimatingEntry(true);
+        if (render) {
+            setShouldRender(true);
+            Animated.spring(animation, {
+                toValue: 1,
+                speed: 8,
+                useNativeDriver: true,
+            }).start(() => {
+                setAnimatingEntry(false);
+            });
+        } else {
+            Animated.spring(animation, {
+                toValue: 0,
+                speed: 8,
+                useNativeDriver: true,
+            }).start(() => {
+                setAnimatingEntry(false);
+                setShouldRender(false);
+            });
+        }
+    }, [render, animation]);
 
     const opacityMap = animation.interpolate({
         inputRange: [0, 1],
@@ -451,82 +466,38 @@ export const ReleaseShow = ({
         outputRange: [-50, 0],
     });
 
-    return (
-        <Animated.View
-            style={{
-                opacity: opacityMap,
-                transform: [{ translateX: translateMap }, { scale: scaleMap }],
-            }}
-            needsOffscreenAlphaCompositing={animatingEntry}
-        >
-            <Card style={styles.cardStyle}>
-                <View style={{ flexDirection: 'row', height: 130 }}>
-                    <View style={{ flex: 0.3 }}>
-                        <Text
-                            style={{
-                                position: 'absolute',
-                                color: colors.subsPleaseLight1,
-                                backgroundColor: colors.primary,
-                                zIndex: 10,
-                                borderRadius: 8,
-                                padding: 3,
-                                margin: 3,
-                            }}
-                        >
-                            {showInfo.episode}
-                        </Text>
-                        <Image
-                            style={styles.stretch}
-                            source={{
-                                uri: new URL(
-                                    showInfo.image_url,
-                                    SubsPleaseApi.apiBaseUrl,
-                                ).href,
-                            }}
-                        />
-                        {getProgressOverlay()}
-                    </View>
-                    <View style={{ flex: 0.8, padding: 5 }}>
-                        <Title
-                            numberOfLines={2}
-                            ellipsizeMode="tail"
-                            onPress={onTitlePress}
-                            style={{
-                                flexGrow: 1,
-                                color: textColour,
-                                paddingLeft: 10,
-                                paddingRight: 10,
-                            }}
-                        >
-                            {showInfo.show}
-                        </Title>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                            }}
-                        >
-                            {getActionInfoSection()}
-                            {getWatchlistActionButton()}
-                        </View>
-                    </View>
-                </View>
-                <View style={styles.centeredView}>
-                    <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={toggleModalVisible}
-                    >
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <Image
+    console.log('Showing', render, 'shouldRender', shouldRender);
+    const getElement = () => {
+        if (shouldRender) {
+            return (
+                <Animated.View
+                    style={{
+                        opacity: opacityMap,
+                        transform: [
+                            { translateX: translateMap },
+                            { scale: scaleMap },
+                        ],
+                    }}
+                    needsOffscreenAlphaCompositing={true}
+                >
+                    <Card style={styles.cardStyle}>
+                        <View style={{ flexDirection: 'row', height: 130 }}>
+                            <View style={{ flex: 0.3 }}>
+                                <Text
                                     style={{
-                                        height: '30%',
-                                        width: '70%',
-                                        marginBottom: 15,
+                                        position: 'absolute',
+                                        color: colors.subsPleaseLight1,
+                                        backgroundColor: colors.primary,
+                                        zIndex: 10,
+                                        borderRadius: 8,
+                                        padding: 3,
+                                        margin: 3,
                                     }}
-                                    resizeMode="contain"
+                                >
+                                    {showInfo.episode}
+                                </Text>
+                                <Image
+                                    style={styles.stretch}
                                     source={{
                                         uri: new URL(
                                             showInfo.image_url,
@@ -534,23 +505,78 @@ export const ReleaseShow = ({
                                         ).href,
                                     }}
                                 />
-                                <ScrollView>
-                                    <Text style={styles.modalText}>
-                                        {showDescription}
-                                    </Text>
-                                </ScrollView>
-                                <Button
-                                    style={{ marginTop: 15 }}
-                                    mode="contained"
-                                    onPress={toggleModalVisible}
+                                {getProgressOverlay()}
+                            </View>
+                            <View style={{ flex: 0.8, padding: 5 }}>
+                                <Title
+                                    numberOfLines={2}
+                                    ellipsizeMode="tail"
+                                    onPress={onTitlePress}
+                                    style={{
+                                        flexGrow: 1,
+                                        color: textColour,
+                                        paddingLeft: 10,
+                                        paddingRight: 10,
+                                    }}
                                 >
-                                    Close
-                                </Button>
+                                    {showInfo.show}
+                                </Title>
+                                <View
+                                    style={{
+                                        flexDirection: 'row',
+                                        justifyContent: 'space-between',
+                                    }}
+                                >
+                                    {getActionInfoSection()}
+                                    {getWatchlistActionButton()}
+                                </View>
                             </View>
                         </View>
-                    </Modal>
-                </View>
-            </Card>
-        </Animated.View>
-    );
+                        <View style={styles.centeredView}>
+                            <Modal
+                                animationType="fade"
+                                transparent={true}
+                                visible={modalVisible}
+                                onRequestClose={toggleModalVisible}
+                            >
+                                <View style={styles.centeredView}>
+                                    <View style={styles.modalView}>
+                                        <Image
+                                            style={{
+                                                height: '30%',
+                                                width: '70%',
+                                                marginBottom: 15,
+                                            }}
+                                            resizeMode="contain"
+                                            source={{
+                                                uri: new URL(
+                                                    showInfo.image_url,
+                                                    SubsPleaseApi.apiBaseUrl,
+                                                ).href,
+                                            }}
+                                        />
+                                        <ScrollView>
+                                            <Text style={styles.modalText}>
+                                                {showDescription}
+                                            </Text>
+                                        </ScrollView>
+                                        <Button
+                                            style={{ marginTop: 15 }}
+                                            mode="contained"
+                                            onPress={toggleModalVisible}
+                                        >
+                                            Close
+                                        </Button>
+                                    </View>
+                                </View>
+                            </Modal>
+                        </View>
+                    </Card>
+                </Animated.View>
+            );
+        }
+        return <></>;
+    };
+
+    return getElement();
 };

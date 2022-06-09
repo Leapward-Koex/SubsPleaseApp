@@ -11,6 +11,7 @@ import { ReleaseShow } from '../ReleaseShow';
 
 type ReleaseListType = {
     showList: ShowInfo[];
+    filteredShowList: ShowInfo[];
     watchList: WatchList;
     onWatchListChanged: (watchlist: WatchList) => void;
     onPullToRefresh: () => void;
@@ -19,6 +20,7 @@ type ReleaseListType = {
 
 export const ReleaseList = ({
     showList,
+    filteredShowList,
     watchList,
     refreshing,
     onWatchListChanged,
@@ -38,6 +40,13 @@ export const ReleaseList = ({
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
         return (
             <ReleaseShow
+                render={
+                    filteredShowList.filter(
+                        (filteredItem) =>
+                            filteredItem.show === item.show &&
+                            filteredItem.episode === item.episode,
+                    ).length > 0
+                }
                 index={index}
                 showInfo={item}
                 watchList={watchList}
