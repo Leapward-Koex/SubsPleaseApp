@@ -141,14 +141,6 @@ export const ReleasesTab = () => {
         [],
     );
 
-    console.log('rendering');
-    React.useEffect(() => {
-        console.log('mounting');
-        return () => {
-            console.log('unmounting!');
-        };
-    }, []);
-
     React.useEffect(() => {
         (async () => {
             const getFilteredList = async () => {
