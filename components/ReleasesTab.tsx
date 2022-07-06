@@ -176,6 +176,13 @@ export const ReleasesTab = () => {
                 return showList;
             };
             const retrievedFilteredShowList = await getFilteredList();
+            LayoutAnimation.configureNext({
+                duration: 1000,
+                update: {
+                    type: LayoutAnimation.Types.spring,
+                    springDamping: 0.9,
+                },
+            });
             setFilteredShowList(retrievedFilteredShowList);
         })();
     }, [filteredShowList.length, showFilter, showList, watchList?.shows]);
