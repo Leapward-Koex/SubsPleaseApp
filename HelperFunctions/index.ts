@@ -84,6 +84,10 @@ interface FilePathModuleInterface {
         filePath: string,
         callback: (success: boolean) => void,
     ): void;
+    ensureFolderExists(
+        folderPath: string,
+        callback: (success: boolean) => void,
+    ): void;
     readTextFile(filePath: string, callback: (text: string) => void): void;
     openVideoIntent(
         filePath: string,
@@ -123,6 +127,14 @@ export const fileExists = (filePath: string) => {
 export const deleteFileIfExists = (filePath: string) => {
     return new Promise<boolean>((resolve) => {
         FilePathModuleTyped.deleteFileIfExists(filePath, (success) =>
+            resolve(success),
+        );
+    });
+};
+
+export const ensureFolderExists = (folderPath: string) => {
+    return new Promise<boolean>((resolve) => {
+        FilePathModuleTyped.ensureFolderExists(folderPath, (success) =>
             resolve(success),
         );
     });

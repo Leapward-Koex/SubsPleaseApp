@@ -131,6 +131,17 @@ public class FilePathModule extends ReactContextBaseJavaModule {
         }
     }
 
+    @ReactMethod
+    public void ensureFolderExists(final String folderPath, Callback callBack) {
+        File file = new File(folderPath);
+        if (file.exists()) {
+            callBack.invoke(true);
+        }
+        else {
+            callBack.invoke(file.mkdirs());
+        }
+    }
+
     // Adapted from https://github.com/saparkhid/AndroidFileNamePicker
     @ReactMethod
     public void getFolderPathFromUri(final String uriString, Callback callBack) {

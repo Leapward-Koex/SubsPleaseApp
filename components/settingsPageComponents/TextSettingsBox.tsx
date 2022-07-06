@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
     Button,
+    IconButton,
     Modal,
     Portal,
     TextInput,
@@ -8,13 +9,17 @@ import {
     TouchableRipple,
     useTheme,
 } from 'react-native-paper';
-import { Appearance, StyleSheet, Text, View } from 'react-native';
+import { Appearance, KeyboardType, StyleSheet, Text, View } from 'react-native';
+import { pickDirectory } from 'react-native-document-picker';
+import { getRealPathFromContentUri } from '../../HelperFunctions';
 
 type TextSettingsBoxType = {
     text: string;
     modalText: string;
     value: string | number;
     onChange: (newValue: string) => void;
+    folderPicker?: boolean;
+    keyboardType?: KeyboardType;
 };
 
 export const TextSettingsBox = ({
@@ -22,6 +27,8 @@ export const TextSettingsBox = ({
     value,
     modalText,
     onChange,
+    folderPicker,
+    keyboardType,
 }: TextSettingsBoxType) => {
     const [visible, setVisible] = React.useState(false);
 
@@ -65,6 +72,17 @@ export const TextSettingsBox = ({
         },
     });
     const stringValue = value?.toString() ?? '0';
+    const onFolderClicked = async () => {
+        const fileLocation = await pickDirectory();
+        if (!fileLocation) {
+            console.log('No file location selected');
+            return;
+        } else {
+            const path = await getRealPathFromContentUri(fileLocation.uri);
+            console.log(`Picked ${path}`);
+            onChange(path);
+        }
+    };
     return (
         <>
             <TouchableRipple onPress={showModal} style={styles.touchableStyle}>
@@ -82,11 +100,23 @@ export const TextSettingsBox = ({
                     contentContainerStyle={styles.modalStyle}
                 >
                     <Title>{modalText}</Title>
-                    <TextInput
-                        value={stringValue}
-                        keyboardType="numeric"
-                        onChangeText={onChange}
-                    />
+                    <View style={{ display: 'flex', flexDirection: 'row' }}>
+                        <TextInput
+                            style={{ flexGrow: 1 }}
+                            value={stringValue}
+                            keyboardType={keyboardType ?? 'default'}
+                            onChangeText={onChange}
+                        />
+                        {folderPicker && (
+                            <IconButton
+                                color={colors.primary}
+                                onPress={onFolderClicked}
+                                icon={'folder'}
+                                size={40}
+                            />
+                        )}
+                    </View>
+
                     <Button
                         style={styles.buttonStyle}
                         mode="contained"
