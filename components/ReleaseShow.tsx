@@ -61,7 +61,7 @@ export const ReleaseShow = ({
         showInfo.show + showInfo.release_date + showInfo.episode,
     );
     const [animatingEntry, setAnimatingEntry] = React.useState(false);
-    const [shouldRender, setShouldRender] = React.useState(false);
+    const [shouldRender, setShouldRender] = React.useState(true);
     const { height, width } = useWindowDimensions();
 
     React.useEffect(() => {
@@ -209,16 +209,31 @@ export const ReleaseShow = ({
                 <Button
                     mode="contained"
                     color={colors.tertiary}
-                    onPress={removeShowFromList}
-                    icon="minus"
+                    onPress={() => removeShowFromList()}
                 >
-                    {width > 500 ? 'Remove' : ''}
+                    <Icon
+                        name="minus"
+                        size={13}
+                        color={colors.subsPleaseDark1}
+                    />
+                    {width > 500 ? (
+                        <Text style={{ color: colors.subsPleaseDark1 }}>
+                            Remove
+                        </Text>
+                    ) : (
+                        <></>
+                    )}
                 </Button>
             );
         }
         return (
-            <Button mode="contained" icon="plus" onPress={addShowToList}>
-                {width > 500 ? 'Add' : ''}
+            <Button mode="contained" onPress={addShowToList}>
+                <Icon name="plus" size={13} color={colors.subsPleaseLight1} />
+                {width > 500 ? (
+                    <Text style={{ color: colors.subsPleaseLight1 }}>Add</Text>
+                ) : (
+                    <></>
+                )}
             </Button>
         );
     };
@@ -417,35 +432,25 @@ export const ReleaseShow = ({
 
     React.useEffect(() => {
         setAnimatingEntry(true);
-        let animationSpring: Animated.CompositeAnimation;
         if (render) {
             setShouldRender(true);
-            animationSpring = Animated.spring(animation, {
+            Animated.spring(animation, {
                 toValue: 1,
                 speed: 8,
                 useNativeDriver: true,
-            });
-            animationSpring.start(({ finished }) => {
-                if (finished) {
-                    setAnimatingEntry(false);
-                }
+            }).start(() => {
+                setAnimatingEntry(false);
             });
         } else {
-            animationSpring = Animated.spring(animation, {
+            Animated.spring(animation, {
                 toValue: 0,
                 speed: 8,
                 useNativeDriver: true,
-            });
-            animationSpring.start(({ finished }) => {
-                if (finished) {
-                    setShouldRender(false);
-                    setAnimatingEntry(false);
-                }
+            }).start(() => {
+                setAnimatingEntry(false);
+                setShouldRender(false);
             });
         }
-        return () => {
-            animationSpring?.stop();
-        };
     }, [render, animation]);
 
     const opacityMap = animation.interpolate({
@@ -461,6 +466,7 @@ export const ReleaseShow = ({
         outputRange: [-50, 0],
     });
 
+    console.log('Showing', render, 'shouldRender', shouldRender);
     const getElement = () => {
         if (shouldRender) {
             return (
@@ -472,7 +478,7 @@ export const ReleaseShow = ({
                             { scale: scaleMap },
                         ],
                     }}
-                    needsOffscreenAlphaCompositing={animatingEntry}
+                    needsOffscreenAlphaCompositing={true}
                 >
                     <Card style={styles.cardStyle}>
                         <View style={{ flexDirection: 'row', height: 130 }}>

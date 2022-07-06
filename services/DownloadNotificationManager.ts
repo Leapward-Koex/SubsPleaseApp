@@ -1,8 +1,5 @@
 import { humanFileSize, openVideoIntent } from '../HelperFunctions';
-import notifee, {
-    AndroidLaunchActivityFlag,
-    EventType,
-} from '@notifee/react-native';
+import notifee, { EventType } from '@notifee/react-native';
 import { logger } from './Logger';
 import { WakeLockInterface } from 'react-native-wake-lock';
 
@@ -92,13 +89,6 @@ class DownloadNotificationManger {
                     },
                     sortKey: notificationSortValue,
                     groupId: this.groupId,
-                    pressAction: {
-                        id: 'default',
-                        launchActivity: 'default',
-                        launchActivityFlags: [
-                            AndroidLaunchActivityFlag.SINGLE_TOP,
-                        ],
-                    },
                 },
             });
             WakeLockInterface.isWakeLocked().then((wakeLocked) => {
@@ -171,11 +161,6 @@ class DownloadNotificationManger {
                 },
                 sortKey: downloadingEpisode.notificationSortValue,
                 groupId: this.groupId,
-                pressAction: {
-                    id: 'default',
-                    launchActivity: 'default',
-                    launchActivityFlags: [AndroidLaunchActivityFlag.SINGLE_TOP],
-                },
             },
         });
         await this.updateSummaryNotification(channelId);
