@@ -17,6 +17,7 @@ import { downloadedShows } from '../services/DownloadedShows';
 import { downloadNotificationManger } from '../services/DownloadNotificationManager';
 import { logger } from '../services/Logger';
 import { styledToast } from '../services/ToastService';
+import { useInterpolateConfig } from 'react-native-reanimated';
 
 type DownloadTorrentButtonProps = {
     resolution: string;
@@ -123,6 +124,9 @@ export const DownloadTorrentButton = ({
             if (await ensureFolderExists(folder)) {
                 storedShowPaths = await getStoredShowPaths();
                 path = folder;
+                storedShowPaths.shows = storedShowPaths.shows.filter(
+                    (show) => show.showName !== showName,
+                );
                 storedShowPaths.shows.push({ showName, showPath: path });
 
                 await AsyncStorage.setItem(
