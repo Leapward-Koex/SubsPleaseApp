@@ -29,6 +29,7 @@ import {
 import { Appbar } from 'react-native-paper';
 import { ImportExportListItem } from './ExportImportSettings';
 import { StorageKeys } from '../../enums/enum';
+import { Storage } from '../../services/Storage';
 
 export interface SavedShowPaths {
     shows: {
@@ -66,19 +67,23 @@ export const SavedShowLocationSettings = () => {
 
     React.useEffect(() => {
         (async () => {
-            const storedShowPaths = JSON.parse(
-                (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
-                    JSON.stringify({ shows: [] }),
-            ) as SavedShowPaths;
+            const storedShowPaths = await Storage.getItem<SavedShowPaths>(
+                StorageKeys.ShowPaths,
+                {
+                    shows: [],
+                },
+            );
             setSavedShowPaths(storedShowPaths);
         })();
     }, []);
 
     const addrandomshow = async () => {
-        const storedShowPaths = JSON.parse(
-            (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
-                JSON.stringify({ shows: [] }),
-        ) as SavedShowPaths;
+        const storedShowPaths = await Storage.getItem<SavedShowPaths>(
+            StorageKeys.ShowPaths,
+            {
+                shows: [],
+            },
+        );
         storedShowPaths.shows.push({
             showName: 'Shijou Saikyou no Daimaou, Murabito A ni Tensei suru',
             showPath: Math.random().toString(),
@@ -91,10 +96,12 @@ export const SavedShowLocationSettings = () => {
     };
 
     const removeShowFromSavedPaths = async (showName: string) => {
-        const storedShowPaths = JSON.parse(
-            (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
-                JSON.stringify({ shows: [] }),
-        ) as SavedShowPaths;
+        const storedShowPaths = await Storage.getItem<SavedShowPaths>(
+            StorageKeys.ShowPaths,
+            {
+                shows: [],
+            },
+        );
         const filteredShows = storedShowPaths.shows.filter(
             (show) => show.showName !== showName,
         );

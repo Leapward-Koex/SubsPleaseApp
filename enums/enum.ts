@@ -1,5 +1,7 @@
 export enum StorageKeys {
+    Releases = 'releases',
     WatchList = 'watchList',
+    HeaderFilter = 'headerFilter',
     ShowPaths = 'showPaths',
     DownloadedShows = 'downloadedShows',
     AnalyticsEnabled = 'analyticsEnabled',

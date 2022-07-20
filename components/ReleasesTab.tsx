@@ -18,6 +18,7 @@ import { asyncFilter, isCastingAvailable } from '../HelperFunctions';
 import { ReleaseList } from './releasePageComponents/ReleaseList';
 import { logger } from '../services/Logger';
 import uniqBy from 'lodash.uniqby';
+import { Storage } from '../services/Storage';
 
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
@@ -50,22 +51,14 @@ export const ReleasesTab = () => {
         }
     }, [searchTerm]);
 
-    const getSavedReleases: () => Promise<ShowInfo[]> = async () => {
-        try {
-            const value = await AsyncStorage.getItem('releases');
-            if (value !== null) {
-                return JSON.parse(value);
-            }
-            return [];
-        } catch (e) {
-            logger.error('Failed to read saved releases', JSON.stringify(e));
-        }
+    const getSavedReleases = () => {
+        return Storage.getItem<ShowInfo[]>(StorageKeys.Releases, []);
     };
 
     const saveReleases = async (releases: ShowInfo[]) => {
         try {
             const jsonValue = JSON.stringify(releases);
-            await AsyncStorage.setItem('releases', jsonValue);
+            await AsyncStorage.setItem(StorageKeys.Releases, jsonValue);
         } catch (e) {
             // saving error
         }
@@ -94,10 +87,10 @@ export const ReleasesTab = () => {
             },
         });
 
-        const cacheLength = JSON.parse(
-            (await AsyncStorage.getItem(StorageKeys.ReleaseShowCacheLength)) ??
-                '100',
-        ) as number;
+        const cacheLength = await Storage.getItem(
+            StorageKeys.ReleaseShowCacheLength,
+            100,
+        );
         if (cacheLength !== -1) {
             uniqueShows.length = Math.min(uniqueShows.length, cacheLength);
         }
@@ -114,17 +107,17 @@ export const ReleasesTab = () => {
             const retrievedCastingAvailalbe = await isCastingAvailable();
 
             refreshShowData();
-            const lastFilter = (await AsyncStorage.getItem(
-                'headerFilter',
-            )) as ShowFilter | null;
+            const lastFilter = await Storage.getItem<ShowFilter>(
+                StorageKeys.HeaderFilter,
+            );
             if (lastFilter) {
                 console.log('setting filter');
                 setShowFilter(lastFilter);
             }
-            const storedWatchList = JSON.parse(
-                (await AsyncStorage.getItem(StorageKeys.WatchList)) ??
-                    JSON.stringify({ shows: [] }),
-            ) as WatchList;
+            const storedWatchList = await Storage.getItem<WatchList>(
+                StorageKeys.WatchList,
+                { shows: [] },
+            );
             setWatchList(storedWatchList);
             setCastingAvailable(retrievedCastingAvailalbe);
         })();

@@ -2,13 +2,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SavedShowPaths } from '../components/settingsPageComponents/SavedShowLocationSettings';
 import { StorageKeys } from '../enums/enum';
 import { fileExists } from '../HelperFunctions';
+import { Storage } from './Storage';
 
 class DownloadedShows {
     public async getShowDownloadPath(showName: string) {
-        const savedShowPaths = JSON.parse(
-            (await AsyncStorage.getItem(StorageKeys.ShowPaths)) ??
-                JSON.stringify({ shows: [] }),
-        ) as SavedShowPaths;
+        const savedShowPaths = await Storage.getItem<SavedShowPaths>(
+            StorageKeys.ShowPaths,
+            {
+                shows: [],
+            },
+        );
         const matchingShow = savedShowPaths.shows.find(
             (show) => show.showName === showName,
         );
@@ -20,9 +23,10 @@ class DownloadedShows {
     }
 
     private getDownloadedShowsStorage = async () => {
-        return JSON.parse(
-            (await AsyncStorage.getItem(StorageKeys.DownloadedShows)) || '[]',
-        ) as { key: string; fileName: string }[];
+        return Storage.getItem<{ key: string; fileName: string }[]>(
+            StorageKeys.DownloadedShows,
+            [],
+        );
     };
 
     public async getShowFileName(magnet: string) {
