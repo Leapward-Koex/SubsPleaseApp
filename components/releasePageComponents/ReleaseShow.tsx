@@ -10,7 +10,14 @@ import {
     Appearance,
     Animated,
 } from 'react-native';
-import { Button, Card, Title, useTheme, Text } from 'react-native-paper';
+import {
+    Button,
+    Card,
+    Title,
+    useTheme,
+    Text,
+    TouchableRipple,
+} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
     getDayOfWeek,
@@ -31,6 +38,7 @@ import { CastPlayButton } from './CastPlayButton';
 import { ShowInformationModal } from './ShowInformationModal';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { TouchableHighlight } from 'react-native-gesture-handler';
 
 type releaseShowProps = {
     showInfo: ShowInfo;
@@ -53,7 +61,6 @@ export const ReleaseShow = ({
     const [downloadingStatus, setDownloadingStatus] = React.useState(
         DownloadingStatus.NotDownloading,
     );
-    const [fileSize, setFileSize] = React.useState(0);
     const [downloadProgress, setDownloadProgress] = React.useState(0);
     const [downloadSpeed, setDownloadSpeed] = React.useState(0);
     const [uploadSpeed, setUploadSpeed] = React.useState(0);
@@ -407,10 +414,6 @@ export const ReleaseShow = ({
         }
     };
 
-    const onTitlePress = () => {
-        navigation.navigate('release-info', { showInfo });
-    };
-
     const animation = React.useRef(new Animated.Value(0)).current;
 
     React.useEffect(() => {
@@ -446,57 +449,62 @@ export const ReleaseShow = ({
             needsOffscreenAlphaCompositing={animatingEntry}
         >
             <Card style={styles.cardStyle}>
-                <View style={{ flexDirection: 'row', height: 130 }}>
-                    <View style={{ flex: 0.3 }}>
-                        <Text
-                            style={{
-                                position: 'absolute',
-                                color: colors.subsPleaseLight1,
-                                backgroundColor: colors.primary,
-                                zIndex: 10,
-                                borderRadius: 8,
-                                padding: 3,
-                                margin: 3,
-                            }}
-                        >
-                            {showInfo.episode}
-                        </Text>
-                        <Image
-                            style={styles.stretch}
-                            source={{
-                                uri: new URL(
-                                    showInfo.image_url,
-                                    SubsPleaseApi.apiBaseUrl,
-                                ).href,
-                            }}
-                        />
-                        {getProgressOverlay()}
-                    </View>
-                    <View style={{ flex: 0.8, padding: 5 }}>
-                        <Title
-                            numberOfLines={2}
-                            ellipsizeMode="tail"
-                            onPress={onTitlePress}
-                            style={{
-                                flexGrow: 1,
-                                color: textColour,
-                                paddingLeft: 10,
-                                paddingRight: 10,
-                            }}
-                        >
-                            {showInfo.show}
-                        </Title>
-                        <View
-                            style={{
-                                flexDirection: 'row',
-                                justifyContent: 'space-between',
-                            }}
-                        >
-                            {getActionInfoSection()}
-                            {getWatchlistActionButton()}
+                <TouchableRipple
+                    onPress={() =>
+                        navigation.navigate('release-info', { showInfo })
+                    }
+                >
+                    <View style={{ flexDirection: 'row', height: 130 }}>
+                        <View style={{ flex: 0.3 }}>
+                            <Text
+                                style={{
+                                    position: 'absolute',
+                                    color: colors.subsPleaseLight1,
+                                    backgroundColor: colors.primary,
+                                    zIndex: 10,
+                                    borderRadius: 8,
+                                    padding: 3,
+                                    margin: 3,
+                                }}
+                            >
+                                {showInfo.episode}
+                            </Text>
+                            <Image
+                                style={styles.stretch}
+                                source={{
+                                    uri: new URL(
+                                        showInfo.image_url,
+                                        SubsPleaseApi.apiBaseUrl,
+                                    ).href,
+                                }}
+                            />
+                            {getProgressOverlay()}
+                        </View>
+                        <View style={{ flex: 0.8, padding: 5 }}>
+                            <Title
+                                numberOfLines={2}
+                                ellipsizeMode="tail"
+                                style={{
+                                    flexGrow: 1,
+                                    color: textColour,
+                                    paddingLeft: 10,
+                                    paddingRight: 10,
+                                }}
+                            >
+                                {showInfo.show}
+                            </Title>
+                            <View
+                                style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                }}
+                            >
+                                {getActionInfoSection()}
+                                {getWatchlistActionButton()}
+                            </View>
                         </View>
                     </View>
-                </View>
+                </TouchableRipple>
             </Card>
         </Animated.View>
     );
