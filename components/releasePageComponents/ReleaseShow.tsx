@@ -16,18 +16,21 @@ import {
     getDayOfWeek,
     humanFileSize,
     isCastingAvailable,
-} from '../HelperFunctions';
-import { ShowInfo, WatchList } from '../models/models';
-import { SubsPleaseApi } from '../SubsPleaseApi';
+} from '../../HelperFunctions';
+import { ShowInfo, WatchList } from '../../models/models';
+import { SubsPleaseApi } from '../../SubsPleaseApi';
 import nodejs from 'nodejs-mobile-react-native';
 import * as Progress from 'react-native-progress';
 import {
     DownloadingStatus,
     DownloadTorrentButton,
 } from './DownloadTorrentButton';
-import { downloadedShows } from '../services/DownloadedShows';
+import { downloadedShows } from '../../services/DownloadedShows';
 import { PlayButton } from './PlayButton';
 import { CastPlayButton } from './CastPlayButton';
+import { ShowInformationModal } from './ShowInformationModal';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 type releaseShowProps = {
     showInfo: ShowInfo;
@@ -36,6 +39,10 @@ type releaseShowProps = {
     index: number;
 };
 
+export interface ReleaseShowInforParams {
+    showInfo: ShowInfo;
+}
+
 export const ReleaseShow = ({
     showInfo,
     watchList,
@@ -43,8 +50,6 @@ export const ReleaseShow = ({
     index,
 }: releaseShowProps) => {
     const { colors } = useTheme();
-    const [modalVisible, setModalVisible] = React.useState(false);
-    const [showDescription, setShowDescription] = React.useState('Loading...');
     const [downloadingStatus, setDownloadingStatus] = React.useState(
         DownloadingStatus.NotDownloading,
     );
@@ -60,6 +65,7 @@ export const ReleaseShow = ({
     );
     const [animatingEntry, setAnimatingEntry] = React.useState(true);
     const { height, width } = useWindowDimensions();
+    const navigation = useNavigation<StackNavigationProp<any>>();
 
     React.useEffect(() => {
         (async () => {
@@ -172,21 +178,6 @@ export const ReleaseShow = ({
             (show) => show.showName !== showInfo.show,
         );
         onWatchListChanged(watchList);
-    };
-
-    const getShowSynopsis = async () => {
-        const storedSynopsis = await AsyncStorage.getItem(
-            `${showInfo.page}-synopsis`,
-        );
-        if (storedSynopsis) {
-            setShowDescription(storedSynopsis);
-        } else {
-            const text = await SubsPleaseApi.getShowSynopsis(showInfo.page);
-            if (typeof text === 'string') {
-                setShowDescription(text);
-                await AsyncStorage.setItem(`${showInfo.page}-synopsis`, text);
-            }
-        }
     };
 
     const setTorrentState = (state: 'resume' | 'pause') => {
@@ -417,12 +408,7 @@ export const ReleaseShow = ({
     };
 
     const onTitlePress = () => {
-        setModalVisible(true);
-        getShowSynopsis();
-    };
-
-    const toggleModalVisible = () => {
-        setModalVisible(!modalVisible);
+        navigation.navigate('release-info', { showInfo });
     };
 
     const animation = React.useRef(new Animated.Value(0)).current;
@@ -510,45 +496,6 @@ export const ReleaseShow = ({
                             {getWatchlistActionButton()}
                         </View>
                     </View>
-                </View>
-                <View style={styles.centeredView}>
-                    <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={modalVisible}
-                        onRequestClose={toggleModalVisible}
-                    >
-                        <View style={styles.centeredView}>
-                            <View style={styles.modalView}>
-                                <Image
-                                    style={{
-                                        height: '30%',
-                                        width: '70%',
-                                        marginBottom: 15,
-                                    }}
-                                    resizeMode="contain"
-                                    source={{
-                                        uri: new URL(
-                                            showInfo.image_url,
-                                            SubsPleaseApi.apiBaseUrl,
-                                        ).href,
-                                    }}
-                                />
-                                <ScrollView>
-                                    <Text style={styles.modalText}>
-                                        {showDescription}
-                                    </Text>
-                                </ScrollView>
-                                <Button
-                                    style={{ marginTop: 15 }}
-                                    mode="contained"
-                                    onPress={toggleModalVisible}
-                                >
-                                    Close
-                                </Button>
-                            </View>
-                        </View>
-                    </Modal>
                 </View>
             </Card>
         </Animated.View>

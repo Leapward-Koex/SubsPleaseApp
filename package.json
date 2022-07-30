@@ -20,6 +20,7 @@
         "@react-native-firebase/crashlytics": "^14.9.4",
         "@react-navigation/material-bottom-tabs": "^6.2.1",
         "@react-navigation/native": "^6.0.10",
+        "@react-navigation/stack": "^6.2.2",
         "@types/react-native-snap-carousel": "^3.8.3",
         "@welldone-software/why-did-you-render": "^7.0.1",
         "expo": "^45.0.4",
@@ -77,6 +78,9 @@
     },
     "jest": {
         "preset": "react-native",
+        "setupFiles": [
+            "./jestSetup.js"
+        ],
         "moduleFileExtensions": [
             "ts",
             "tsx",

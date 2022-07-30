@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { Button } from 'react-native-paper';
-import { downloadedShows } from '../services/DownloadedShows';
+import { downloadedShows } from '../../services/DownloadedShows';
 import { View } from 'react-native';
-import { openVideoIntent } from '../HelperFunctions';
+import { openVideoIntent } from '../../HelperFunctions';
 
 export type PlayButtonType = {
     showName: string;

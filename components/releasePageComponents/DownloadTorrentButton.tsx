@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Linking } from 'react-native';
 import { Button } from 'react-native-paper';
-import { ShowDownloadInfo } from '../models/models';
+import { ShowDownloadInfo } from '../../models/models';
 import nodejs from 'nodejs-mobile-react-native';
 import { pickDirectory } from 'react-native-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,16 +9,16 @@ import {
     ensureFolderExists,
     getRealPathFromContentUri,
     requestStoragePermission,
-} from '../HelperFunctions';
-import { StorageKeys } from '../enums/enum';
-import { SavedShowPaths } from './settingsPageComponents/SavedShowLocationSettings';
-import { convert } from '../services/converter';
-import { downloadedShows } from '../services/DownloadedShows';
-import { downloadNotificationManger } from '../services/DownloadNotificationManager';
-import { logger } from '../services/Logger';
-import { styledToast } from '../services/ToastService';
+} from '../../HelperFunctions';
+import { StorageKeys } from '../../enums/enum';
+import { SavedShowPaths } from '../settingsPageComponents/SavedShowLocationSettings';
+import { convert } from '../../services/converter';
+import { downloadedShows } from '../../services/DownloadedShows';
+import { downloadNotificationManger } from '../../services/DownloadNotificationManager';
+import { logger } from '../../services/Logger';
+import { styledToast } from '../../services/ToastService';
 import { useInterpolateConfig } from 'react-native-reanimated';
-import { Storage } from '../services/Storage';
+import { Storage } from '../../services/Storage';
 
 type DownloadTorrentButtonProps = {
     resolution: string;

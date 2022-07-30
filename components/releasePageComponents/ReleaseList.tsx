@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import * as React from 'react';
 import {
     Appearance,
@@ -5,9 +7,9 @@ import {
     ListRenderItemInfo,
     FlatList,
 } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import { Button, useTheme } from 'react-native-paper';
 import { ShowInfo, WatchList } from '../../models/models';
-import { ReleaseShow } from '../ReleaseShow';
+import { ReleaseShow } from './ReleaseShow';
 
 type ReleaseListType = {
     showList: ShowInfo[];
@@ -35,6 +37,13 @@ export const ReleaseList = ({
         },
     });
 
+    React.useEffect(() => {
+        console.log('mounting lsit');
+        return () => {
+            console.log('unmounting list');
+        };
+    });
+
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
         return (
             <ReleaseShow
@@ -58,3 +67,4 @@ export const ReleaseList = ({
         />
     );
 };
+ReleaseList.whyDidYouRender = true;

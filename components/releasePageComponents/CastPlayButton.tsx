@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button } from 'react-native-paper';
-import { downloadedShows } from '../services/DownloadedShows';
+import { downloadedShows } from '../../services/DownloadedShows';
 import {
     CastState,
     MediaPlayerIdleReason,
@@ -10,9 +10,9 @@ import {
 } from 'react-native-google-cast';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { EmitterSubscription, View } from 'react-native';
-import { localWebServerManager } from '../services/LocalWebServerManager';
+import { localWebServerManager } from '../../services/LocalWebServerManager';
 import ReactNativeBlobUtil from 'react-native-blob-util';
-import { convert } from '../services/converter';
+import { convert } from '../../services/converter';
 import Toast from 'react-native-toast-message';
 import {
     deleteFileIfExists,
@@ -20,7 +20,7 @@ import {
     isCastingAvailable,
     openVideoIntent,
     tryParseInt,
-} from '../HelperFunctions';
+} from '../../HelperFunctions';
 import { NetworkInfo } from 'react-native-network-info';
 import GoogleCast from 'react-native-google-cast';
 import { WakeLockInterface } from 'react-native-wake-lock';

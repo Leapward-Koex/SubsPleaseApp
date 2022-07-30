@@ -4,6 +4,8 @@ import {
     View,
     StyleSheet,
     LayoutAnimation,
+    Text,
+    Button,
 } from 'react-native';
 import { ShowInfo, WatchList } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,6 +21,13 @@ import { ReleaseList } from './releasePageComponents/ReleaseList';
 import { logger } from '../services/Logger';
 import uniqBy from 'lodash.uniqby';
 import { Storage } from '../services/Storage';
+import { ShowInformationModal } from './releasePageComponents/ShowInformationModal';
+import {
+    createStackNavigator,
+    TransitionPresets,
+} from '@react-navigation/stack';
+
+const Stack = createStackNavigator();
 
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
@@ -190,6 +199,27 @@ export const ReleasesTab = () => {
         setShowFilter(filterValue);
     }, []);
 
+    const ReleasesList = React.useCallback(
+        (navigation: any) => {
+            return (
+                <ReleaseList
+                    showList={filteredShowList}
+                    onPullToRefresh={refreshShowData}
+                    refreshing={refreshing}
+                    watchList={watchList}
+                    onWatchListChanged={onWatchListChanged}
+                />
+            );
+        },
+        [
+            filteredShowList,
+            onWatchListChanged,
+            refreshShowData,
+            refreshing,
+            watchList,
+        ],
+    );
+
     console.log(filteredShowList.length);
     return (
         <View style={styles.viewStyles}>
@@ -199,13 +229,21 @@ export const ReleasesTab = () => {
                 onSearchChanged={onSearchChanged}
                 onFilterChanged={onFilterChanged}
             />
-            <ReleaseList
-                showList={filteredShowList}
-                onPullToRefresh={refreshShowData}
-                refreshing={refreshing}
-                watchList={watchList}
-                onWatchListChanged={onWatchListChanged}
-            />
+
+            <Stack.Navigator
+                initialRouteName="ReleasesList"
+                screenOptions={({ route, navigation }) => ({
+                    headerShown: false,
+                    gestureEnabled: true,
+                    ...TransitionPresets.ModalPresentationIOS,
+                })}
+            >
+                <Stack.Screen name="ReleasesList" component={ReleasesList} />
+                <Stack.Screen
+                    name="release-info"
+                    component={ShowInformationModal}
+                />
+            </Stack.Navigator>
         </View>
     );
 };
