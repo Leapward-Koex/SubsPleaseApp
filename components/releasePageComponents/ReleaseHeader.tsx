@@ -17,6 +17,7 @@ export enum ShowFilter {
     None = '0',
     Downloaded = '1',
     Watching = '2',
+    NewRelease = '3',
 }
 
 export const ReleaseTabHeader = ({
@@ -106,6 +107,10 @@ export const ReleaseTabHeader = ({
                             <RadioButton.Item
                                 label="No filter"
                                 value={ShowFilter.None}
+                            />
+                            <RadioButton.Item
+                                label="New"
+                                value={ShowFilter.NewRelease}
                             />
                             <RadioButton.Item
                                 label="Watching shows"

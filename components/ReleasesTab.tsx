@@ -26,6 +26,7 @@ import {
     createStackNavigator,
     TransitionPresets,
 } from '@react-navigation/stack';
+import { WatchedEpisodes } from '../services/WatchedEpisodes';
 
 const Stack = createStackNavigator();
 
@@ -174,6 +175,10 @@ export const ReleasesTab = () => {
                     return showList.filter((show) =>
                         watchingShowNames.includes(show.show),
                     );
+                } else if (showFilter === ShowFilter.NewRelease) {
+                    return asyncFilter(showList, (show) => {
+                        return WatchedEpisodes.isShowNew(show);
+                    });
                 }
                 return showList;
             };

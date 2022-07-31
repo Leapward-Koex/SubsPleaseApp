@@ -16,6 +16,7 @@ import Carousel from 'react-native-snap-carousel';
 import { weekday } from '../HelperFunctions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Storage } from '../services/Storage';
+import { WatchListService } from '../services/WatchList';
 
 interface DayOfWeek {
     dayName: string;
@@ -124,10 +125,7 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
     };
     React.useEffect(() => {
         const init = async () => {
-            const watchList = await Storage.getItem<WatchList>(
-                StorageKeys.WatchList,
-                { shows: [] },
-            );
+            const watchList = await WatchListService.getWatchList();
             setShowsForCurrentDay(
                 watchList.shows.filter((show) => show.releaseTime === dayName),
             );
@@ -136,17 +134,12 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
     }, [dayName]);
 
     const onRemoveShow = async (showName: string) => {
-        const watchList = await Storage.getItem<WatchList>(
-            StorageKeys.WatchList,
-            { shows: [] },
-        );
-        watchList.shows = watchList.shows.filter(
-            (show) => show.showName !== showName,
+        const watchList = await WatchListService.removeShowFromWatchList(
+            showName,
         );
         setShowsForCurrentDay(
             watchList.shows.filter((show) => show.releaseTime === dayName),
         );
-        AsyncStorage.setItem(StorageKeys.WatchList, JSON.stringify(watchList));
     };
 
     const getNoShowText = (showCount: number) => {

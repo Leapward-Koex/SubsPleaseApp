@@ -1,11 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react';
 import {
     Image,
     StyleSheet,
     View,
-    Modal,
-    ScrollView,
     useWindowDimensions,
     Appearance,
     Animated,
@@ -35,10 +32,9 @@ import {
 import { downloadedShows } from '../../services/DownloadedShows';
 import { PlayButton } from './PlayButton';
 import { CastPlayButton } from './CastPlayButton';
-import { ShowInformationModal } from './ShowInformationModal';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { TouchableHighlight } from 'react-native-gesture-handler';
+import { WatchedEpisodes } from '../../services/WatchedEpisodes';
 
 type releaseShowProps = {
     showInfo: ShowInfo;
@@ -70,6 +66,7 @@ export const ReleaseShow = ({
     const [callbackId] = React.useState(
         showInfo.show + showInfo.release_date + showInfo.episode,
     );
+    const [isShowNew, setIsShowNew] = React.useState(false);
     const [animatingEntry, setAnimatingEntry] = React.useState(true);
     const { height, width } = useWindowDimensions();
     const navigation = useNavigation<StackNavigationProp<any>>();
@@ -79,6 +76,12 @@ export const ReleaseShow = ({
             setCastingAvailable(await isCastingAvailable());
         })();
     }, []);
+
+    React.useEffect(() => {
+        (async () => {
+            setIsShowNew(await WatchedEpisodes.isShowNew(showInfo));
+        })();
+    }, [showInfo]);
 
     React.useEffect(() => {
         (async () => {
@@ -456,19 +459,41 @@ export const ReleaseShow = ({
                 >
                     <View style={{ flexDirection: 'row', height: 130 }}>
                         <View style={{ flex: 0.3 }}>
-                            <Text
+                            <View
                                 style={{
                                     position: 'absolute',
-                                    color: colors.subsPleaseLight1,
-                                    backgroundColor: colors.primary,
                                     zIndex: 10,
-                                    borderRadius: 8,
                                     padding: 3,
-                                    margin: 3,
+                                    display: 'flex',
+                                    flexDirection: 'row',
                                 }}
                             >
-                                {showInfo.episode}
-                            </Text>
+                                {isShowNew && (
+                                    <Text
+                                        style={{
+                                            color: colors.subsPleaseLight1,
+                                            backgroundColor: colors.primary,
+                                            borderRadius: 4,
+                                            padding: 3,
+                                            marginRight: 5,
+                                        }}
+                                    >
+                                        NEW
+                                    </Text>
+                                )}
+
+                                <Text
+                                    style={{
+                                        color: colors.subsPleaseLight1,
+                                        backgroundColor: colors.secondary,
+                                        borderRadius: 4,
+                                        padding: 3,
+                                    }}
+                                >
+                                    {showInfo.episode}
+                                </Text>
+                            </View>
+
                             <Image
                                 style={styles.stretch}
                                 source={{
@@ -493,6 +518,7 @@ export const ReleaseShow = ({
                             >
                                 {showInfo.show}
                             </Title>
+
                             <View
                                 style={{
                                     flexDirection: 'row',
