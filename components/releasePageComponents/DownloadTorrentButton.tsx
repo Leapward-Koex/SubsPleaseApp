@@ -76,7 +76,6 @@ export const DownloadTorrentButton = ({
             console.error(
                 'Cannot open the magnet URL as not associated programs are registered',
             );
-            return;
         }
         Linking.openURL(desiredResoltion.magnet);
     };

@@ -9,18 +9,24 @@ import {
     Pressable,
     View,
     Image,
+    useWindowDimensions,
+    Linking,
 } from 'react-native';
 import { Button, IconButton, Title, useTheme } from 'react-native-paper';
 import { ShowInfo, WatchList } from '../../models/models';
 import { Storage } from '../../services/Storage';
 import { SubsPleaseApi } from '../../SubsPleaseApi';
 import { ReleaseShow, ReleaseShowInforParams } from './ReleaseShow';
+import { EpisodeInformationBlock } from './ShowInformationModalComponents/EpisodeInformationBlock';
+import dateFormat from 'dateformat';
+import { WatchedEpisodes } from '../../services/WatchedEpisodes';
 
 export const ShowInformationModal = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { colors } = useTheme();
     const [showDescription, setShowDescription] = React.useState('');
+    const [isShowNew, setIsShowNew] = React.useState(false);
     const { showInfo } = route.params as ReleaseShowInforParams;
     const styles = StyleSheet.create({
         centeredView: {
@@ -67,6 +73,14 @@ export const ShowInformationModal = () => {
         getShowSynopsis();
     }, [showInfo.page]);
 
+    React.useEffect(() => {
+        (async () => {
+            setIsShowNew(await WatchedEpisodes.isShowNew(showInfo));
+        })();
+    }, [showInfo]);
+
+    const { width } = useWindowDimensions();
+
     return (
         <View style={styles.centeredView}>
             <View
@@ -90,7 +104,7 @@ export const ShowInformationModal = () => {
                 }}
             >
                 <Text style={{ fontSize: 25, color: colors.subsPleaseLight3 }}>
-                    About
+                    About Series
                 </Text>
                 <IconButton
                     color={colors.subsPleaseLight3}
@@ -114,8 +128,14 @@ export const ShowInformationModal = () => {
                         {showInfo.show}
                     </Title>
                 </View>
-                <View style={{ display: 'flex', flexDirection: 'row' }}>
-                    <View style={{ width: '30%' }}>
+                <View
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        flexWrap: 'wrap',
+                    }}
+                >
+                    <View style={{ width: 200 }}>
                         <Image
                             resizeMode="cover"
                             style={{
@@ -133,16 +153,59 @@ export const ShowInformationModal = () => {
                     </View>
                     <Text
                         style={{
-                            width: '70%',
-                            paddingLeft: 10,
-                            paddingRight: 10,
                             fontSize: 18,
+                            width:
+                                Math.max(width - 250) < 200
+                                    ? '100%'
+                                    : Math.max(width - 250),
                             color: colors.subsPleaseLight3,
+                            marginLeft: Math.max(width - 250) >= 200 ? 10 : 0,
                         }}
                     >
                         {showDescription}
                     </Text>
                 </View>
+            </View>
+            <Text
+                style={{
+                    fontSize: 25,
+                    color: colors.subsPleaseLight3,
+                    marginLeft: 10,
+                }}
+            >
+                About Episode
+            </Text>
+            <View
+                style={{
+                    backgroundColor: colors.subsPleaseDark3,
+                    margin: 10,
+                    borderRadius: 10,
+                    padding: 10,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                }}
+            >
+                {isShowNew && (
+                    <EpisodeInformationBlock
+                        iconName="new-box"
+                        onPress={() => console.log('hello')}
+                    />
+                )}
+                <EpisodeInformationBlock
+                    iconName="calendar"
+                    value={dateFormat(new Date(showInfo.release_date), 'd mmm')}
+                />
+                {showInfo.downloads.map((downloadInfo) => {
+                    return (
+                        <EpisodeInformationBlock
+                            iconName="magnet"
+                            value={`${downloadInfo.res}p`}
+                            onPress={() => Linking.openURL(downloadInfo.magnet)}
+                        />
+                    );
+                })}
             </View>
         </View>
     );
