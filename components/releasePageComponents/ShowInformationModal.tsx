@@ -14,6 +14,7 @@ import {
     ScrollView,
 } from 'react-native';
 import {
+    ActivityIndicator,
     Button,
     IconButton,
     Title,
@@ -153,7 +154,12 @@ export const ShowInformationModal = () => {
                             flexWrap: 'wrap',
                         }}
                     >
-                        <View style={{ width: 200 }}>
+                        <View
+                            style={{
+                                width:
+                                    Math.max(width - 250) < 200 ? '100%' : 200,
+                            }}
+                        >
                             <Image
                                 resizeMode="cover"
                                 style={{
@@ -169,20 +175,34 @@ export const ShowInformationModal = () => {
                                 }}
                             />
                         </View>
-                        <Text
-                            style={{
-                                fontSize: 18,
-                                width:
-                                    Math.max(width - 250) < 200
-                                        ? '100%'
-                                        : Math.max(width - 250),
-                                color: colors.subsPleaseLight3,
-                                marginLeft:
-                                    Math.max(width - 250) >= 200 ? 10 : 0,
-                            }}
-                        >
-                            {showDescription}
-                        </Text>
+                        {showDescription ? (
+                            <Text
+                                style={{
+                                    fontSize: 18,
+                                    width:
+                                        Math.max(width - 250) < 200
+                                            ? '100%'
+                                            : Math.max(width - 250),
+                                    color: colors.subsPleaseLight3,
+                                    marginLeft:
+                                        Math.max(width - 250) >= 200 ? 10 : 0,
+                                }}
+                            >
+                                {showDescription}
+                            </Text>
+                        ) : (
+                            <ActivityIndicator
+                                animating={true}
+                                style={{
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    marginTop: 25,
+                                    marginBottom: 25,
+                                }}
+                                size={'large'}
+                                color={colors.primary}
+                            />
+                        )}
                     </View>
                 </View>
                 <Text
@@ -203,7 +223,6 @@ export const ShowInformationModal = () => {
                         display: 'flex',
                         flexWrap: 'wrap',
                         flexDirection: 'row',
-                        justifyContent: 'space-between',
                     }}
                 >
                     {isShowNew && (

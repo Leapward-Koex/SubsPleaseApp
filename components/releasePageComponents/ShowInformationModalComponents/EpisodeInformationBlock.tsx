@@ -19,6 +19,7 @@ export const EpisodeInformationBlock = ({
         <TouchableRipple
             style={{
                 borderRadius: 5,
+                margin: 5,
                 backgroundColor: colors.secondary,
             }}
             onPress={onPress}
@@ -31,7 +32,6 @@ export const EpisodeInformationBlock = ({
                     justifyContent: 'center',
                     height: 60,
                     width: 60,
-                    margin: 5,
                     padding: 5,
                 }}
             >
