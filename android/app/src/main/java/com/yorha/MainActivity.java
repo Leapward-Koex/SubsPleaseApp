@@ -38,7 +38,7 @@ public class MainActivity extends ReactActivity {
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+    super.onCreate(null);
     PACKAGE_NAME = getApplicationContext().getPackageName();
     try {
       CastContext.getSharedInstance(this);

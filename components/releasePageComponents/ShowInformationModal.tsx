@@ -11,8 +11,15 @@ import {
     Image,
     useWindowDimensions,
     Linking,
+    ScrollView,
 } from 'react-native';
-import { Button, IconButton, Title, useTheme } from 'react-native-paper';
+import {
+    Button,
+    IconButton,
+    Title,
+    TouchableRipple,
+    useTheme,
+} from 'react-native-paper';
 import { ShowInfo, WatchList } from '../../models/models';
 import { Storage } from '../../services/Storage';
 import { SubsPleaseApi } from '../../SubsPleaseApi';
@@ -31,8 +38,8 @@ export const ShowInformationModal = () => {
     const styles = StyleSheet.create({
         centeredView: {
             paddingTop: 20,
+            paddingBottom: 20,
             backgroundColor: colors.subsPleaseDark2,
-            height: '100%',
         },
         button: {
             borderRadius: 20,
@@ -82,131 +89,180 @@ export const ShowInformationModal = () => {
     const { width } = useWindowDimensions();
 
     return (
-        <View style={styles.centeredView}>
-            <View
-                style={{
-                    width: '80%',
-                    height: 5,
-                    borderRadius: 5,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    marginBottom: 20,
-                    backgroundColor: colors.subsPleaseDark3,
-                }}
-            />
-            <View
-                style={{
-                    marginLeft: 10,
-                    marginRight: 10,
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                }}
-            >
-                <Text style={{ fontSize: 25, color: colors.subsPleaseLight3 }}>
-                    About Series
-                </Text>
-                <IconButton
-                    color={colors.subsPleaseLight3}
-                    onPress={() => navigation.goBack()}
-                    icon={'close'}
-                    size={20}
+        <ScrollView
+            style={{
+                marginBottom: 20,
+                backgroundColor: colors.subsPleaseDark3,
+            }}
+        >
+            <View style={styles.centeredView}>
+                <View
+                    style={{
+                        width: '80%',
+                        height: 5,
+                        borderRadius: 5,
+                        marginLeft: 'auto',
+                        marginRight: 'auto',
+                        marginBottom: 20,
+                        backgroundColor: colors.subsPleaseDark3,
+                    }}
                 />
-            </View>
-            <View
-                style={{
-                    backgroundColor: colors.subsPleaseDark3,
-                    margin: 10,
-                    borderRadius: 10,
-                    padding: 10,
-                }}
-            >
-                <View style={{ paddingBottom: 15 }}>
-                    <Title
-                        style={{ color: colors.subsPleaseLight3, fontSize: 25 }}
+                <View
+                    style={{
+                        marginLeft: 10,
+                        marginRight: 10,
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <Text
+                        style={{ fontSize: 25, color: colors.subsPleaseLight3 }}
                     >
-                        {showInfo.show}
-                    </Title>
+                        About Series
+                    </Text>
+                    <IconButton
+                        color={colors.subsPleaseLight3}
+                        onPress={() => navigation.goBack()}
+                        icon={'close'}
+                        size={20}
+                    />
                 </View>
                 <View
                     style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        flexWrap: 'wrap',
+                        backgroundColor: colors.subsPleaseDark3,
+                        margin: 10,
+                        borderRadius: 10,
+                        padding: 10,
                     }}
                 >
-                    <View style={{ width: 200 }}>
-                        <Image
-                            resizeMode="cover"
+                    <View style={{ paddingBottom: 15 }}>
+                        <Title
                             style={{
-                                height: undefined,
-                                aspectRatio: 11 / 16,
-                                borderRadius: 5,
+                                color: colors.subsPleaseLight3,
+                                fontSize: 25,
                             }}
-                            source={{
-                                uri: new URL(
-                                    showInfo.image_url,
-                                    SubsPleaseApi.apiBaseUrl,
-                                ).href,
-                            }}
-                        />
+                        >
+                            {showInfo.show}
+                        </Title>
                     </View>
-                    <Text
+                    <View
                         style={{
-                            fontSize: 18,
-                            width:
-                                Math.max(width - 250) < 200
-                                    ? '100%'
-                                    : Math.max(width - 250),
-                            color: colors.subsPleaseLight3,
-                            marginLeft: Math.max(width - 250) >= 200 ? 10 : 0,
+                            display: 'flex',
+                            flexDirection: 'row',
+                            flexWrap: 'wrap',
                         }}
                     >
-                        {showDescription}
-                    </Text>
+                        <View style={{ width: 200 }}>
+                            <Image
+                                resizeMode="cover"
+                                style={{
+                                    height: undefined,
+                                    aspectRatio: 11 / 16,
+                                    borderRadius: 5,
+                                }}
+                                source={{
+                                    uri: new URL(
+                                        showInfo.image_url,
+                                        SubsPleaseApi.apiBaseUrl,
+                                    ).href,
+                                }}
+                            />
+                        </View>
+                        <Text
+                            style={{
+                                fontSize: 18,
+                                width:
+                                    Math.max(width - 250) < 200
+                                        ? '100%'
+                                        : Math.max(width - 250),
+                                color: colors.subsPleaseLight3,
+                                marginLeft:
+                                    Math.max(width - 250) >= 200 ? 10 : 0,
+                            }}
+                        >
+                            {showDescription}
+                        </Text>
+                    </View>
                 </View>
-            </View>
-            <Text
-                style={{
-                    fontSize: 25,
-                    color: colors.subsPleaseLight3,
-                    marginLeft: 10,
-                }}
-            >
-                About Episode
-            </Text>
-            <View
-                style={{
-                    backgroundColor: colors.subsPleaseDark3,
-                    margin: 10,
-                    borderRadius: 10,
-                    padding: 10,
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                }}
-            >
-                {isShowNew && (
-                    <EpisodeInformationBlock
-                        iconName="new-box"
-                        onPress={() => console.log('hello')}
-                    />
-                )}
-                <EpisodeInformationBlock
-                    iconName="calendar"
-                    value={dateFormat(new Date(showInfo.release_date), 'd mmm')}
-                />
-                {showInfo.downloads.map((downloadInfo) => {
-                    return (
+                <Text
+                    style={{
+                        fontSize: 25,
+                        color: colors.subsPleaseLight3,
+                        marginLeft: 10,
+                    }}
+                >
+                    About Episode
+                </Text>
+                <View
+                    style={{
+                        backgroundColor: colors.subsPleaseDark3,
+                        margin: 10,
+                        borderRadius: 10,
+                        padding: 10,
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    {isShowNew && (
                         <EpisodeInformationBlock
-                            iconName="magnet"
-                            value={`${downloadInfo.res}p`}
-                            onPress={() => Linking.openURL(downloadInfo.magnet)}
+                            iconName="new-box"
+                            onPress={() => console.log('hello')}
                         />
-                    );
-                })}
+                    )}
+                    <EpisodeInformationBlock
+                        iconName="calendar"
+                        value={dateFormat(
+                            new Date(showInfo.release_date),
+                            'd mmm',
+                        )}
+                    />
+                    {/* {showInfo.downloads.map((downloadInfo, index) => {
+                        return (
+                            <EpisodeInformationBlock
+                                iconName="magnet"
+                                key={index}
+                                value={`${downloadInfo.res}p`}
+                                onPress={() =>
+                                    Linking.openURL(downloadInfo.magnet)
+                                }
+                            />
+                        );
+                    })} */}
+                </View>
+                <TouchableRipple
+                    style={{
+                        backgroundColor: colors.subsPleaseDark3,
+                        margin: 10,
+                        borderRadius: 10,
+                        padding: 10,
+                    }}
+                    onPress={() => {
+                        WatchedEpisodes.setShowWatched(showInfo, isShowNew);
+                        setIsShowNew(!isShowNew);
+                    }}
+                >
+                    <View
+                        style={{
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 16,
+                                color: colors.subsPleaseLight3,
+                            }}
+                        >
+                            Mark as {isShowNew ? 'watched' : 'new'}
+                        </Text>
+                    </View>
+                </TouchableRipple>
             </View>
-        </View>
+        </ScrollView>
     );
 };

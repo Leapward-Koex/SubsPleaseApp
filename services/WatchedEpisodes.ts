@@ -30,9 +30,10 @@ export class WatchedEpisodes {
         const showKey = this.getKey(show);
         if (watched) {
             if (!watchedEpisodes.includes(showKey)) {
+                watchedEpisodes.push(showKey);
                 await AsyncStorage.setItem(
                     StorageKeys.WatchedEpisodes,
-                    JSON.stringify(watchedEpisodes.push(showKey)),
+                    JSON.stringify(watchedEpisodes),
                 );
             }
         } else {
