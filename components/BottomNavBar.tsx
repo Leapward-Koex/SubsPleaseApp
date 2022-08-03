@@ -14,8 +14,15 @@ import { CastSettingsTab } from './castPageComponents/CastSettingsTab';
 import { logger } from '../services/Logger';
 import { ShowFilter } from './releasePageComponents/ReleaseHeader';
 import { StorageKeys } from '../enums/enum';
+import {
+    createStackNavigator,
+    TransitionPresets,
+} from '@react-navigation/stack';
+import { ShowInformationModal } from './releasePageComponents/ShowInformationModal';
 
 const Tab = createMaterialBottomTabNavigator();
+const Stack = createStackNavigator();
+
 export const BottomNavBar = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
 
@@ -52,42 +59,65 @@ export const BottomNavBar = () => {
         return <></>;
     };
 
+    const tabNavigator = () => {
+        return (
+            <Tab.Navigator shifting>
+                <Tab.Screen
+                    name="Releases"
+                    component={ReleasesRoute}
+                    options={{
+                        tabBarLabel: 'Releases',
+                        tabBarIcon: ({ color }) => (
+                            <Icon name="new-box" color={color} size={25} />
+                        ),
+                        tabBarColor: colors.primary,
+                    }}
+                />
+                {getCastSettingsTab()}
+                <Tab.Screen
+                    name="Watch list"
+                    component={WatchListRoute}
+                    options={{
+                        tabBarLabel: 'Watch list',
+                        tabBarIcon: ({ color }) => (
+                            <Icon
+                                name="playlist-play"
+                                color={color}
+                                size={25}
+                            />
+                        ),
+                        tabBarColor: colors.secondary,
+                    }}
+                />
+                <Tab.Screen
+                    name="Settings"
+                    component={SettingsRoute}
+                    options={{
+                        tabBarLabel: 'Settings',
+                        tabBarIcon: ({ color }) => (
+                            <Icon name="cog-outline" color={color} size={25} />
+                        ),
+                        tabBarColor: colors.tertiary,
+                    }}
+                />
+            </Tab.Navigator>
+        );
+    };
+
     return (
-        <Tab.Navigator shifting>
-            <Tab.Screen
-                name="Releases"
-                component={ReleasesRoute}
-                options={{
-                    tabBarLabel: 'Releases',
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="new-box" color={color} size={25} />
-                    ),
-                    tabBarColor: colors.primary,
-                }}
+        <Stack.Navigator
+            initialRouteName="ReleasesList"
+            screenOptions={({ route, navigation }) => ({
+                headerShown: false,
+                gestureEnabled: true,
+                ...TransitionPresets.ModalPresentationIOS,
+            })}
+        >
+            <Stack.Screen name="ReleasesList" component={tabNavigator} />
+            <Stack.Screen
+                name="release-info"
+                component={ShowInformationModal}
             />
-            {getCastSettingsTab()}
-            <Tab.Screen
-                name="Watch list"
-                component={WatchListRoute}
-                options={{
-                    tabBarLabel: 'Watch list',
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="playlist-play" color={color} size={25} />
-                    ),
-                    tabBarColor: colors.secondary,
-                }}
-            />
-            <Tab.Screen
-                name="Settings"
-                component={SettingsRoute}
-                options={{
-                    tabBarLabel: 'Settings',
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="cog-outline" color={color} size={25} />
-                    ),
-                    tabBarColor: colors.tertiary,
-                }}
-            />
-        </Tab.Navigator>
+        </Stack.Navigator>
     );
 };

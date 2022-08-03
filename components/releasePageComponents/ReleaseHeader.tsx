@@ -45,7 +45,7 @@ export const ReleaseTabHeader = ({
     const onFilterPressed = async (filterValue: ShowFilter) => {
         console.log('setting last checked');
         onFilterChanged(filterValue);
-        await AsyncStorage.setItem('headerFilter', filterValue);
+        await AsyncStorage.setItem('headerFilter', JSON.stringify(filterValue));
     };
 
     const toggleFilterPanel = () => {

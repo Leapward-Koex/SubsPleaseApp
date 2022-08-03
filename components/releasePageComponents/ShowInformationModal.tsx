@@ -28,6 +28,7 @@ import { ReleaseShow, ReleaseShowInforParams } from './ReleaseShow';
 import { EpisodeInformationBlock } from './ShowInformationModalComponents/EpisodeInformationBlock';
 import dateFormat from 'dateformat';
 import { WatchedEpisodes } from '../../services/WatchedEpisodes';
+import { WatchListService } from '../../services/WatchList';
 
 export const ShowInformationModal = () => {
     const route = useRoute();
@@ -35,6 +36,7 @@ export const ShowInformationModal = () => {
     const { colors } = useTheme();
     const [showDescription, setShowDescription] = React.useState('');
     const [isShowNew, setIsShowNew] = React.useState(false);
+    const [showOnWatchList, setShowOnWatchList] = React.useState(false);
     const { showInfo } = route.params as ReleaseShowInforParams;
     const styles = StyleSheet.create({
         centeredView: {
@@ -84,51 +86,53 @@ export const ShowInformationModal = () => {
     React.useEffect(() => {
         (async () => {
             setIsShowNew(await WatchedEpisodes.isShowNew(showInfo));
+            setShowOnWatchList(
+                await WatchListService.isShowOnWatchList(showInfo),
+            );
         })();
     }, [showInfo]);
 
     const { width } = useWindowDimensions();
 
     return (
-        <ScrollView
-            style={{
-                marginBottom: 20,
-                backgroundColor: colors.subsPleaseDark3,
-            }}
-        >
-            <View style={styles.centeredView}>
-                <View
-                    style={{
-                        width: '80%',
-                        height: 5,
-                        borderRadius: 5,
-                        marginLeft: 'auto',
-                        marginRight: 'auto',
-                        marginBottom: 20,
-                        backgroundColor: colors.subsPleaseDark3,
-                    }}
+        <View style={styles.centeredView}>
+            <View
+                style={{
+                    width: '80%',
+                    height: 5,
+                    borderRadius: 5,
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                    marginBottom: 20,
+                    backgroundColor: colors.subsPleaseDark3,
+                }}
+            />
+            <View
+                style={{
+                    marginLeft: 10,
+                    marginRight: 10,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                }}
+            >
+                <Text style={{ fontSize: 25, color: colors.subsPleaseLight3 }}>
+                    About
+                </Text>
+                <IconButton
+                    color={colors.subsPleaseLight3}
+                    onPress={() => navigation.goBack()}
+                    icon={'close'}
+                    size={20}
                 />
-                <View
-                    style={{
-                        marginLeft: 10,
-                        marginRight: 10,
-                        display: 'flex',
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}
-                >
-                    <Text
-                        style={{ fontSize: 25, color: colors.subsPleaseLight3 }}
-                    >
-                        About Series
-                    </Text>
-                    <IconButton
-                        color={colors.subsPleaseLight3}
-                        onPress={() => navigation.goBack()}
-                        icon={'close'}
-                        size={20}
-                    />
-                </View>
+            </View>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={{
+                    backgroundColor: colors.subsPleaseDark2,
+                    marginBottom: 45,
+                }}
+            >
                 <View
                     style={{
                         backgroundColor: colors.subsPleaseDark3,
@@ -207,12 +211,12 @@ export const ShowInformationModal = () => {
                 </View>
                 <Text
                     style={{
-                        fontSize: 25,
+                        fontSize: 20,
                         color: colors.subsPleaseLight3,
                         marginLeft: 10,
                     }}
                 >
-                    About Episode
+                    Episode details
                 </Text>
                 <View
                     style={{
@@ -228,6 +232,7 @@ export const ShowInformationModal = () => {
                     {isShowNew && (
                         <EpisodeInformationBlock
                             iconName="new-box"
+                            value={'New'}
                             onPress={() => console.log('hello')}
                         />
                     )}
@@ -251,37 +256,39 @@ export const ShowInformationModal = () => {
                         );
                     })} */}
                 </View>
-                <TouchableRipple
-                    style={{
-                        backgroundColor: colors.subsPleaseDark3,
-                        margin: 10,
-                        borderRadius: 10,
-                        padding: 10,
-                    }}
-                    onPress={() => {
-                        WatchedEpisodes.setShowWatched(showInfo, isShowNew);
-                        setIsShowNew(!isShowNew);
-                    }}
-                >
-                    <View
+                {showOnWatchList && (
+                    <TouchableRipple
                         style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            flexDirection: 'row',
-                            justifyContent: 'space-between',
+                            backgroundColor: colors.subsPleaseDark3,
+                            margin: 10,
+                            borderRadius: 10,
+                            padding: 10,
+                        }}
+                        onPress={() => {
+                            WatchedEpisodes.setShowWatched(showInfo, isShowNew);
+                            setIsShowNew(!isShowNew);
                         }}
                     >
-                        <Text
+                        <View
                             style={{
-                                fontSize: 16,
-                                color: colors.subsPleaseLight3,
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
                             }}
                         >
-                            Mark as {isShowNew ? 'watched' : 'new'}
-                        </Text>
-                    </View>
-                </TouchableRipple>
-            </View>
-        </ScrollView>
+                            <Text
+                                style={{
+                                    fontSize: 16,
+                                    color: colors.subsPleaseLight3,
+                                }}
+                            >
+                                Mark as {isShowNew ? 'watched' : 'new'}
+                            </Text>
+                        </View>
+                    </TouchableRipple>
+                )}
+            </ScrollView>
+        </View>
     );
 };

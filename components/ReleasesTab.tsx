@@ -28,8 +28,6 @@ import {
 } from '@react-navigation/stack';
 import { WatchedEpisodes } from '../services/WatchedEpisodes';
 
-const Stack = createStackNavigator();
-
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
 
@@ -204,27 +202,6 @@ export const ReleasesTab = () => {
         setShowFilter(filterValue);
     }, []);
 
-    const ReleasesList = React.useCallback(
-        (navigation: any) => {
-            return (
-                <ReleaseList
-                    showList={filteredShowList}
-                    onPullToRefresh={refreshShowData}
-                    refreshing={refreshing}
-                    watchList={watchList}
-                    onWatchListChanged={onWatchListChanged}
-                />
-            );
-        },
-        [
-            filteredShowList,
-            onWatchListChanged,
-            refreshShowData,
-            refreshing,
-            watchList,
-        ],
-    );
-
     console.log(filteredShowList.length);
     return (
         <View style={styles.viewStyles}>
@@ -235,20 +212,13 @@ export const ReleasesTab = () => {
                 onFilterChanged={onFilterChanged}
             />
 
-            <Stack.Navigator
-                initialRouteName="ReleasesList"
-                screenOptions={({ route, navigation }) => ({
-                    headerShown: false,
-                    gestureEnabled: true,
-                    ...TransitionPresets.ModalPresentationIOS,
-                })}
-            >
-                <Stack.Screen name="ReleasesList" component={ReleasesList} />
-                <Stack.Screen
-                    name="release-info"
-                    component={ShowInformationModal}
-                />
-            </Stack.Navigator>
+            <ReleaseList
+                showList={filteredShowList}
+                onPullToRefresh={refreshShowData}
+                refreshing={refreshing}
+                watchList={watchList}
+                onWatchListChanged={onWatchListChanged}
+            />
         </View>
     );
 };

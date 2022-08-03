@@ -38,11 +38,11 @@ export const EpisodeInformationBlock = ({
                 <Icon
                     name={iconName}
                     color={colors.subsPleaseLight1}
-                    size={value ? 30 : 40}
+                    size={value ? 25 : 30}
                 />
                 {value && (
                     <Text
-                        style={{ color: colors.subsPleaseLight1, fontSize: 16 }}
+                        style={{ color: colors.subsPleaseLight1, fontSize: 14 }}
                     >
                         {value}
                     </Text>
