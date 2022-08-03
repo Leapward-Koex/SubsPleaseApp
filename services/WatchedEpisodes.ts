@@ -31,20 +31,17 @@ export class WatchedEpisodes {
         if (watched) {
             if (!watchedEpisodes.includes(showKey)) {
                 watchedEpisodes.push(showKey);
-                await AsyncStorage.setItem(
+                await Storage.setItem(
                     StorageKeys.WatchedEpisodes,
-                    JSON.stringify(watchedEpisodes),
+                    watchedEpisodes,
                 );
             }
         } else {
             if (watchedEpisodes.includes(showKey)) {
-                await AsyncStorage.setItem(
+                await Storage.setItem(
                     StorageKeys.WatchedEpisodes,
-                    JSON.stringify(
-                        watchedEpisodes.filter(
-                            (watchedEpisodeKey) =>
-                                watchedEpisodeKey !== showKey,
-                        ),
+                    watchedEpisodes.filter(
+                        (watchedEpisodeKey) => watchedEpisodeKey !== showKey,
                     ),
                 );
             }

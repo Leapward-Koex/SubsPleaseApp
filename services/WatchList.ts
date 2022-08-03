@@ -20,10 +20,7 @@ export class WatchListService {
         watchList.shows = watchList.shows.filter(
             (show) => show.showName !== showName,
         );
-        await AsyncStorage.setItem(
-            StorageKeys.WatchList,
-            JSON.stringify(watchList),
-        );
+        await Storage.setItem(StorageKeys.WatchList, JSON.stringify(watchList));
         return watchList;
     }
 

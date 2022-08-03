@@ -89,10 +89,7 @@ export const SavedShowLocationSettings = () => {
             showPath: Math.random().toString(),
         });
         setSavedShowPaths({ ...storedShowPaths });
-        await AsyncStorage.setItem(
-            StorageKeys.ShowPaths,
-            JSON.stringify(storedShowPaths),
-        );
+        await Storage.setItem(StorageKeys.ShowPaths, storedShowPaths);
     };
 
     const removeShowFromSavedPaths = async (showName: string) => {
@@ -106,10 +103,7 @@ export const SavedShowLocationSettings = () => {
             (show) => show.showName !== showName,
         );
         setSavedShowPaths({ shows: filteredShows });
-        await AsyncStorage.setItem(
-            StorageKeys.ShowPaths,
-            JSON.stringify({ shows: filteredShows }),
-        );
+        await Storage.setItem(StorageKeys.ShowPaths, { shows: filteredShows });
     };
 
     const getShowPaths = () => {

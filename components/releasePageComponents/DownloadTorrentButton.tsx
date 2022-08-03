@@ -120,10 +120,7 @@ export const DownloadTorrentButton = ({
                 );
                 storedShowPaths.shows.push({ showName, showPath: path });
 
-                await AsyncStorage.setItem(
-                    StorageKeys.ShowPaths,
-                    JSON.stringify(storedShowPaths),
-                );
+                await Storage.setItem(StorageKeys.ShowPaths, storedShowPaths);
             } else {
                 styledToast.showToast(
                     'error',
@@ -147,10 +144,7 @@ export const DownloadTorrentButton = ({
                 storedShowPaths = await getStoredShowPaths();
                 storedShowPaths.shows.push({ showName, showPath: path });
 
-                await AsyncStorage.setItem(
-                    StorageKeys.ShowPaths,
-                    JSON.stringify(storedShowPaths),
-                );
+                await Storage.setItem(StorageKeys.ShowPaths, storedShowPaths);
             }
         } else {
             path = currentShow.showPath;

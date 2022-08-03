@@ -73,9 +73,9 @@ class DownloadedShows {
             )
         ) {
             downloadedShowsStorage.push({ key: magnet, fileName });
-            await AsyncStorage.setItem(
+            await Storage.setItem(
                 StorageKeys.DownloadedShows,
-                JSON.stringify(downloadedShowsStorage),
+                downloadedShowsStorage,
             );
         }
     }

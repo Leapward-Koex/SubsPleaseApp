@@ -5,6 +5,8 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GoogleCast, { CastButton } from 'react-native-google-cast';
+import { Storage } from '../../services/Storage';
+import { StorageKeys } from '../../enums/enum';
 
 interface ReleaseTabHeaderProps {
     filter: ShowFilter;
@@ -45,7 +47,7 @@ export const ReleaseTabHeader = ({
     const onFilterPressed = async (filterValue: ShowFilter) => {
         console.log('setting last checked');
         onFilterChanged(filterValue);
-        await AsyncStorage.setItem('headerFilter', JSON.stringify(filterValue));
+        await Storage.setItem(StorageKeys.HeaderFilter, filterValue);
     };
 
     const toggleFilterPanel = () => {

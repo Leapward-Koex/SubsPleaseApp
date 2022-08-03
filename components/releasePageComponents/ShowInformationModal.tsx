@@ -29,6 +29,7 @@ import { EpisodeInformationBlock } from './ShowInformationModalComponents/Episod
 import dateFormat from 'dateformat';
 import { WatchedEpisodes } from '../../services/WatchedEpisodes';
 import { WatchListService } from '../../services/WatchList';
+import { StorageKeys } from '../../enums/enum';
 
 export const ShowInformationModal = () => {
     const route = useRoute();
@@ -73,9 +74,9 @@ export const ShowInformationModal = () => {
                 const text = await SubsPleaseApi.getShowSynopsis(showInfo.page);
                 if (typeof text === 'string') {
                     setShowDescription(text);
-                    await AsyncStorage.setItem(
-                        `${showInfo.page}-synopsis`,
-                        JSON.stringify(text),
+                    await Storage.setItem(
+                        `${showInfo.page}-synopsis` as StorageKeys,
+                        text,
                     );
                 }
             }

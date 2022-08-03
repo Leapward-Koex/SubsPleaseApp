@@ -65,8 +65,7 @@ export const ReleasesTab = () => {
 
     const saveReleases = async (releases: ShowInfo[]) => {
         try {
-            const jsonValue = JSON.stringify(releases);
-            await AsyncStorage.setItem(StorageKeys.Releases, jsonValue);
+            await Storage.setItem(StorageKeys.Releases, releases);
         } catch (e) {
             // saving error
         }
@@ -134,10 +133,7 @@ export const ReleasesTab = () => {
     const onWatchListChanged = React.useCallback(
         (updatedWatchList: WatchList) => {
             setWatchList({ ...updatedWatchList });
-            AsyncStorage.setItem(
-                StorageKeys.WatchList,
-                JSON.stringify(updatedWatchList),
-            );
+            Storage.setItem(StorageKeys.WatchList, updatedWatchList);
         },
         [],
     );

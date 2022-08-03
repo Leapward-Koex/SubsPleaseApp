@@ -12,4 +12,8 @@ export class Storage {
         }
         return JSON.parse(storedValue) as T;
     }
+
+    public static async setItem(key: StorageKeys, value: any) {
+        return AsyncStorage.setItem(key, JSON.stringify(value));
+    }
 }
