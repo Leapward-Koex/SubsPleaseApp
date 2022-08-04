@@ -14,7 +14,6 @@ import {
     promiseEach,
     requestStoragePermission,
 } from '../../HelperFunctions';
-import { SubsPleaseApi } from '../../SubsPleaseApi';
 import { ReleasesTab } from '../ReleasesTab';
 import { WatchListTab } from '../WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';

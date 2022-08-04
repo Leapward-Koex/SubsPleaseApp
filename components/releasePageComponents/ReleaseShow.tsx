@@ -22,7 +22,7 @@ import {
     isCastingAvailable,
 } from '../../HelperFunctions';
 import { ShowInfo, WatchList } from '../../models/models';
-import { SubsPleaseApi } from '../../SubsPleaseApi';
+import { SubsPleaseApi } from '../../ExternalApis/SubsPleaseApi';
 import nodejs from 'nodejs-mobile-react-native';
 import * as Progress from 'react-native-progress';
 import {

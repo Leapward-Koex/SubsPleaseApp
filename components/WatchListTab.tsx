@@ -11,7 +11,7 @@ import { Button, Card, Text, Title, useTheme } from 'react-native-paper';
 import { WatchList, WatchListItem } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
-import { SubsPleaseApi } from '../SubsPleaseApi';
+import { SubsPleaseApi } from '../ExternalApis/SubsPleaseApi';
 import Carousel from 'react-native-snap-carousel';
 import { weekday } from '../HelperFunctions';
 import Icon from 'react-native-vector-icons/FontAwesome';

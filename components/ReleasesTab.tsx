@@ -14,7 +14,7 @@ import {
     ReleaseTabHeader,
     ShowFilter,
 } from './releasePageComponents/ReleaseHeader';
-import { SubsPleaseApi } from '../SubsPleaseApi';
+import { SubsPleaseApi } from '../ExternalApis/SubsPleaseApi';
 import { downloadedShows } from '../services/DownloadedShows';
 import { asyncFilter, isCastingAvailable } from '../HelperFunctions';
 import { ReleaseList } from './releasePageComponents/ReleaseList';

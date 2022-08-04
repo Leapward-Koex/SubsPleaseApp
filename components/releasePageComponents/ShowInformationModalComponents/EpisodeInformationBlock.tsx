@@ -1,5 +1,5 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, ToastAndroid } from 'react-native';
 import { Text, TouchableRipple, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -7,12 +7,14 @@ export type EpisodeInformationBlockProps = {
     iconName: string;
     value?: string;
     onPress?: () => void;
+    toastMessage?: string;
 };
 
 export const EpisodeInformationBlock = ({
     iconName,
     value,
     onPress,
+    toastMessage,
 }: EpisodeInformationBlockProps) => {
     const { colors } = useTheme();
     return (
@@ -22,7 +24,18 @@ export const EpisodeInformationBlock = ({
                 margin: 5,
                 backgroundColor: colors.secondary,
             }}
-            onPress={onPress}
+            onPress={
+                onPress
+                    ? onPress
+                    : () =>
+                          ToastAndroid.showWithGravityAndOffset(
+                              toastMessage ?? 'NO MESSAGE SET',
+                              ToastAndroid.SHORT,
+                              ToastAndroid.BOTTOM,
+                              25,
+                              50,
+                          )
+            }
         >
             <View
                 style={{

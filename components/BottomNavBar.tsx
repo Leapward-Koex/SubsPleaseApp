@@ -4,7 +4,7 @@ import * as React from 'react';
 import { BottomNavigation, Text, useTheme } from 'react-native-paper';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import { isCastingAvailable, promiseEach } from '../HelperFunctions';
-import { SubsPleaseApi } from '../SubsPleaseApi';
+import { SubsPleaseApi } from '../ExternalApis/SubsPleaseApi';
 import { ReleasesTab } from './ReleasesTab';
 import { WatchListTab } from './WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -19,6 +19,7 @@ import {
     TransitionPresets,
 } from '@react-navigation/stack';
 import { ShowInformationModal } from './releasePageComponents/ShowInformationModal';
+import { EditSettingsModal } from './EditSettingsModal';
 
 const Tab = createMaterialBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -118,6 +119,7 @@ export const BottomNavBar = () => {
                 name="release-info"
                 component={ShowInformationModal}
             />
+            <Stack.Screen name="edit-settings" component={EditSettingsModal} />
         </Stack.Navigator>
     );
 };

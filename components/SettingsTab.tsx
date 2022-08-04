@@ -30,9 +30,11 @@ import { getVersion } from 'react-native-device-info';
 import { CheckBoxSettingsBox } from './settingsPageComponents/CheckBoxSettingBox';
 import { TextSettingsBox } from './settingsPageComponents/TextSettingsBox';
 import { Storage } from '../services/Storage';
+import { useNavigation } from '@react-navigation/native';
 
 export const SettingsTab = () => {
     const { colors } = useTheme();
+    const navigation = useNavigation<any>();
     const [logViewOpen, setLogViewOpen] = React.useState(false);
     const [logText, setLogText] = React.useState('');
     const [logFileName, setFileName] = React.useState('');
@@ -277,6 +279,14 @@ export const SettingsTab = () => {
                 >
                     <View>
                         <Title style={textStyle}>Clear all data</Title>
+                    </View>
+                </TouchableRipple>
+                <TouchableRipple
+                    onPress={() => navigation.navigate('edit-settings')}
+                    style={styles.touchableStyle}
+                >
+                    <View>
+                        <Title style={textStyle}>View data</Title>
                     </View>
                 </TouchableRipple>
                 <SettingsDivider />

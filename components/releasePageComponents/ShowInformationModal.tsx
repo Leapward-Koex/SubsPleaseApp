@@ -23,19 +23,23 @@ import {
 } from 'react-native-paper';
 import { ShowInfo, WatchList } from '../../models/models';
 import { Storage } from '../../services/Storage';
-import { SubsPleaseApi } from '../../SubsPleaseApi';
+import { SubsPleaseApi } from '../../ExternalApis/SubsPleaseApi';
 import { ReleaseShow, ReleaseShowInforParams } from './ReleaseShow';
 import { EpisodeInformationBlock } from './ShowInformationModalComponents/EpisodeInformationBlock';
 import dateFormat from 'dateformat';
 import { WatchedEpisodes } from '../../services/WatchedEpisodes';
 import { WatchListService } from '../../services/WatchList';
 import { StorageKeys } from '../../enums/enum';
+import { JikanApi, JikanShow } from '../../ExternalApis/JikanApi';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const ShowInformationModal = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { colors } = useTheme();
     const [showDescription, setShowDescription] = React.useState('');
+    const [loadingJikan, setLoadingJikan] = React.useState(false);
+    const [jikanShowInfo, setJikanShowInfo] = React.useState<JikanShow>();
     const [isShowNew, setIsShowNew] = React.useState(false);
     const [showOnWatchList, setShowOnWatchList] = React.useState(false);
     const { showInfo } = route.params as ReleaseShowInforParams;
@@ -81,8 +85,44 @@ export const ShowInformationModal = () => {
                 }
             }
         };
+        const getJikanShowInfo = async () => {
+            const storedJikanShows = await Storage.getItem<{
+                [key: string]: { show: JikanShow; expiry: Date };
+            }>(StorageKeys.JikanShowInfo, {});
+            if (
+                storedJikanShows[showInfo.page] &&
+                new Date(storedJikanShows[showInfo.page].expiry).getTime() >
+                    Date.now()
+            ) {
+                setJikanShowInfo(storedJikanShows[showInfo.page].show);
+            } else {
+                setLoadingJikan(true);
+                const matchingShows = await JikanApi.tryFindShow(showInfo.show);
+                if (matchingShows.length > 0) {
+                    // todo, if more than one open dialog with selector
+                    setJikanShowInfo(matchingShows[0]);
+                    const nextWeek = new Date();
+                    // 7 day expiry
+                    nextWeek.setDate(new Date().getDate() + 7);
+                    storedJikanShows[showInfo.page] = {
+                        show: matchingShows[0],
+                        expiry: nextWeek,
+                    };
+                    Storage.setItem(
+                        StorageKeys.JikanShowInfo,
+                        storedJikanShows,
+                    );
+                } else {
+                    console.warn(
+                        'No JikanShow info found for show ' + showInfo.show,
+                    );
+                }
+                setLoadingJikan(false);
+            }
+        };
         getShowSynopsis();
-    }, [showInfo.page]);
+        getJikanShowInfo();
+    }, [showInfo.page, showInfo.show]);
 
     React.useEffect(() => {
         (async () => {
@@ -243,7 +283,23 @@ export const ShowInformationModal = () => {
                             new Date(showInfo.release_date),
                             'd mmm',
                         )}
+                        toastMessage="Episode release date"
                     />
+                    {jikanShowInfo && jikanShowInfo.score && (
+                        <EpisodeInformationBlock
+                            iconName="star-outline"
+                            toastMessage={`Average rating from ${jikanShowInfo.scored_by} users`}
+                            value={jikanShowInfo.score!.toString()}
+                        />
+                    )}
+                    {jikanShowInfo && jikanShowInfo.episodes && (
+                        <EpisodeInformationBlock
+                            iconName="video"
+                            toastMessage="Number of episodes"
+                            value={jikanShowInfo.episodes!.toString()}
+                        />
+                    )}
+
                     {/* {showInfo.downloads.map((downloadInfo, index) => {
                         return (
                             <EpisodeInformationBlock
@@ -256,6 +312,9 @@ export const ShowInformationModal = () => {
                             />
                         );
                     })} */}
+                    {/*
+					// link to episode discussio on reddit?
+				*/}
                 </View>
                 {showOnWatchList && (
                     <TouchableRipple
@@ -286,6 +345,56 @@ export const ShowInformationModal = () => {
                             >
                                 Mark as {isShowNew ? 'watched' : 'new'}
                             </Text>
+                        </View>
+                    </TouchableRipple>
+                )}
+                {loadingJikan && (
+                    <ActivityIndicator
+                        animating={true}
+                        style={{
+                            marginLeft: 'auto',
+                            marginRight: 'auto',
+                            marginTop: 25,
+                            marginBottom: 25,
+                        }}
+                        size={'large'}
+                        color={colors.primary}
+                    />
+                )}
+
+                {jikanShowInfo && (
+                    <TouchableRipple
+                        style={{
+                            backgroundColor: colors.subsPleaseDark3,
+                            margin: 10,
+                            borderRadius: 10,
+                            padding: 10,
+                        }}
+                        onPress={() => {
+                            Linking.openURL(jikanShowInfo.url);
+                        }}
+                    >
+                        <View
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: 16,
+                                    color: colors.subsPleaseLight3,
+                                }}
+                            >
+                                Open MAL page.
+                            </Text>
+                            <Icon
+                                name="open-in-new"
+                                color={colors.subsPleaseLight3}
+                                size={25}
+                            />
                         </View>
                     </TouchableRipple>
                 )}
