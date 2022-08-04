@@ -32,6 +32,7 @@ import { WatchListService } from '../../services/WatchList';
 import { StorageKeys } from '../../enums/enum';
 import { JikanApi, JikanShow } from '../../ExternalApis/JikanApi';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { RedditApi, Thread } from '../../ExternalApis/RedditApi';
 
 export const ShowInformationModal = () => {
     const route = useRoute();
@@ -40,6 +41,7 @@ export const ShowInformationModal = () => {
     const [showDescription, setShowDescription] = React.useState('');
     const [loadingJikan, setLoadingJikan] = React.useState(false);
     const [jikanShowInfo, setJikanShowInfo] = React.useState<JikanShow>();
+    const [redditThread, setRedditThread] = React.useState<Thread>();
     const [isShowNew, setIsShowNew] = React.useState(false);
     const [showOnWatchList, setShowOnWatchList] = React.useState(false);
     const { showInfo } = route.params as ReleaseShowInforParams;
@@ -120,9 +122,16 @@ export const ShowInformationModal = () => {
                 setLoadingJikan(false);
             }
         };
+        const getRedditThread = async () => {
+            const thread = await RedditApi.tryFindDiscussionThread(showInfo);
+            if (thread) {
+                setRedditThread(thread);
+            }
+        };
         getShowSynopsis();
         getJikanShowInfo();
-    }, [showInfo.page, showInfo.show]);
+        getRedditThread();
+    }, [showInfo, showInfo.page, showInfo.show]);
 
     React.useEffect(() => {
         (async () => {
@@ -389,6 +398,42 @@ export const ShowInformationModal = () => {
                                 }}
                             >
                                 Open MAL page.
+                            </Text>
+                            <Icon
+                                name="open-in-new"
+                                color={colors.subsPleaseLight3}
+                                size={25}
+                            />
+                        </View>
+                    </TouchableRipple>
+                )}
+                {redditThread && (
+                    <TouchableRipple
+                        style={{
+                            backgroundColor: colors.subsPleaseDark3,
+                            margin: 10,
+                            borderRadius: 10,
+                            padding: 10,
+                        }}
+                        onPress={() => {
+                            Linking.openURL(redditThread.data.url);
+                        }}
+                    >
+                        <View
+                            style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                flexDirection: 'row',
+                                justifyContent: 'space-between',
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: 16,
+                                    color: colors.subsPleaseLight3,
+                                }}
+                            >
+                                Open Reddit discussion thread.
                             </Text>
                             <Icon
                                 name="open-in-new"
