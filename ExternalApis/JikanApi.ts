@@ -20,21 +20,16 @@ export class JikanApi {
                     `Jikan query for ${showName} returned ${jikanReponse.data.length} results`,
                 );
 
-                const showsWithDefaultTitle = jikanReponse.data.filter(
-                    (show) =>
-                        show.titles?.length > 0 &&
-                        show.titles.filter(
-                            (showTitle) => showTitle.type === 'Default',
-                        ),
+                const showsWithTitles = jikanReponse.data.filter(
+                    (show) => show.titles?.length > 0,
                 );
-                const rankedShows = showsWithDefaultTitle.map((show) => {
+                const rankedShows = showsWithTitles.map((show) => {
+                    const similarities = show.titles.map((showTitle) => {
+                        return this.similarity(showName, showTitle.title);
+                    });
+                    const maxSimilarity = Math.max(...similarities);
                     return {
-                        similarity: this.similarity(
-                            showName,
-                            show.titles.find(
-                                (title) => title.type === 'Default',
-                            )!.title,
-                        ),
+                        similarity: maxSimilarity,
                         show,
                     };
                 });
