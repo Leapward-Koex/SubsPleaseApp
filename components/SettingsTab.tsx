@@ -282,11 +282,11 @@ export const SettingsTab = () => {
                     </View>
                 </TouchableRipple>
                 <TouchableRipple
-                    onPress={() => navigation.navigate('edit-settings')}
+                    onPress={() => Storage.clearCache()}
                     style={styles.touchableStyle}
                 >
                     <View>
-                        <Title style={textStyle}>View data</Title>
+                        <Title style={textStyle}>Clear cache</Title>
                     </View>
                 </TouchableRipple>
                 <SettingsDivider />

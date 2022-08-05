@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShowInfo, SubsPleaseShowApiResult } from '../models/models';
 import { parse } from 'fast-html-parser';
+import orderBy from 'lodash.orderby';
 
 export class JikanApi {
     static apiBaseUrl = 'https://api.jikan.moe/v4/';
@@ -19,7 +20,26 @@ export class JikanApi {
                     `Jikan query for ${showName} returned ${jikanReponse.data.length} results`,
                 );
 
-                return jikanReponse.data;
+                const showsWithDefaultTitle = jikanReponse.data.filter(
+                    (show) =>
+                        show.titles?.length > 0 &&
+                        show.titles.filter(
+                            (showTitle) => showTitle.type === 'Default',
+                        ),
+                );
+                const rankedShows = showsWithDefaultTitle.map((show) => {
+                    return {
+                        similarity: this.similarity(
+                            showName,
+                            show.titles.find(
+                                (title) => title.type === 'Default',
+                            )!.title,
+                        ),
+                        show,
+                    };
+                });
+                const sorted = orderBy(rankedShows, ['similarity'], ['desc']);
+                return sorted.map((showRanking) => showRanking.show);
             } else {
                 console.log(
                     'error',
@@ -34,6 +54,54 @@ export class JikanApi {
             console.log('error', error);
             return [];
         }
+    }
+
+    private static similarity(s1: string, s2: string) {
+        let longer = s1;
+        let shorter = s2;
+        if (s1.length < s2.length) {
+            longer = s2;
+            shorter = s1;
+        }
+        const longerLength = longer.length;
+        if (longerLength === 0) {
+            return 1.0;
+        }
+        return (
+            (longerLength - this.editDistance(longer, shorter)) / longerLength
+        );
+    }
+
+    private static editDistance(s1: string, s2: string) {
+        s1 = s1.toLowerCase();
+        s2 = s2.toLowerCase();
+
+        var costs = [];
+        for (var i = 0; i <= s1.length; i++) {
+            var lastValue = i;
+            for (let j = 0; j <= s2.length; j++) {
+                if (i === 0) {
+                    costs[j] = j;
+                } else {
+                    if (j > 0) {
+                        var newValue = costs[j - 1];
+                        if (s1.charAt(i - 1) != s2.charAt(j - 1)) {
+                            newValue =
+                                Math.min(
+                                    Math.min(newValue, lastValue),
+                                    costs[j],
+                                ) + 1;
+                        }
+                        costs[j - 1] = lastValue;
+                        lastValue = newValue;
+                    }
+                }
+            }
+            if (i > 0) {
+                costs[s2.length] = lastValue;
+            }
+        }
+        return costs[s2.length];
     }
 }
 
