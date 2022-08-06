@@ -2,11 +2,30 @@ import React from 'react';
 import { ShowInfo, SubsPleaseShowApiResult } from '../models/models';
 import { parse } from 'fast-html-parser';
 import orderBy from 'lodash.orderby';
+import axios from 'axios';
 
 export class JikanApi {
     static apiBaseUrl = 'https://api.jikan.moe/v4/';
     public static async tryFindShow(showName: string) {
         try {
+            axios
+                .post(
+                    new URL(
+                        '/anime/?q=' + encodeURIComponent(showName),
+                        JikanApi.apiBaseUrl,
+                    ).href,
+                    null,
+                    {
+                        timeout: 2000,
+                    },
+                )
+                .then((res) => {
+                    console.log('response', JSON.stringify(res));
+                })
+                .catch((err) => {
+                    console.log('exios error', JSON.stringify(err));
+                });
+
             const response = await fetch(
                 new URL(
                     '/anime/?q=' + encodeURIComponent(showName),

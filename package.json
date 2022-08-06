@@ -23,6 +23,7 @@
         "@react-navigation/stack": "^6.2.2",
         "@types/react-native-snap-carousel": "^3.8.3",
         "@welldone-software/why-did-you-render": "^7.0.1",
+        "axios": "^0.27.2",
         "dateformat": "^5.0.3",
         "expo": "^45.0.4",
         "fast-html-parser": "^1.0.1",
