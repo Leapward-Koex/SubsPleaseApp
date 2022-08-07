@@ -1,16 +1,15 @@
 {
-  "name": "sample-node-project",
-  "version": "0.0.1",
-  "description": "node part of the project",
-  "main": "main.js",
-  "author": "janeasystems",
-  "license": "",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "esbuild": "^0.14.37",
-    "express": "^4.18.1",
-    "jsonfile": "^6.1.0",
-    "lodash.throttle": "^4.1.1",
-    "webtorrent": "^1.8.13"
-  }
+    "name": "sample-node-project",
+    "version": "0.0.1",
+    "description": "node part of the project",
+    "main": "main.js",
+    "author": "janeasystems",
+    "license": "",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.18.1",
+        "jsonfile": "^6.1.0",
+        "lodash.throttle": "^4.1.1",
+        "webtorrent": "^1.8.13"
+    }
 }
