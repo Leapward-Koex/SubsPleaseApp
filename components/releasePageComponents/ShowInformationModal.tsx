@@ -27,8 +27,8 @@ import { SubsPleaseApi } from '../../ExternalApis/SubsPleaseApi';
 import { ReleaseShow, ReleaseShowInforParams } from './ReleaseShow';
 import { EpisodeInformationBlock } from './ShowInformationModalComponents/EpisodeInformationBlock';
 import dateFormat from 'dateformat';
-import { WatchedEpisodes } from '../../services/WatchedEpisodes';
-import { WatchListService } from '../../services/WatchList';
+import { watchedEpisodeStore } from '../../services/WatchedEpisodesStore';
+import { watchListStore } from '../../services/WatchListStore';
 import { StorageKeys } from '../../enums/enum';
 import { JikanApi, JikanShow } from '../../ExternalApis/JikanApi';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -42,8 +42,6 @@ export const ShowInformationModal = () => {
     const [loadingJikan, setLoadingJikan] = React.useState(false);
     const [jikanShowInfo, setJikanShowInfo] = React.useState<JikanShow>();
     const [redditThread, setRedditThread] = React.useState<Thread>();
-    const [isShowNew, setIsShowNew] = React.useState(false);
-    const [showOnWatchList, setShowOnWatchList] = React.useState(false);
     const { showInfo } = route.params as ReleaseShowInforParams;
     const styles = StyleSheet.create({
         centeredView: {
@@ -132,15 +130,6 @@ export const ShowInformationModal = () => {
         getJikanShowInfo();
         getRedditThread();
     }, [showInfo, showInfo.page, showInfo.show]);
-
-    React.useEffect(() => {
-        (async () => {
-            setIsShowNew(await WatchedEpisodes.isShowNew(showInfo));
-            setShowOnWatchList(
-                await WatchListService.isShowOnWatchList(showInfo),
-            );
-        })();
-    }, [showInfo]);
 
     const { width } = useWindowDimensions();
 
@@ -270,7 +259,7 @@ export const ShowInformationModal = () => {
                         flexDirection: 'row',
                     }}
                 >
-                    {isShowNew && (
+                    {watchedEpisodeStore.isShowNew(showInfo) && (
                         <EpisodeInformationBlock
                             iconName="new-box"
                             value={'New'}
@@ -313,10 +302,9 @@ export const ShowInformationModal = () => {
                         );
                     })} */}
                     {/*
-					// link to episode discussio on reddit?
-				*/}
+                     */}
                 </View>
-                {showOnWatchList && (
+                {watchListStore.isShowOnWatchList(showInfo) && (
                     <TouchableRipple
                         style={{
                             backgroundColor: colors.subsPleaseDark3,
@@ -325,8 +313,10 @@ export const ShowInformationModal = () => {
                             padding: 10,
                         }}
                         onPress={() => {
-                            WatchedEpisodes.setShowWatched(showInfo, isShowNew);
-                            setIsShowNew(!isShowNew);
+                            watchedEpisodeStore.setShowWatched(
+                                showInfo,
+                                watchedEpisodeStore.isShowNew(showInfo),
+                            );
                         }}
                     >
                         <View
@@ -343,7 +333,10 @@ export const ShowInformationModal = () => {
                                     color: colors.subsPleaseLight3,
                                 }}
                             >
-                                Mark as {isShowNew ? 'watched' : 'new'}
+                                Mark as
+                                {watchedEpisodeStore.isShowNew(showInfo)
+                                    ? ' watched'
+                                    : ' new'}
                             </Text>
                         </View>
                     </TouchableRipple>

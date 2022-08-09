@@ -26,7 +26,7 @@ import {
     createStackNavigator,
     TransitionPresets,
 } from '@react-navigation/stack';
-import { WatchedEpisodes } from '../services/WatchedEpisodes';
+import { WatchedEpisodes } from '../services/WatchedEpisodesStore';
 
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);

@@ -16,7 +16,9 @@ import Carousel from 'react-native-snap-carousel';
 import { weekday } from '../HelperFunctions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { Storage } from '../services/Storage';
-import { WatchListService } from '../services/WatchList';
+import { watchListStore } from '../services/WatchListStore';
+import { observer } from 'mobx-react-lite';
+import { action } from 'mobx';
 
 interface DayOfWeek {
     dayName: string;
@@ -33,10 +35,9 @@ const daysOfWeek: DayOfWeek[] = [
 
 type WatshListShowProps = {
     showInfo: WatchListItem;
-    onShowRemoved: (showName: string) => Promise<void>;
 };
 const WatchListShow = (props: WatshListShowProps) => {
-    const { showInfo, onShowRemoved } = props;
+    const { showInfo } = props;
     const { colors } = useTheme();
     const textColour =
         Appearance.getColorScheme() !== 'light'
@@ -80,7 +81,11 @@ const WatchListShow = (props: WatshListShowProps) => {
                     <Button
                         mode="contained"
                         color={colors.tertiary}
-                        onPress={() => onShowRemoved(showInfo.showName)}
+                        onPress={action(() =>
+                            watchListStore.removeShowFromWatchList(
+                                showInfo.showName,
+                            ),
+                        )}
                     >
                         <Icon
                             name="minus"
@@ -101,13 +106,10 @@ const WatchListShow = (props: WatshListShowProps) => {
 type ShowDayInfoProps = {
     dayName: string;
 };
-const ShowDayInfo = (props: ShowDayInfoProps) => {
+const ShowDayInfo = observer((props: ShowDayInfoProps) => {
     const { dayName } = props;
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
-    const [showsForCurrentDay, setShowsForCurrentDay] = React.useState<
-        WatchListItem[]
-    >([]);
     const cardStyle = {
         margin: 20,
         marginTop: 0,
@@ -122,24 +124,6 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
         shadowColor: '#000',
 
         elevation: 6,
-    };
-    React.useEffect(() => {
-        const init = async () => {
-            const watchList = await WatchListService.getWatchList();
-            setShowsForCurrentDay(
-                watchList.shows.filter((show) => show.releaseTime === dayName),
-            );
-        };
-        init();
-    }, [dayName]);
-
-    const onRemoveShow = async (showName: string) => {
-        const watchList = await WatchListService.removeShowFromWatchList(
-            showName,
-        );
-        setShowsForCurrentDay(
-            watchList.shows.filter((show) => show.releaseTime === dayName),
-        );
     };
 
     const getNoShowText = (showCount: number) => {
@@ -183,18 +167,14 @@ const ShowDayInfo = (props: ShowDayInfoProps) => {
                 {dayName}
             </Text>
             <View style={cardStyle}>
-                {getNoShowText(showsForCurrentDay.length)}
-                {showsForCurrentDay.map((show, index) => (
-                    <WatchListShow
-                        key={index}
-                        onShowRemoved={onRemoveShow}
-                        showInfo={show}
-                    />
+                {getNoShowText(watchListStore.getShowsOnday(dayName).length)}
+                {watchListStore.getShowsOnday(dayName).map((show, index) => (
+                    <WatchListShow key={index} showInfo={show} />
                 ))}
             </View>
         </View>
     );
-};
+});
 
 export const WatchListTab = () => {
     const carouselRef = React.useRef(null);
