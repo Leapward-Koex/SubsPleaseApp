@@ -19,8 +19,8 @@ export const AddRemoveToWatchlistButton = observer(
         const getText = () => {
             if (width > 500) {
                 return watchListStore.isShowOnWatchList(showInfo)
-                    ? 'Remove'
-                    : 'Add';
+                    ? '  Remove'
+                    : '  Add';
             }
             return ' ';
         };
