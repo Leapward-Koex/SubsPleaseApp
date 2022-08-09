@@ -37,13 +37,6 @@ export const ReleaseList = ({
         },
     });
 
-    React.useEffect(() => {
-        console.log('mounting lsit');
-        return () => {
-            console.log('unmounting list');
-        };
-    });
-
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
         return (
             <ReleaseShow

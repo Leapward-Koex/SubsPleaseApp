@@ -26,7 +26,7 @@ import {
     createStackNavigator,
     TransitionPresets,
 } from '@react-navigation/stack';
-import { WatchedEpisodes } from '../services/WatchedEpisodesStore';
+import { watchedEpisodeStore } from '../services/WatchedEpisodesStore';
 
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
@@ -170,9 +170,9 @@ export const ReleasesTab = () => {
                         watchingShowNames.includes(show.show),
                     );
                 } else if (showFilter === ShowFilter.NewRelease) {
-                    return asyncFilter(showList, (show) => {
-                        return WatchedEpisodes.isShowNew(show);
-                    });
+                    return showList.filter((show) =>
+                        watchedEpisodeStore.isShowNew(show),
+                    );
                 }
                 return showList;
             };
@@ -198,7 +198,6 @@ export const ReleasesTab = () => {
         setShowFilter(filterValue);
     }, []);
 
-    console.log(filteredShowList.length);
     return (
         <View style={styles.viewStyles}>
             <ReleaseTabHeader

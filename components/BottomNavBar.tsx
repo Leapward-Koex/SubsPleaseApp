@@ -60,7 +60,7 @@ export const BottomNavBar = () => {
         return <></>;
     };
 
-    const tabNavigator = () => {
+    const TabNavigator = () => {
         return (
             <Tab.Navigator shifting>
                 <Tab.Screen
@@ -114,7 +114,7 @@ export const BottomNavBar = () => {
                 ...TransitionPresets.ModalPresentationIOS,
             })}
         >
-            <Stack.Screen name="ReleasesList" component={tabNavigator} />
+            <Stack.Screen name="ReleasesList" component={TabNavigator} />
             <Stack.Screen
                 name="release-info"
                 component={ShowInformationModal}
