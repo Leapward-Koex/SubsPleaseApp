@@ -148,7 +148,7 @@ export const ShowInformationModal = () => {
         <View style={styles.centeredView}>
             <View
                 style={{
-                    width: '80%',
+                    width: '15%',
                     height: 5,
                     borderRadius: 5,
                     marginLeft: 'auto',
@@ -259,15 +259,6 @@ export const ShowInformationModal = () => {
                         )}
                     </View>
                 </View>
-                <Text
-                    style={{
-                        fontSize: 20,
-                        color: colors.subsPleaseLight3,
-                        marginLeft: 10,
-                    }}
-                >
-                    Episode details
-                </Text>
                 <View
                     style={{
                         backgroundColor: colors.subsPleaseDark3,

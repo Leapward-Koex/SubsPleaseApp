@@ -35,6 +35,7 @@ import { CastPlayButton } from './CastPlayButton';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WatchedEpisodes } from '../../services/WatchedEpisodes';
+import { AddRemoveToWatchlistButton } from './AddRemoveToWatchlistButton';
 
 type releaseShowProps = {
     showInfo: ShowInfo;
@@ -199,40 +200,15 @@ export const ReleaseShow = ({
     };
 
     const getWatchlistActionButton = () => {
-        if (
+        const onWatchlist =
             watchList.shows.filter((show) => show.showName === showInfo.show)
-                .length > 0
-        ) {
-            return (
-                <Button
-                    mode="contained"
-                    color={colors.tertiary}
-                    onPress={() => removeShowFromList()}
-                >
-                    <Icon
-                        name="minus"
-                        size={13}
-                        color={colors.subsPleaseDark1}
-                    />
-                    {width > 500 ? (
-                        <Text style={{ color: colors.subsPleaseDark1 }}>
-                            Remove
-                        </Text>
-                    ) : (
-                        <></>
-                    )}
-                </Button>
-            );
-        }
+                .length > 0;
         return (
-            <Button mode="contained" onPress={addShowToList}>
-                <Icon name="plus" size={13} color={colors.subsPleaseLight1} />
-                {width > 500 ? (
-                    <Text style={{ color: colors.subsPleaseLight1 }}>Add</Text>
-                ) : (
-                    <></>
-                )}
-            </Button>
+            <AddRemoveToWatchlistButton
+                onWatchlist={onWatchlist}
+                onAddToWatchlist={addShowToList}
+                onRemoveFromWatchlist={removeShowFromList}
+            />
         );
     };
 
