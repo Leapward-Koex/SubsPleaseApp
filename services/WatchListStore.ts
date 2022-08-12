@@ -14,9 +14,11 @@ export class WatchListStore {
             addShowToWatchList: action,
             removeShowFromWatchList: action,
         });
-        this.getWatchList().then((savedWatchList) => {
-            this.watchList = savedWatchList;
-        });
+        this.getWatchList().then(
+            action((savedWatchList) => {
+                this.watchList = savedWatchList;
+            }),
+        );
     }
 
     public isShowOnWatchList(show: ShowInfo) {

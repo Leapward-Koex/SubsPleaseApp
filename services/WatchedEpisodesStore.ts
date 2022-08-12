@@ -16,9 +16,9 @@ export class WatchedEpisodeStore {
             setShowWatched: action,
         });
         Storage.getItem<string[]>(StorageKeys.WatchedEpisodes, []).then(
-            (savedWatchedEpisodes) => {
+            action((savedWatchedEpisodes) => {
                 this.watchedEpisodes = savedWatchedEpisodes;
-            },
+            }),
         );
     }
 

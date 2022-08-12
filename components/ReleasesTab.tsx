@@ -46,7 +46,7 @@ export const ReleasesTab = () => {
     const styles = StyleSheet.create({
         viewStyles: {
             flexDirection: 'column',
-            height: height - 50,
+            height: '100%',
         },
     });
 
