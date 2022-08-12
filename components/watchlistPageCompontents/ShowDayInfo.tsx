@@ -28,31 +28,47 @@ export const ShowDayInfo = observer((props: ShowDayInfoProps) => {
         elevation: 6,
     };
 
+    const getKaomoji = () => {
+        const kaomojis = [
+            '(ノ﹏ヽ)',
+            '(-人-。)',
+            '(╯︵╰,)',
+            '(´；д；`)',
+            '(´＿｀。)',
+            '(づ-̩̩̩-̩̩̩_-̩̩̩-̩̩̩)づ',
+            'ヽ(´□｀。)ﾉ',
+            '( ; ω ; )',
+        ];
+        return kaomojis[Math.floor(Math.random() * kaomojis.length)];
+    };
+
     const getNoShowText = (showCount: number) => {
         if (!showCount) {
             return (
-                <>
+                <View
+                    style={{
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                    }}
+                >
                     <Text
                         style={{
-                            textAlignVertical: 'center',
                             textAlign: 'center',
-                            fontSize: 18,
-                            paddingTop: '70%',
                             paddingBottom: 10,
+                            fontSize: 18,
                         }}
                     >
                         Nothing on today...
                     </Text>
                     <Text
                         style={{
-                            textAlignVertical: 'center',
                             textAlign: 'center',
-                            fontSize: 18,
                         }}
                     >
-                        (╯︵╰,)
+                        {getKaomoji()}
                     </Text>
-                </>
+                </View>
             );
         }
     };
@@ -64,6 +80,7 @@ export const ShowDayInfo = observer((props: ShowDayInfoProps) => {
                     textAlignVertical: 'center',
                     textAlign: 'center',
                     fontSize: 24,
+                    color: colors.subsPleaseLight1,
                 }}
             >
                 {dayName}

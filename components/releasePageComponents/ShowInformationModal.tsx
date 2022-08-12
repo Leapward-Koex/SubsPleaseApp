@@ -45,8 +45,8 @@ export const ShowInformationModal = () => {
     const { showInfo } = route.params as ReleaseShowInforParams;
     const styles = StyleSheet.create({
         centeredView: {
+            height: '100%',
             paddingTop: 20,
-            paddingBottom: 20,
             backgroundColor: colors.subsPleaseDark2,
         },
         button: {
@@ -169,7 +169,6 @@ export const ShowInformationModal = () => {
                 showsVerticalScrollIndicator={false}
                 style={{
                     backgroundColor: colors.subsPleaseDark2,
-                    marginBottom: 45,
                 }}
             >
                 <View
@@ -347,8 +346,8 @@ export const ShowInformationModal = () => {
                         style={{
                             marginLeft: 'auto',
                             marginRight: 'auto',
-                            marginTop: 25,
-                            marginBottom: 25,
+                            marginTop: 10,
+                            marginBottom: 10,
                         }}
                         size={'large'}
                         color={colors.primary}
@@ -360,6 +359,7 @@ export const ShowInformationModal = () => {
                         style={{
                             backgroundColor: colors.subsPleaseDark3,
                             margin: 10,
+                            marginBottom: 0,
                             borderRadius: 10,
                             padding: 10,
                         }}
@@ -396,6 +396,7 @@ export const ShowInformationModal = () => {
                         style={{
                             backgroundColor: colors.subsPleaseDark3,
                             margin: 10,
+                            marginBottom: 30,
                             borderRadius: 10,
                             padding: 10,
                         }}
