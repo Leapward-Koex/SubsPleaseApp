@@ -4,16 +4,16 @@ import { Button, TouchableRipple, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { ShowInfo, WatchList } from '../../models/models';
 import { action } from 'mobx';
-import { WatchListStore } from '../../services/WatchListStore';
 import { observer } from 'mobx-react-lite';
+import { useStore } from '../../stores/RootStore';
 
 type AddRemoveToWatchlistButtonProps = {
     showInfo: ShowInfo;
-    watchListStore: WatchListStore;
 };
 
 export const AddRemoveToWatchlistButton = observer(
-    ({ showInfo, watchListStore }: AddRemoveToWatchlistButtonProps) => {
+    ({ showInfo }: AddRemoveToWatchlistButtonProps) => {
+        const { watchListStore } = useStore();
         const { colors } = useTheme();
         const { width } = useWindowDimensions();
         const getText = () => {

@@ -27,17 +27,17 @@ import { SubsPleaseApi } from '../../ExternalApis/SubsPleaseApi';
 import { ReleaseShow, ReleaseShowInforParams } from './ReleaseShow';
 import { EpisodeInformationBlock } from './ShowInformationModalComponents/EpisodeInformationBlock';
 import dateFormat from 'dateformat';
-import { watchedEpisodeStore } from '../../services/WatchedEpisodesStore';
-import { watchListStore } from '../../services/WatchListStore';
 import { StorageKeys } from '../../enums/enum';
 import { JikanApi, JikanShow } from '../../ExternalApis/JikanApi';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RedditApi, Thread } from '../../ExternalApis/RedditApi';
+import { useStore } from '../../stores/RootStore';
 
 export const ShowInformationModal = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { colors } = useTheme();
+    const { watchedEpisodeStore, watchListStore } = useStore();
     const [showDescription, setShowDescription] = React.useState('');
     const [loadingJikan, setLoadingJikan] = React.useState(false);
     const [jikanShowInfo, setJikanShowInfo] = React.useState<JikanShow>();

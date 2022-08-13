@@ -1,20 +1,22 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from '../enums/enum';
 import { ShowInfo, WatchList } from '../models/models';
-import { Storage } from './Storage';
-import { makeAutoObservable, observable, computed, action } from 'mobx';
+import { makeObservable, observable, computed, action } from 'mobx';
 import { getDayOfWeek } from '../HelperFunctions';
+import { Storage } from '../services/Storage';
+import { RootStore } from './RootStore';
 
 export class WatchListStore {
     watchList: WatchList = { shows: [] };
+    private rootStore: RootStore;
 
-    constructor() {
-        makeAutoObservable(this, {
+    constructor(rootStore: RootStore) {
+        this.rootStore = rootStore;
+        makeObservable(this, {
             watchList: observable,
             addShowToWatchList: action,
             removeShowFromWatchList: action,
         });
-        this.getWatchList().then(
+        Storage.getItem<WatchList>(StorageKeys.WatchList, { shows: [] }).then(
             action((savedWatchList) => {
                 this.watchList = savedWatchList;
             }),
@@ -49,7 +51,6 @@ export class WatchListStore {
             (show) => show.showName !== showName,
         );
         await Storage.setItem(StorageKeys.WatchList, this.watchList);
-        return this.watchList;
     }
 
     public getShowsOnday(dayName: string) {
@@ -57,11 +58,4 @@ export class WatchListStore {
             (show) => show.releaseTime === dayName,
         );
     }
-
-    public async getWatchList() {
-        return Storage.getItem<WatchList>(StorageKeys.WatchList, { shows: [] });
-    }
 }
-
-const watchListStore = new WatchListStore();
-export { watchListStore };

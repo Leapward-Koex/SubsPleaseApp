@@ -2,7 +2,7 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useWindowDimensions, Appearance, Text, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { watchListStore } from '../../services/WatchListStore';
+import { useStore } from '../../stores/RootStore';
 import { WatchListShow } from './WatchListShow';
 
 type ShowDayInfoProps = {
@@ -12,6 +12,7 @@ export const ShowDayInfo = observer((props: ShowDayInfoProps) => {
     const { dayName } = props;
     const { colors } = useTheme();
     const { height } = useWindowDimensions();
+    const { watchListStore } = useStore();
     const cardStyle = {
         margin: 20,
         marginTop: 0,

@@ -26,22 +26,21 @@ import {
     createStackNavigator,
     TransitionPresets,
 } from '@react-navigation/stack';
-import { watchedEpisodeStore } from '../services/WatchedEpisodesStore';
+import { observer } from 'mobx-react-lite';
+import { autorun } from 'mobx';
+import { useStore } from '../stores/RootStore';
 
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
-
     const [showList, setShowList] = React.useState<ShowInfo[]>([]);
     const [filteredShowList, setFilteredShowList] = React.useState<ShowInfo[]>(
         [],
     );
-    const [watchList, setWatchList] = React.useState<WatchList>({ shows: [] });
     const [showFilter, setShowFilter] = React.useState(ShowFilter.None);
-
     const [searchTerm, setSearchTerm] = React.useState('');
     const [refreshing, setRefreshing] = React.useState(false);
 
-    const { height } = useWindowDimensions();
+    const { watchedEpisodeStore, watchListStore } = useStore();
 
     const styles = StyleSheet.create({
         viewStyles: {
@@ -98,12 +97,12 @@ export const ReleasesTab = () => {
             StorageKeys.ReleaseShowCacheLength,
             100,
         );
+        saveReleases(uniqueShows);
         if (cacheLength !== -1) {
             uniqueShows.length = Math.min(uniqueShows.length, cacheLength);
         }
         setRefreshing(false);
         setShowList(uniqueShows);
-        saveReleases(uniqueShows);
     }, []);
 
     // Load initial page data
@@ -121,67 +120,51 @@ export const ReleasesTab = () => {
                 console.log('setting filter');
                 setShowFilter(lastFilter);
             }
-            const storedWatchList = await Storage.getItem<WatchList>(
-                StorageKeys.WatchList,
-                { shows: [] },
-            );
-            setWatchList(storedWatchList);
             setCastingAvailable(retrievedCastingAvailalbe);
         })();
     }, [refreshShowData]);
 
-    const onWatchListChanged = React.useCallback(
-        (updatedWatchList: WatchList) => {
-            setWatchList({ ...updatedWatchList });
-            Storage.setItem(StorageKeys.WatchList, updatedWatchList);
-        },
-        [],
-    );
-
-    console.log('rendering');
     React.useEffect(() => {
-        console.log('mounting');
-        return () => {
-            console.log('unmounting!');
+        const getFilteredList = async () => {
+            if (showFilter === ShowFilter.Downloaded) {
+                return asyncFilter(showList, async (show) => {
+                    const downloadedEpisodesForSeries = await asyncFilter(
+                        show.downloads,
+                        async (download) =>
+                            (download.res === '720' ||
+                                download.res === '1080') &&
+                            (await downloadedShows.isShowDownloaded(
+                                show.show,
+                                download.magnet,
+                            )),
+                    );
+                    return downloadedEpisodesForSeries.length > 0;
+                });
+            } else if (showFilter === ShowFilter.Watching) {
+                return showList.filter((show) =>
+                    watchListStore.isShowOnWatchList(show),
+                );
+            } else if (showFilter === ShowFilter.NewRelease) {
+                return showList.filter((show) =>
+                    watchedEpisodeStore.isShowNew(show),
+                );
+            }
+            return showList;
         };
-    }, []);
-
-    React.useEffect(() => {
-        (async () => {
-            const getFilteredList = async () => {
-                if (showFilter === ShowFilter.Downloaded) {
-                    return asyncFilter(showList, async (show) => {
-                        const downloadedEpisodesForSeries = await asyncFilter(
-                            show.downloads,
-                            async (download) =>
-                                (download.res === '720' ||
-                                    download.res === '1080') &&
-                                (await downloadedShows.isShowDownloaded(
-                                    show.show,
-                                    download.magnet,
-                                )),
-                        );
-                        return downloadedEpisodesForSeries.length > 0;
-                    });
-                } else if (showFilter === ShowFilter.Watching) {
-                    const watchingShowNames =
-                        watchList?.shows.map((show) => show.showName) ?? [];
-                    return showList.filter((show) =>
-                        watchingShowNames.includes(show.show),
-                    );
-                } else if (showFilter === ShowFilter.NewRelease) {
-                    return showList.filter((show) =>
-                        watchedEpisodeStore.isShowNew(show),
-                    );
-                }
-                return showList;
-            };
+        autorun(async () => {
+            console.log('Running filter');
             const retrievedFilteredShowList = await getFilteredList();
             if (retrievedFilteredShowList.length !== filteredShowList.length) {
                 setFilteredShowList(retrievedFilteredShowList);
             }
-        })();
-    }, [filteredShowList.length, showFilter, showList, watchList?.shows]);
+        });
+    }, [
+        filteredShowList.length,
+        showFilter,
+        showList,
+        watchListStore,
+        watchedEpisodeStore,
+    ]);
 
     const onSearchChanged = React.useCallback(
         (newSearchTerm) => {
@@ -211,8 +194,6 @@ export const ReleasesTab = () => {
                 showList={filteredShowList}
                 onPullToRefresh={refreshShowData}
                 refreshing={refreshing}
-                watchList={watchList}
-                onWatchListChanged={onWatchListChanged}
             />
         </View>
     );

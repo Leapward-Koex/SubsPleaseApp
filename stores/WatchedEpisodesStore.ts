@@ -1,17 +1,19 @@
 import { StorageKeys } from '../enums/enum';
 import { ShowInfo } from '../models/models';
-import { Storage } from './Storage';
-import { watchListStore } from './WatchListStore';
-import { makeAutoObservable, observable, computed, action } from 'mobx';
+import { Storage } from '../services/Storage';
+import { makeObservable, observable, computed, action } from 'mobx';
+import { RootStore } from './RootStore';
 
 export class WatchedEpisodeStore {
     watchedEpisodes: string[] = [];
+    private rootStore: RootStore;
     private getKey(show: ShowInfo) {
         return `${show.time}|${show.episode}`;
     }
 
-    constructor() {
-        makeAutoObservable(this, {
+    constructor(rootStore: RootStore) {
+        this.rootStore = rootStore;
+        makeObservable(this, {
             watchedEpisodes: observable,
             setShowWatched: action,
         });
@@ -23,11 +25,11 @@ export class WatchedEpisodeStore {
     }
 
     public isShowNew(show: ShowInfo) {
-        const isShowOnWatchList = watchListStore.isShowOnWatchList(show);
-        return (
-            !this.watchedEpisodes.includes(this.getKey(show)) &&
-            isShowOnWatchList
-        );
+        return computed(
+            () =>
+                !this.watchedEpisodes.includes(this.getKey(show)) &&
+                this.rootStore.watchListStore.isShowOnWatchList(show),
+        ).get();
     }
 
     public async setShowWatched(show: ShowInfo, watched: boolean) {
@@ -52,6 +54,3 @@ export class WatchedEpisodeStore {
         }
     }
 }
-
-const watchedEpisodeStore = new WatchedEpisodeStore();
-export { watchedEpisodeStore };

@@ -4,15 +4,17 @@ import { Button, Card, Title, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SubsPleaseApi } from '../../ExternalApis/SubsPleaseApi';
 import { WatchListItem } from '../../models/models';
-import { watchListStore } from '../../services/WatchListStore';
 import { action } from 'mobx';
+import { useStore } from '../../stores/RootStore';
+import { observer } from 'mobx-react-lite';
 
 type WatshListShowProps = {
     showInfo: WatchListItem;
 };
-export const WatchListShow = (props: WatshListShowProps) => {
+export const WatchListShow = observer((props: WatshListShowProps) => {
     const { showInfo } = props;
     const { colors } = useTheme();
+    const { watchListStore } = useStore();
     const textColour =
         Appearance.getColorScheme() !== 'light'
             ? colors.darkText
@@ -75,4 +77,4 @@ export const WatchListShow = (props: WatshListShowProps) => {
             </View>
         </Card>
     );
-};
+});

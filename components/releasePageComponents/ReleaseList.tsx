@@ -13,17 +13,13 @@ import { ReleaseShow } from './ReleaseShow';
 
 type ReleaseListType = {
     showList: ShowInfo[];
-    watchList: WatchList;
-    onWatchListChanged: (watchlist: WatchList) => void;
     onPullToRefresh: () => void;
     refreshing: boolean;
 };
 
 export const ReleaseList = ({
     showList,
-    watchList,
     refreshing,
-    onWatchListChanged,
     onPullToRefresh,
 }: ReleaseListType) => {
     const { colors } = useTheme();
@@ -38,14 +34,7 @@ export const ReleaseList = ({
     });
 
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
-        return (
-            <ReleaseShow
-                index={index}
-                showInfo={item}
-                watchList={watchList}
-                onWatchListChanged={onWatchListChanged}
-            />
-        );
+        return <ReleaseShow index={index} showInfo={item} />;
     };
 
     const getItemKey = (show: ShowInfo) => `${show.page}${show.episode}`;

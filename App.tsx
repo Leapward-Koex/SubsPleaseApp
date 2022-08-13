@@ -18,11 +18,22 @@ import { LogBox } from 'react-native';
 import { FileLogger } from 'react-native-file-logger';
 import { WakeLockInterface } from 'react-native-wake-lock';
 import notifee from '@notifee/react-native';
+import { configure } from 'mobx';
+import { RootStore, RootStoreProvider } from './stores/RootStore';
 
 LogBox.ignoreLogs([
     'new NativeEventEmitter',
     "EventEmitter.removeListener('keyboardDidHide', ...)",
 ]); // Ignore log notification by message
+
+// configure({
+//     enforceActions: 'always',
+//     computedRequiresReaction: true,
+//     reactionRequiresObservable: true,
+//     observableRequiresReaction: true,
+//     disableErrorBoundaries: true,
+// });
+
 declare global {
     namespace ReactNativePaper {
         interface ThemeColors {
@@ -96,10 +107,12 @@ const App = () => {
 
     return (
         <NavigationContainer>
-            <PaperProvider theme={theme}>
-                <BottomNavBar />
-                <Toast />
-            </PaperProvider>
+            <RootStoreProvider>
+                <PaperProvider theme={theme}>
+                    <BottomNavBar />
+                    <Toast />
+                </PaperProvider>
+            </RootStoreProvider>
         </NavigationContainer>
     );
 };
