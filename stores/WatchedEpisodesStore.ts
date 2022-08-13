@@ -8,7 +8,7 @@ export class WatchedEpisodeStore {
     watchedEpisodes: string[] = [];
     private rootStore: RootStore;
     private getKey(show: ShowInfo) {
-        return `${show.time}|${show.episode}`;
+        return `${show.show}|${show.release_date}|${show.episode}`;
     }
 
     constructor(rootStore: RootStore) {
@@ -44,11 +44,12 @@ export class WatchedEpisodeStore {
             }
         } else {
             if (this.watchedEpisodes.includes(showKey)) {
+                this.watchedEpisodes = this.watchedEpisodes.filter(
+                    (watchedEpisodeKey) => watchedEpisodeKey !== showKey,
+                );
                 await Storage.setItem(
                     StorageKeys.WatchedEpisodes,
-                    this.watchedEpisodes.filter(
-                        (watchedEpisodeKey) => watchedEpisodeKey !== showKey,
-                    ),
+                    this.watchedEpisodes,
                 );
             }
         }

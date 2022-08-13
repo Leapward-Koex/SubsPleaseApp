@@ -32,8 +32,10 @@ import { JikanApi, JikanShow } from '../../ExternalApis/JikanApi';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RedditApi, Thread } from '../../ExternalApis/RedditApi';
 import { useStore } from '../../stores/RootStore';
+import { observer } from 'mobx-react-lite';
+import { action } from 'mobx';
 
-export const ShowInformationModal = () => {
+export const ShowInformationModal = observer(() => {
     const route = useRoute();
     const navigation = useNavigation();
     const { colors } = useTheme();
@@ -311,12 +313,12 @@ export const ShowInformationModal = () => {
                             borderRadius: 10,
                             padding: 10,
                         }}
-                        onPress={() => {
+                        onPress={action(() => {
                             watchedEpisodeStore.setShowWatched(
                                 showInfo,
                                 watchedEpisodeStore.isShowNew(showInfo),
                             );
-                        }}
+                        })}
                     >
                         <View
                             style={{
@@ -431,4 +433,4 @@ export const ShowInformationModal = () => {
             </ScrollView>
         </View>
     );
-};
+});

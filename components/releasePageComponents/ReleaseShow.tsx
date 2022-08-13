@@ -171,10 +171,6 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
         });
     };
 
-    const getWatchlistActionButton = () => {
-        return <AddRemoveToWatchlistButton showInfo={showInfo} />;
-    };
-
     const getPlayButton = () => {
         if (!showDownloaded) {
             return <></>;
@@ -360,7 +356,6 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
 
     React.useEffect(() => {
         Animated.spring(animation, {
-            delay: index * 50 + 1,
             toValue: 1,
             speed: 8,
             useNativeDriver: true,
@@ -465,7 +460,9 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
                                 }}
                             >
                                 {getActionInfoSection()}
-                                {getWatchlistActionButton()}
+                                <AddRemoveToWatchlistButton
+                                    showInfo={showInfo}
+                                />
                             </View>
                         </View>
                     </View>
