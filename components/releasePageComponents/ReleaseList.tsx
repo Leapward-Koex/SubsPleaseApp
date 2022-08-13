@@ -10,6 +10,7 @@ import {
 import { Button, useTheme } from 'react-native-paper';
 import { ShowInfo, WatchList } from '../../models/models';
 import { ReleaseShow } from './ReleaseShow';
+import { EmptyListPlaceholder } from './EmptyListPlaceholder';
 
 type ReleaseListType = {
     showList: ShowInfo[];
@@ -31,6 +32,13 @@ export const ReleaseList = ({
                     ? colors.subsPleaseDark2
                     : colors.subsPleaseLight3,
         },
+        font: {
+            color:
+                Appearance.getColorScheme() !== 'light'
+                    ? colors.darkText
+                    : colors.lightText,
+            fontSize: 20,
+        },
     });
 
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
@@ -39,14 +47,19 @@ export const ReleaseList = ({
 
     const getItemKey = (show: ShowInfo) => `${show.page}${show.episode}`;
     return (
-        <FlatList
-            style={styles.backgroundStyle}
-            data={showList}
-            refreshing={refreshing}
-            onRefresh={onPullToRefresh}
-            renderItem={renderItem}
-            keyExtractor={getItemKey}
-        />
+        <>
+            <EmptyListPlaceholder show={showList.length === 0} />
+            {showList.length !== 0 && (
+                <FlatList
+                    style={styles.backgroundStyle}
+                    data={showList}
+                    refreshing={refreshing}
+                    onRefresh={onPullToRefresh}
+                    renderItem={renderItem}
+                    keyExtractor={getItemKey}
+                />
+            )}
+        </>
     );
 };
 ReleaseList.whyDidYouRender = true;
