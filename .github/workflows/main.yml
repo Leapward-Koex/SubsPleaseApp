@@ -88,9 +88,30 @@ jobs:
                   keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
                   keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
-            - name: Upload a Build Artifact
+            - name: Upload arm64-v8a
               uses: actions/upload-artifact@v3.0.0
               with:
                   # Artifact name
-                  name: Android App
-                  path: android/app/build/outputs/apk/release/*-signed.apk
+                  name: arm64-v8a
+                  path: android/app/build/outputs/apk/release/YoRHa-arm64-v8a-signed.apk
+
+            - name: Upload armeabi-v7a
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: armeabi-v7a
+                  path: android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk
+
+            - name: Upload x86_64
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: x86_64
+                  path: android/app/build/outputs/apk/release/YoRHa-x86_64-signed.apk
+
+            - name: Upload x86
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: x86
+                  path: android/app/build/outputs/apk/release/YoRHa-x86-signed.apk
