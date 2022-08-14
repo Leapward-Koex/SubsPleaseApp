@@ -93,8 +93,4 @@ jobs:
               with:
                   # Artifact name
                   name: Android App
-                  path: |
-                      ${{ steps.sign_app.signedReleaseFile0 }}
-                      ${{ steps.sign_app.signedReleaseFile1 }}
-                      ${{ steps.sign_app.signedReleaseFile2 }}
-                      ${{ steps.sign_app.signedReleaseFile3 }}
+                  path: android/app/build/outputs/apk/release/*-signed.apk
