@@ -102,7 +102,7 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
         stretch: {
             borderTopLeftRadius: 3,
             borderBottomLeftRadius: 3,
-            height: 130,
+            height: 150,
             resizeMode: 'cover',
         },
         centeredView: {
@@ -112,23 +112,6 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
             marginTop: 22,
             maxHeight: '100%',
             overflow: 'scroll',
-        },
-        modalView: {
-            maxHeight: height - 50,
-            width: '90%',
-            margin: 20,
-            backgroundColor: 'white',
-            borderRadius: 5,
-            padding: 35,
-            alignItems: 'center',
-            shadowColor: '#000',
-            shadowOffset: {
-                width: 0,
-                height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 4,
-            elevation: 5,
         },
         button: {
             borderRadius: 20,
@@ -141,16 +124,12 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
         buttonClose: {
             backgroundColor: '#2196F3',
         },
-        modalText: {
-            marginBottom: 20,
-            fontSize: 20,
-        },
         cardStyle: {
             marginLeft: 5,
             marginTop: 10,
             marginBottom: 10,
             marginRight: 5,
-            height: 130,
+            height: 150,
             backgroundColor:
                 Appearance.getColorScheme() !== 'light'
                     ? colors.subsPleaseDark1
@@ -391,7 +370,7 @@ export const ReleaseShow = observer(({ showInfo, index }: releaseShowProps) => {
                         navigation.navigate('release-info', { showInfo })
                     }
                 >
-                    <View style={{ flexDirection: 'row', height: 130 }}>
+                    <View style={{ flexDirection: 'row', height: 150 }}>
                         <View style={{ flex: 0.3 }}>
                             <View
                                 style={{
