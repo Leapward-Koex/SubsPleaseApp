@@ -55,6 +55,7 @@ declare global {
 
 const theme = {
     ...DefaultTheme,
+    version: 3,
     colors: {
         ...DefaultTheme.colors,
         primary: '#cb2b78',

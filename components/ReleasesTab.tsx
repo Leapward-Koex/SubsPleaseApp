@@ -38,7 +38,7 @@ export const ReleasesTab = () => {
     );
     const [showFilter, setShowFilter] = React.useState(ShowFilter.None);
     const [searchTerm, setSearchTerm] = React.useState('');
-    const [refreshing, setRefreshing] = React.useState(false);
+    const [refreshing, setRefreshing] = React.useState(true);
 
     const { watchedEpisodeStore, watchListStore } = useStore();
 

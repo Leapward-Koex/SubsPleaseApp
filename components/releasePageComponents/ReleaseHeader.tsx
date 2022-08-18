@@ -1,6 +1,19 @@
 import * as React from 'react';
-import { View, Keyboard, useWindowDimensions, StyleSheet } from 'react-native';
-import { Appbar, Button, Dialog, Portal, Searchbar } from 'react-native-paper';
+import {
+    View,
+    Keyboard,
+    useWindowDimensions,
+    StyleSheet,
+    Appearance,
+} from 'react-native';
+import {
+    Appbar,
+    Button,
+    Dialog,
+    Portal,
+    Searchbar,
+    useTheme,
+} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { RadioButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,6 +42,7 @@ export const ReleaseTabHeader = ({
     onFilterChanged,
 }: ReleaseTabHeaderProps) => {
     const { width } = useWindowDimensions();
+    const { colors } = useTheme();
     const [searchQuery, setSearchQuery] = React.useState('');
     const [filterPanelShown, setFilterPanelShown] = React.useState(false);
 
@@ -37,6 +51,18 @@ export const ReleaseTabHeader = ({
         searchbar: { flexGrow: 1, width: width - 150 },
         showFilterButton: { paddingTop: 5, width: 50 },
         showFilterButtonContent: { flexDirection: 'row-reverse' },
+        backgroundStyle: {
+            backgroundColor:
+                Appearance.getColorScheme() !== 'light'
+                    ? colors.subsPleaseDark2
+                    : colors.subsPleaseLight3,
+        },
+        font: {
+            color:
+                Appearance.getColorScheme() !== 'light'
+                    ? colors.darkText
+                    : colors.lightText,
+        },
     });
 
     const onChangeText = (query: string) => {
@@ -70,6 +96,11 @@ export const ReleaseTabHeader = ({
         return <></>;
     };
 
+    const radioButtonStyle =
+        Appearance.getColorScheme() !== 'light'
+            ? colors.darkText
+            : colors.lightText;
+
     return (
         <>
             <Appbar.Header statusBarHeight={1}>
@@ -94,10 +125,11 @@ export const ReleaseTabHeader = ({
             </Appbar.Header>
             <Portal>
                 <Dialog
+                    style={styles.backgroundStyle}
                     visible={filterPanelShown}
                     onDismiss={toggleFilterPanel}
                 >
-                    <Dialog.Title>Filter</Dialog.Title>
+                    <Dialog.Title style={styles.font}>Filter</Dialog.Title>
                     <Dialog.Content>
                         <RadioButton.Group
                             onValueChange={(value) => {
@@ -107,18 +139,26 @@ export const ReleaseTabHeader = ({
                             value={filter}
                         >
                             <RadioButton.Item
+                                uncheckedColor={radioButtonStyle}
+                                labelStyle={styles.font}
                                 label="No filter"
                                 value={ShowFilter.None}
                             />
                             <RadioButton.Item
+                                uncheckedColor={radioButtonStyle}
+                                labelStyle={styles.font}
                                 label="New"
                                 value={ShowFilter.NewRelease}
                             />
                             <RadioButton.Item
+                                uncheckedColor={radioButtonStyle}
+                                labelStyle={styles.font}
                                 label="Watching shows"
                                 value={ShowFilter.Watching}
                             />
                             <RadioButton.Item
+                                uncheckedColor={radioButtonStyle}
+                                labelStyle={styles.font}
                                 label="Downloaded shows"
                                 value={ShowFilter.Downloaded}
                             />
