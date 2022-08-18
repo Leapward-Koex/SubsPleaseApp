@@ -3,15 +3,14 @@ import { Animated, Appearance, StyleSheet, Text, View } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useTheme } from 'react-native-paper';
 
-export const EmptyListPlaceholder = ({ show }: { show: boolean }) => {
+export const EmptyListPlaceholder = () => {
     const animation = React.useRef(new Animated.Value(0)).current;
     const { colors } = useTheme();
 
     React.useEffect(() => {
-        console.log('showing snca');
         Animated.timing(animation, {
             toValue: 1,
-            duration: 1500,
+            duration: 600,
             useNativeDriver: true,
         }).start();
     }, [animation]);
@@ -24,42 +23,34 @@ export const EmptyListPlaceholder = ({ show }: { show: boolean }) => {
                     : colors.lightText,
             fontSize: 20,
         },
+        background: {
+            backgroundColor:
+                Appearance.getColorScheme() !== 'light'
+                    ? colors.subsPleaseDark2
+                    : colors.subsPleaseLight3,
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            flexDirection: 'column',
+        },
     });
 
     const opacityMap = animation.interpolate({
-        inputRange: [0, 0.9],
+        inputRange: [0, 1],
         outputRange: [0, 1],
     });
-    const scaleMap = animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [0.9, 1],
-    });
-    const translateMap = animation.interpolate({
-        inputRange: [0, 1],
-        outputRange: [150, 0],
-    });
-    return show ? (
-        <View
-            style={{
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                flexDirection: 'column',
-                opacity: 0.5,
-            }}
-        >
+
+    return (
+        <View style={styles.background}>
             <Animated.View
+                needsOffscreenAlphaCompositing
                 style={{
                     opacity: opacityMap,
-                    transform: [
-                        { translateX: translateMap },
-                        { scale: scaleMap },
-                    ],
                 }}
             >
                 <LottieView
                     autoPlay
-                    speed={0.3}
+                    speed={1}
                     style={{
                         width: '70%',
                         marginTop: 20,
@@ -77,7 +68,5 @@ export const EmptyListPlaceholder = ({ show }: { show: boolean }) => {
                 <Text style={styles.font}>Nothing here..</Text>
             </Animated.View>
         </View>
-    ) : (
-        <></>
     );
 };

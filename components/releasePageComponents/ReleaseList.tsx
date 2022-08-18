@@ -48,8 +48,9 @@ export const ReleaseList = ({
     const getItemKey = (show: ShowInfo) => `${show.page}${show.episode}`;
     return (
         <>
-            <EmptyListPlaceholder show={showList.length === 0} />
-            {showList.length !== 0 && (
+            {showList.length === 0 && !refreshing ? (
+                <EmptyListPlaceholder />
+            ) : (
                 <FlatList
                     style={styles.backgroundStyle}
                     data={showList}
