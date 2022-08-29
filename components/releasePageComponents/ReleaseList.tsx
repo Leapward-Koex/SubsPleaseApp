@@ -58,6 +58,7 @@ export const ReleaseList = ({
                     onRefresh={onPullToRefresh}
                     renderItem={renderItem}
                     keyExtractor={getItemKey}
+                    fadingEdgeLength={50}
                 />
             )}
         </>
