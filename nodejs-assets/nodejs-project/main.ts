@@ -1,10 +1,10 @@
 const rn_bridge = require('rn-bridge');
-const WebTorrent = require('webtorrent');
-const express = require('express');
-const fs = require('fs');
-const cors = require('cors');
-const throttle = require('lodash.throttle');
-const jsonfile = require('jsonfile');
+import WebTorrent from 'webtorrent';
+import express from 'express';
+import fs from 'fs';
+import cors from 'cors';
+import throttle from 'lodash.throttle';
+import jsonfile from 'jsonfile';
 
 function log(...args) {
     rn_bridge.channel.send({

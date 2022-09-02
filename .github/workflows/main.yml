@@ -26,10 +26,19 @@ jobs:
             - name: Install react native application dependencies
               run: npm ci
 
-            - name: Install node-js application dependencies
-              run: cd nodejs-assets/nodejs-project && npm ci && cd ../../
+            - name: Build NodsJs project
+              shell: pwsh
+              run: |
+                  cd nodejs-assets/nodejs-project
+                  npm ci
+                  node ./esbuild.js
+                  Remove-Item './node_modules/'
+                  Remove-Item './main.ts'
+                  Remove-Item './sample*'
+                  Remove-Item './esbuild.js'
+                  cd ../../
 
-            ## configure cash for gradle : will help to reduce build time
+            ## configure cache for gradle : will help to reduce build time
             - name: Cache Gradle Wrapper
               uses: actions/cache@v2
               with:
