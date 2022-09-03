@@ -32,10 +32,10 @@ jobs:
                   cd nodejs-assets/nodejs-project
                   npm ci
                   node ./esbuild.js
-                  Remove-Item './node_modules/' -Recurse -Force
-                  Remove-Item './main.ts' -Force
-                  Remove-Item './sample*' -Force
-                  Remove-Item './esbuild.js' -Force
+                  # Remove-Item './node_modules/' -Recurse -Force
+                  # Remove-Item './main.ts' -Force
+                  # Remove-Item './sample*' -Force
+                  # Remove-Item './esbuild.js' -Force
                   cd ../../
 
             ## configure cache for gradle : will help to reduce build time
