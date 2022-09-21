@@ -1,7 +1,6 @@
 import { humanFileSize, openVideoIntent } from '../HelperFunctions';
 import notifee, { EventType } from '@notifee/react-native';
 import { logger } from './Logger';
-import { WakeLockInterface } from 'react-native-wake-lock';
 
 export interface EpisodeDownloadProgress {
     episodeNumber: string;
@@ -90,11 +89,6 @@ class DownloadNotificationManger {
                     sortKey: notificationSortValue,
                     groupId: this.groupId,
                 },
-            });
-            WakeLockInterface.isWakeLocked().then((wakeLocked) => {
-                if (!wakeLocked) {
-                    WakeLockInterface.setWakeLock();
-                }
             });
             this.downloads.push({
                 showName,
@@ -202,11 +196,6 @@ class DownloadNotificationManger {
         });
         await this.updateSummaryNotification(channelId);
         if (this.getInprogressDownloads().currentDownloadCount === 0) {
-            WakeLockInterface.isWakeLocked().then((wakeLocked) => {
-                if (wakeLocked) {
-                    WakeLockInterface.releaseWakeLock();
-                }
-            });
         }
     }
 

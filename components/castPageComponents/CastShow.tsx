@@ -17,7 +17,6 @@ import GoogleCast, {
 import { NetworkInfo } from 'react-native-network-info';
 import { Button, Card, Title, Text, useTheme } from 'react-native-paper';
 import Toast from 'react-native-toast-message';
-import { WakeLockInterface } from 'react-native-wake-lock';
 import {
     deleteFileIfExists,
     getExtensionlessFilepath,
@@ -201,12 +200,6 @@ export const CastShow = ({
             console.error('Cannot cast if local IP address is not available!');
         }
         console.log('Going to serve assets on:', localIp);
-        const isWakeLocked = await WakeLockInterface.isWakeLocked();
-        console.log('Is wake locked', isWakeLocked);
-        if (!isWakeLocked) {
-            console.log('Acquiring wakelock');
-            WakeLockInterface.setWakeLock();
-        }
         try {
             await client.loadMedia({
                 mediaInfo: {
@@ -253,7 +246,6 @@ export const CastShow = ({
             const fileToDelete = `${getExtensionlessFilepath(filePath)}.vtt`;
             console.log('Deleting subtitle file:', fileToDelete);
             deleteFileIfExists(fileToDelete);
-            WakeLockInterface.releaseWakeLock();
         });
         client.onMediaStatusUpdated((status) => {
             if (
@@ -263,7 +255,6 @@ export const CastShow = ({
                     status?.idleReason === MediaPlayerIdleReason.FINISHED)
             ) {
                 console.log('Releasing wakelock');
-                WakeLockInterface.releaseWakeLock();
             }
         });
     };

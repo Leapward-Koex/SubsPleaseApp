@@ -23,7 +23,6 @@ import {
 } from '../../HelperFunctions';
 import { NetworkInfo } from 'react-native-network-info';
 import GoogleCast from 'react-native-google-cast';
-import { WakeLockInterface } from 'react-native-wake-lock';
 
 export type CastPlayButtonType = {
     showName: string;
@@ -68,16 +67,11 @@ export const CastPlayButton = ({
                 sessionStartingEmitterSubscription =
                     sessionManager.onSessionStarting(() => {
                         console.log('Acquiring wakelock');
-                        WakeLockInterface.setWakeLock();
-                        WakeLockInterface.isWakeLocked().then((wakeLocked) => {
-                            console.log('Is wake locked', wakeLocked);
-                        });
                     });
 
                 sessionEndingEmitterSubscription =
                     sessionManager.onSessionEnded(() => {
                         console.log('Releasing wakelock due to ending session');
-                        WakeLockInterface.releaseWakeLock();
                         setIsCastingFile(false);
                     });
 
@@ -86,7 +80,6 @@ export const CastPlayButton = ({
                         console.log(
                             'Releasing wakelock due to failure to start session',
                         );
-                        WakeLockInterface.releaseWakeLock();
                         setIsCastingFile(false);
                     });
             }
@@ -98,7 +91,6 @@ export const CastPlayButton = ({
                         )}.vtt`;
                         console.log('Deleting subtitle file:', fileToDelete);
                         deleteFileIfExists(fileToDelete);
-                        WakeLockInterface.releaseWakeLock();
                         setIsCastingFile(false);
                     });
                 clientOnMediaStatusEmitterSubscription =
@@ -175,12 +167,6 @@ export const CastPlayButton = ({
             console.error('Cannot cast if local IP address is not available!');
         }
         console.log('Going to serve assets on:', localIp);
-        const isWakeLocked = await WakeLockInterface.isWakeLocked();
-        console.log('Is wake locked', isWakeLocked);
-        if (!isWakeLocked) {
-            console.log('Acquiring wakelock');
-            WakeLockInterface.setWakeLock();
-        }
         const parsedEpisodeNumber = tryParseInt(episodeNumber, 0);
         client
             .loadMedia({

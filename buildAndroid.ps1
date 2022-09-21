@@ -15,5 +15,5 @@ Remove-Item './app/src/main/res/drawable-xxhdpi/resources*' -Recurse
 Remove-Item './app/src/main/res/drawable-xxxhdpi/node_modules*' -Recurse
 Remove-Item './app/src/main/res/drawable-xxxhdpi/resources*' -Recurse
 
-./gradlew assembleRelease
+./gradlew app:assembleRelease
 cd ..

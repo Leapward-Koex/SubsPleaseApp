@@ -16,7 +16,6 @@ import Toast from 'react-native-toast-message';
 import { localWebServerManager } from './services/LocalWebServerManager';
 import { LogBox } from 'react-native';
 import { FileLogger } from 'react-native-file-logger';
-import { WakeLockInterface } from 'react-native-wake-lock';
 import notifee from '@notifee/react-native';
 import { configure } from 'mobx';
 import { RootStore, RootStoreProvider } from './stores/RootStore';
@@ -100,7 +99,6 @@ const App = () => {
             await notifee.cancelAllNotifications();
         })();
         return () => {
-            WakeLockInterface.releaseWakeLock();
             notifee.cancelAllNotifications();
             localWebServerManager.stopServer();
         };
