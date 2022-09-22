@@ -15,15 +15,15 @@ export interface EpisodeDownloadProgress {
 class DownloadNotificationManger {
     private downloads: EpisodeDownloadProgress[] = [];
     private notificationIndex = 0;
+    private foregroundNotificationId = '';
     private groupId = 'group-id';
     private summaryNotificationId = 'summary-notification-id';
     constructor() {
         notifee.registerForegroundService((notification) => {
             return new Promise(() => {
-                // Long running task...
+                console.log('notification callback');
             });
         });
-
         notifee.onBackgroundEvent(async ({ type, detail }) => {
             if (
                 type === EventType.PRESS &&
@@ -77,6 +77,10 @@ class DownloadNotificationManger {
                 id: 'Downloadnotifications',
                 name: 'Episode download notifications',
             });
+            const foreGroundServiceChannelId = await notifee.createChannel({
+                id: 'ForeGroundNotification',
+                name: 'Downloads in progress notification',
+            });
             console.log('Created or acquired a channel for notification');
             const notificationSortValue = (this.notificationIndex++).toString();
             const notificationId = await notifee.displayNotification({
@@ -86,8 +90,6 @@ class DownloadNotificationManger {
                     channelId,
                     onlyAlertOnce: true,
                     ongoing: true,
-                    asForegroundService: true,
-                    color: AndroidColor.CYAN,
                     colorized: true,
                     autoCancel: false,
                     smallIcon: 'subsplease_notification_icon',
@@ -108,6 +110,19 @@ class DownloadNotificationManger {
                 notificationSortValue,
                 currentSpeed: 0,
             });
+            if (this.downloads.length === 1) {
+                console.log('Showing foreground notification');
+                await notifee.displayNotification({
+                    title: 'Episode downloads in progress',
+                    body: 'test body',
+                    android: {
+                        channelId: foreGroundServiceChannelId,
+                        asForegroundService: true,
+                        color: AndroidColor.RED,
+                        colorized: true,
+                    },
+                });
+            }
         } catch (ex) {
             logger.error(
                 'Failed to create notification for',
@@ -156,8 +171,6 @@ class DownloadNotificationManger {
                 channelId,
                 onlyAlertOnce: true,
                 ongoing: true,
-                asForegroundService: true,
-                color: AndroidColor.CYAN,
                 colorized: true,
                 autoCancel: false,
                 smallIcon: 'subsplease_notification_icon',
@@ -208,6 +221,10 @@ class DownloadNotificationManger {
         });
         await this.updateSummaryNotification(channelId);
         if (this.getInprogressDownloads().currentDownloadCount === 0) {
+            console.log('Stopping foreground service');
+            await notifee.cancelNotification(this.foregroundNotificationId);
+            await notifee.stopForegroundService();
+            console.log('Stopped foreground service');
         }
     }
 
