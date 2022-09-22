@@ -1,5 +1,5 @@
 import { humanFileSize, openVideoIntent } from '../HelperFunctions';
-import notifee, { EventType } from '@notifee/react-native';
+import notifee, { AndroidColor, EventType } from '@notifee/react-native';
 import { logger } from './Logger';
 
 export interface EpisodeDownloadProgress {
@@ -18,6 +18,12 @@ class DownloadNotificationManger {
     private groupId = 'group-id';
     private summaryNotificationId = 'summary-notification-id';
     constructor() {
+        notifee.registerForegroundService((notification) => {
+            return new Promise(() => {
+                // Long running task...
+            });
+        });
+
         notifee.onBackgroundEvent(async ({ type, detail }) => {
             if (
                 type === EventType.PRESS &&
@@ -80,6 +86,9 @@ class DownloadNotificationManger {
                     channelId,
                     onlyAlertOnce: true,
                     ongoing: true,
+                    asForegroundService: true,
+                    color: AndroidColor.CYAN,
+                    colorized: true,
                     autoCancel: false,
                     smallIcon: 'subsplease_notification_icon',
                     progress: {
@@ -147,6 +156,9 @@ class DownloadNotificationManger {
                 channelId,
                 onlyAlertOnce: true,
                 ongoing: true,
+                asForegroundService: true,
+                color: AndroidColor.CYAN,
+                colorized: true,
                 autoCancel: false,
                 smallIcon: 'subsplease_notification_icon',
                 progress: {

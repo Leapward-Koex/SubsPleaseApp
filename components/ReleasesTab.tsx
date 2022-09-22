@@ -52,9 +52,26 @@ export const ReleasesTab = () => {
     React.useEffect(() => {
         if (searchTerm) {
             console.log('Searching for ', searchTerm);
-            SubsPleaseApi.getShowsFromSearch(searchTerm).then((result) => {
-                setShowList(result);
-            });
+            SubsPleaseApi.getShowsFromSearch(searchTerm).then(
+                async (result) => {
+                    setShowList(result);
+                    const savedShowList = await Storage.getItem<ShowInfo[]>(
+                        StorageKeys.Releases,
+                        [],
+                    );
+                    const uniqueShows = uniqBy(
+                        result.concat(savedShowList),
+                        (show) => `${show.page}${show.episode}`,
+                    );
+                    uniqueShows.sort(
+                        (a, b) =>
+                            new Date(b.release_date).getTime() -
+                            new Date(a.release_date).getTime(),
+                    );
+
+                    saveReleases(uniqueShows);
+                },
+            );
         }
     }, [searchTerm]);
 
