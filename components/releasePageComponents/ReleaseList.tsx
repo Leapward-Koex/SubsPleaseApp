@@ -15,6 +15,7 @@ import { EmptyListPlaceholder } from './EmptyListPlaceholder';
 type ReleaseListType = {
     showList: ShowInfo[];
     onPullToRefresh: () => void;
+    onItemLongPress: (showInfo: ShowInfo) => void;
     refreshing: boolean;
 };
 
@@ -22,6 +23,7 @@ export const ReleaseList = ({
     showList,
     refreshing,
     onPullToRefresh,
+    onItemLongPress,
 }: ReleaseListType) => {
     const { colors } = useTheme();
 
@@ -42,7 +44,13 @@ export const ReleaseList = ({
     });
 
     const renderItem = ({ item, index }: ListRenderItemInfo<ShowInfo>) => {
-        return <ReleaseShow index={index} showInfo={item} />;
+        return (
+            <ReleaseShow
+                index={index}
+                showInfo={item}
+                onItemLongPress={() => onItemLongPress(item)}
+            />
+        );
     };
 
     const getItemKey = (show: ShowInfo) => `${show.page}${show.episode}`;

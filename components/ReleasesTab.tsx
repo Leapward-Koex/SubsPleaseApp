@@ -6,6 +6,7 @@ import {
     LayoutAnimation,
     Text,
     Button,
+    Vibration,
 } from 'react-native';
 import { ShowInfo, WatchList } from '../models/models';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,6 +30,8 @@ import {
 import { observer } from 'mobx-react-lite';
 import { autorun } from 'mobx';
 import { useStore } from '../stores/RootStore';
+import Modal from 'react-native-modal/dist/modal';
+import { BottomModal } from './releasePageComponents/BottomModalComponents/BottomModal';
 
 export const ReleasesTab = () => {
     const [castingAvailable, setCastingAvailable] = React.useState(false);
@@ -40,12 +43,20 @@ export const ReleasesTab = () => {
     const [searchTerm, setSearchTerm] = React.useState('');
     const [refreshing, setRefreshing] = React.useState(true);
 
+    const [bottomModalVisible, setbottomModalVisible] = React.useState(false);
+    const [currentBottomModalShow, setCurrentBottomModalShow] =
+        React.useState<ShowInfo>();
+
     const { watchedEpisodeStore, watchListStore } = useStore();
 
     const styles = StyleSheet.create({
         viewStyles: {
             flexDirection: 'column',
             height: '100%',
+        },
+        bottomModal: {
+            justifyContent: 'flex-end',
+            margin: 0,
         },
     });
 
@@ -198,6 +209,10 @@ export const ReleasesTab = () => {
         setShowFilter(filterValue);
     }, []);
 
+    const onModalClosed = () => {
+        setbottomModalVisible(false);
+    };
+
     return (
         <View style={styles.viewStyles}>
             <ReleaseTabHeader
@@ -211,7 +226,25 @@ export const ReleasesTab = () => {
                 showList={filteredShowList}
                 onPullToRefresh={refreshShowData}
                 refreshing={refreshing}
+                onItemLongPress={(showInfo) => {
+                    Vibration.vibrate();
+                    setCurrentBottomModalShow(showInfo);
+                    setbottomModalVisible(true);
+                }}
             />
+            <Modal
+                isVisible={bottomModalVisible}
+                onSwipeComplete={onModalClosed}
+                onBackdropPress={onModalClosed}
+                onBackButtonPress={onModalClosed}
+                onModalHide={() => setCurrentBottomModalShow(undefined)}
+                swipeDirection={['down']}
+                style={styles.bottomModal}
+            >
+                {currentBottomModalShow && (
+                    <BottomModal showInfo={currentBottomModalShow} />
+                )}
+            </Modal>
         </View>
     );
 };

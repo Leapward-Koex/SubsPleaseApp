@@ -23,7 +23,7 @@ class TorrentClient {
     client;
     callbackId;
     torrent;
-    constructor(callbackId) {
+    constructor(callbackId: string) {
         this.client = new WebTorrent();
         this.callbackId = callbackId;
     }
@@ -87,6 +87,7 @@ class TorrentClient {
 
 class LocalWebServer {
     port;
+    app;
     constructor(port) {
         this.port = port;
     }

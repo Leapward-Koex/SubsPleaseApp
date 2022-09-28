@@ -44,6 +44,7 @@
         "react-native-fs": "^2.19.0",
         "react-native-gesture-handler": "^1.10.3",
         "react-native-google-cast": "^4.2.4",
+        "react-native-modal": "^13.0.1",
         "react-native-network-info": "^5.2.1",
         "react-native-paper": "^4.12.4",
         "react-native-progress": "^5.0.0",
