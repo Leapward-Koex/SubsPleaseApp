@@ -227,9 +227,9 @@ export const ReleasesTab = () => {
                 onPullToRefresh={refreshShowData}
                 refreshing={refreshing}
                 onItemLongPress={(showInfo) => {
-                    Vibration.vibrate();
                     setCurrentBottomModalShow(showInfo);
                     setbottomModalVisible(true);
+                    Vibration.vibrate(16);
                 }}
             />
             <Modal
