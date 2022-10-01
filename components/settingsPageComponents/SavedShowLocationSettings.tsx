@@ -10,7 +10,7 @@ import {
     useTheme,
 } from 'react-native-paper';
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
-import { promiseEach } from '../../HelperFunctions';
+import { deleteFolder, openFolder, promiseEach } from '../../HelperFunctions';
 import { ReleasesTab } from '../ReleasesTab';
 import { WatchListTab } from '../WatchListTab';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -105,6 +105,15 @@ export const SavedShowLocationSettings = () => {
         await Storage.setItem(StorageKeys.ShowPaths, { shows: filteredShows });
     };
 
+    const onShowRemovePress = async (show: {
+        showName: string;
+        showPath: string;
+    }) => {
+        removeShowFromSavedPaths(show.showName);
+        // if setting
+        await deleteFolder(show.showPath);
+    };
+
     const getShowPaths = () => {
         if (savedShowPaths?.shows.length === 0) {
             return (
@@ -128,7 +137,7 @@ export const SavedShowLocationSettings = () => {
         }
         return savedShowPaths?.shows.map((show, index) => {
             return (
-                <View
+                <TouchableRipple
                     key={index}
                     style={{
                         position: 'relative',
@@ -141,36 +150,47 @@ export const SavedShowLocationSettings = () => {
                                 ? colors.subsPleaseLight3
                                 : colors.subsPleaseDark1,
                     }}
+                    onPress={() => openFolder(show.showPath)}
                 >
-                    <View style={{ width: width - 120 }}>
-                        <Text
-                            style={Object.assign({ fontSize: 20 }, textStyle)}
-                        >
-                            {show.showName}
-                        </Text>
-                    </View>
-                    <View style={{ marginLeft: 10, marginTop: 5 }}>
-                        <Text
-                            style={Object.assign({ fontSize: 16 }, textStyle)}
-                        >
-                            {show.showPath}
-                        </Text>
-                    </View>
-                    <Button
-                        mode="text"
-                        compact
-                        color={colors.tertiary}
-                        onPress={() => removeShowFromSavedPaths(show.showName)}
-                        style={{ position: 'absolute', right: 4, top: 4 }}
-                    >
-                        <Icon
-                            name="trash-can-outline"
-                            size={20}
+                    <View>
+                        <View style={{ width: width - 120 }}>
+                            <Text
+                                style={Object.assign(
+                                    { fontSize: 20 },
+                                    textStyle,
+                                )}
+                            >
+                                {show.showName}
+                            </Text>
+                        </View>
+                        <View style={{ marginLeft: 10, marginTop: 5 }}>
+                            <Text
+                                style={Object.assign(
+                                    { fontSize: 16 },
+                                    textStyle,
+                                )}
+                            >
+                                {show.showPath}
+                            </Text>
+                        </View>
+                        <Button
+                            mode="text"
+                            compact
                             color={colors.tertiary}
-                        />
-                        <Text style={{ color: colors.tertiary }}>Remove</Text>
-                    </Button>
-                </View>
+                            onPress={() => onShowRemovePress(show)}
+                            style={{ position: 'absolute', right: 4, top: 4 }}
+                        >
+                            <Icon
+                                name="trash-can-outline"
+                                size={20}
+                                color={colors.tertiary}
+                            />
+                            <Text style={{ color: colors.tertiary }}>
+                                Remove
+                            </Text>
+                        </Button>
+                    </View>
+                </TouchableRipple>
             );
         });
     };

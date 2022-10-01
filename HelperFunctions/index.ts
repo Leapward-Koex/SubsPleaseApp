@@ -84,6 +84,11 @@ interface FilePathModuleInterface {
         filePath: string,
         callback: (success: boolean) => void,
     ): void;
+    deleteFolder(
+        folderPath: string,
+        callback: (success: boolean) => void,
+    ): void;
+    openFolder(folderPath: string, callback: (success: boolean) => void): void;
     ensureFolderExists(
         folderPath: string,
         callback: (success: boolean) => void,
@@ -127,6 +132,22 @@ export const fileExists = (filePath: string) => {
 export const deleteFileIfExists = (filePath: string) => {
     return new Promise<boolean>((resolve) => {
         FilePathModuleTyped.deleteFileIfExists(filePath, (success) =>
+            resolve(success),
+        );
+    });
+};
+
+export const deleteFolder = (folderPath: string) => {
+    return new Promise<boolean>((resolve) => {
+        FilePathModuleTyped.deleteFolder(folderPath, (success) =>
+            resolve(success),
+        );
+    });
+};
+
+export const openFolder = (folderPath: string) => {
+    return new Promise<boolean>((resolve) => {
+        FilePathModuleTyped.openFolder(folderPath, (success) =>
             resolve(success),
         );
     });

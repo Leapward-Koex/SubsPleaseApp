@@ -132,6 +132,30 @@ public class FilePathModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void openFolder(final String folderPath, Callback callBack) {
+        Intent intent = new Intent(Intent.ACTION_PICK);
+
+        intent.setDataAndType(Uri.parse(folderPath), "*/*");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getReactApplicationContext().startActivity(intent);
+    }
+
+    @ReactMethod
+    public void deleteFolder(final String fileOrDirectoryPath, Callback callBack) {
+        deleteRecursive(new File(fileOrDirectoryPath));
+        callBack.invoke(true);
+    }
+
+    private void deleteRecursive(File fileOrDirectory) {
+		if (fileOrDirectory.exists() && fileOrDirectory.isDirectory()) {
+			for (File child : fileOrDirectory.listFiles()) {
+				deleteRecursive(child);
+			}
+		}
+		fileOrDirectory.delete();
+	}
+
+    @ReactMethod
     public void ensureFolderExists(final String folderPath, Callback callBack) {
         File file = new File(folderPath);
         if (file.exists()) {
