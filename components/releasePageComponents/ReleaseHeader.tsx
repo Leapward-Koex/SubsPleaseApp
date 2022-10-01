@@ -100,7 +100,6 @@ export const ReleaseTabHeader = ({
         Appearance.getColorScheme() !== 'light'
             ? colors.darkText
             : colors.lightText;
-
     return (
         <>
             <Appbar.Header statusBarHeight={1}>
