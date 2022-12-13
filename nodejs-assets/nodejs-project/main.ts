@@ -1,12 +1,12 @@
 const rn_bridge = require('rn-bridge');
 import WebTorrent from 'webtorrent';
-import express from 'express';
 import fs from 'fs';
 import cors from 'cors';
 import throttle from 'lodash.throttle';
 import jsonfile from 'jsonfile';
+import express, { Express, Request, Response } from 'express';
 
-function log(...args) {
+function log(...args: any[]) {
     rn_bridge.channel.send({
         name: 'log',
         text: args.join(' '),
@@ -16,19 +16,19 @@ function log(...args) {
 console.log = log;
 console.error = log;
 
-const torrentObjects = {};
-let localServer = null;
+const torrentObjects: { [key: string]: TorrentClient } = {};
+let localServer: LocalWebServer | null = null;
 
 class TorrentClient {
     client;
     callbackId;
-    torrent;
+    torrent: WebTorrent.Torrent | undefined;
     constructor(callbackId: string) {
         this.client = new WebTorrent();
         this.callbackId = callbackId;
     }
 
-    downloadTorrent(magnetUri, location) {
+    downloadTorrent(magnetUri: string, location: string) {
         console.log('Starting torrent', this.callbackId);
         this.client.add(magnetUri, { path: location }, (torrent) => {
             // Got torrent metadata!
@@ -38,6 +38,8 @@ class TorrentClient {
                 size: torrent.length,
             });
             this.torrent = torrent;
+            let chunkedDownloadedBytes = 0;
+            let chunkedUploadedBytes = 0;
             console.log('Torrent client is downloading:', torrent.infoHash);
             console.log(
                 'Torrent data, file path:',
@@ -50,13 +52,38 @@ class TorrentClient {
                     callbackId: this.callbackId,
                     name: 'torrent-progress',
                     downloaded: torrent.downloaded,
+                    uploaded: torrent.uploaded,
                     downloadSpeed: torrent.downloadSpeed,
+
                     uploadSpeed: torrent.uploadSpeed,
                     progress: torrent.progress,
                 });
             }, 1000);
+            const throttledDownloadBytesHandler = throttle(() => {
+                rn_bridge.channel.send({
+                    callbackId: this.callbackId,
+                    name: 'torrent-download-bytes',
+                    bytes: chunkedDownloadedBytes,
+                });
+                chunkedDownloadedBytes = 0;
+            }, 1000);
+            const throttledUploadBytesHandler = throttle(() => {
+                rn_bridge.channel.send({
+                    callbackId: this.callbackId,
+                    name: 'torrent-upload-bytes',
+                    bytes: chunkedUploadedBytes,
+                });
+                chunkedUploadedBytes = 0;
+            }, 1000);
             torrent.on('download', (bytes) => {
                 throttledDownloadHandler();
+                chunkedDownloadedBytes += bytes;
+                throttledDownloadBytesHandler();
+            });
+            torrent.on('upload', (bytes) => {
+                throttledDownloadHandler();
+                chunkedUploadedBytes += bytes;
+                throttledUploadBytesHandler();
             });
             torrent.on('done', () => {
                 console.log('Torrent downloaded');
@@ -87,12 +114,12 @@ class TorrentClient {
 
 class LocalWebServer {
     port;
-    app;
+    app: Express | undefined;
     constructor(port) {
         this.port = port;
     }
 
-    startServer(callback) {
+    startServer(callback: Function) {
         console.log('Starting local webserver on port', this.port);
         this.app = express();
         this.app.use(cors());
@@ -102,7 +129,9 @@ class LocalWebServer {
         });
 
         this.app.get('/video', function (req, res) {
-            const localFilePathToPlay = decodeURIComponent(req.query.file);
+            const localFilePathToPlay = decodeURIComponent(
+                req.query.file as any,
+            );
             console.log('Handling video route', localFilePathToPlay);
             if (!localFilePathToPlay) {
                 console.error('No local file to play setup!');
@@ -139,7 +168,9 @@ class LocalWebServer {
         });
 
         this.app.get('/vtt', function (req, res) {
-            const localFilePathToPlay = decodeURIComponent(req.query.file);
+            const localFilePathToPlay = decodeURIComponent(
+                req.query.file as any,
+            );
             console.log('Handling vtt subtitle route');
             const filePathWithoutExtension = localFilePathToPlay
                 .split('.')
@@ -151,17 +182,19 @@ class LocalWebServer {
     }
 
     stopServer() {
-        this.app.close();
+        if (this.app) {
+            (this.app as any).close();
+        }
     }
 }
 
 class VttTidier {
     callbackId;
-    constructor(callbackId) {
+    constructor(callbackId: string) {
         console.log('Creating VTT Tidier with', callbackId);
         this.callbackId = callbackId;
     }
-    splitEntries(subtitles) {
+    splitEntries(subtitles: string) {
         const dialogEntries = subtitles.split(/\n\n/);
         dialogEntries.shift(); // Remove the WEBTTV line.
         const keyedDialogEntries = dialogEntries
@@ -179,7 +212,12 @@ class VttTidier {
         );
         return keyedDialogEntries;
     }
-    removeBackgrounds(keyedDialogEntries) {
+    removeBackgrounds(
+        keyedDialogEntries: {
+            time: string;
+            text: string;
+        }[],
+    ) {
         console.log('Removing backgrounds');
         return keyedDialogEntries.filter((keyedDialogEntry) => {
             return !keyedDialogEntry.text.match(
@@ -188,8 +226,16 @@ class VttTidier {
         });
     }
 
-    removeDuplicateText(keyedDialogEntries) {
-        const dedupedDialogs = [];
+    removeDuplicateText(
+        keyedDialogEntries: {
+            time: string;
+            text: string;
+        }[],
+    ) {
+        const dedupedDialogs: {
+            time: string;
+            text: string;
+        }[] = [];
         keyedDialogEntries.forEach((keyedDialogEntry) => {
             const duplicatedItem = dedupedDialogs.find((dialog) => {
                 const sameDialog = dialog.text === keyedDialogEntry.text;
@@ -218,7 +264,7 @@ class VttTidier {
         return dedupedDialogs;
     }
 
-    markSignText(keyedDialogEntries) {
+    markSignText(keyedDialogEntries: { time: string; text: string }[]) {
         keyedDialogEntries.forEach((entry) => {
             entry.text = entry.text.replace(/{=\d+}/gm, '[Sign] ');
         });
@@ -226,7 +272,9 @@ class VttTidier {
         return keyedDialogEntries;
     }
 
-    serializeDialogEntries(keyedDialogEntries) {
+    serializeDialogEntries(
+        keyedDialogEntries: { time: string; text: string }[],
+    ) {
         const dialogEntries = keyedDialogEntries.map((keyedEntry) => {
             return `${keyedEntry.time}\n${keyedEntry.text}`;
         });
@@ -238,7 +286,7 @@ class VttTidier {
         return vttText;
     }
 
-    tidyVttFile(path) {
+    tidyVttFile(path: string) {
         fs.readFile(path, 'utf8', (err, data) => {
             if (err) {
                 console.error('Failed to read text file', err);
@@ -325,8 +373,8 @@ rn_bridge.channel.on('message', (msg) => {
                 });
             });
         } else if (msg.name === 'stop-server') {
-            console.log('Starting local webserver', JSON.stringify(msg));
-            if (localServer) {
+            console.log('Stopping local webserver', JSON.stringify(msg));
+            if (!localServer) {
                 console.log('No webserver, cant stop!');
                 return;
             }

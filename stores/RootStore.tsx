@@ -1,13 +1,16 @@
 import React from 'react';
+import { DownloadStatisticsStore } from './DownloadStatisticsStore';
 import { WatchedEpisodeStore } from './WatchedEpisodesStore';
 import { WatchListStore } from './WatchListStore';
 
 export class RootStore {
     watchedEpisodeStore: WatchedEpisodeStore;
     watchListStore: WatchListStore;
+    downloadStatisticsStore: DownloadStatisticsStore;
     constructor() {
         this.watchedEpisodeStore = new WatchedEpisodeStore(this);
         this.watchListStore = new WatchListStore(this);
+        this.downloadStatisticsStore = new DownloadStatisticsStore(this);
     }
 }
 

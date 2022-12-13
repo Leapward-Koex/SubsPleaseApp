@@ -31,6 +31,7 @@ import { CheckBoxSettingsBox } from './settingsPageComponents/CheckBoxSettingBox
 import { TextSettingsBox } from './settingsPageComponents/TextSettingsBox';
 import { Storage } from '../services/Storage';
 import { useNavigation } from '@react-navigation/native';
+import { DownloadStatistics } from './settingsPageComponents/DownloadStatistics';
 
 export const SettingsTab = () => {
     const { colors } = useTheme();
@@ -189,6 +190,7 @@ export const SettingsTab = () => {
                         );
                     }}
                 />
+                <DownloadStatistics />
                 <TextSettingsBox
                     value={cacheLength}
                     text="Release list cache count"

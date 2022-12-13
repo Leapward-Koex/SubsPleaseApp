@@ -12,5 +12,11 @@
         "jsonfile": "^6.1.0",
         "lodash.throttle": "^4.1.1",
         "webtorrent": "^1.8.13"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.12",
+        "@types/express": "^4.17.14",
+        "@types/jsonfile": "^6.1.0",
+        "@types/lodash.throttle": "^4.1.7"
     }
 }

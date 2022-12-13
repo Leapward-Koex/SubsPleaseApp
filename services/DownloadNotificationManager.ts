@@ -18,6 +18,7 @@ class DownloadNotificationManger {
     private foregroundNotificationId = '';
     private groupId = 'group-id';
     private summaryNotificationId = 'summary-notification-id';
+    private channelId: string | undefined;
     constructor() {
         notifee.registerForegroundService((notification) => {
             return new Promise(() => {
@@ -73,10 +74,13 @@ class DownloadNotificationManger {
     ) {
         try {
             console.log('Showing notification for', showName, episodeNumber);
-            const channelId = await notifee.createChannel({
-                id: 'Downloadnotifications',
-                name: 'Episode download notifications',
-            });
+            if (this.downloads.length === 0) {
+                this.channelId = await notifee.createChannel({
+                    id: 'Downloadnotifications',
+                    name: 'Episode download notifications',
+                });
+            }
+
             const foreGroundServiceChannelId = await notifee.createChannel({
                 id: 'ForeGroundNotification',
                 name: 'Downloads in progress notification',
@@ -87,7 +91,7 @@ class DownloadNotificationManger {
                 id: showName + episodeNumber,
                 title: `${showName} ep: ${episodeNumber}`,
                 android: {
-                    channelId,
+                    channelId: this.channelId,
                     onlyAlertOnce: true,
                     ongoing: true,
                     colorized: true,
@@ -152,26 +156,21 @@ class DownloadNotificationManger {
         downloadingEpisode.downloaded = totalDownloaded;
         downloadingEpisode.currentSpeed = currentSpeed;
 
-        const channelId = await notifee.createChannel({
-            id: 'Downloadnotifications',
-            name: 'Episode download notifications',
-        });
         await notifee.displayNotification({
-            id: showName + episodeNumber,
-            title: `${showName} ep: ${episodeNumber}`,
-            body: `${Math.round(
+            id: downloadingEpisode.notificationId,
+            title: `${Math.round(
                 (downloadingEpisode.downloaded / downloadingEpisode.totalSize) *
                     100,
-            )}% - ${humanFileSize(
+            )}% - ${showName} ep: ${episodeNumber}`,
+            body: `${humanFileSize(
                 downloadingEpisode.downloaded,
             )} / ${humanFileSize(
                 downloadingEpisode.totalSize,
             )}. ${humanFileSize(currentSpeed)}/s`,
             android: {
-                channelId,
+                channelId: this.channelId,
                 onlyAlertOnce: true,
                 ongoing: true,
-                colorized: true,
                 autoCancel: false,
                 smallIcon: 'subsplease_notification_icon',
                 progress: {
@@ -182,7 +181,7 @@ class DownloadNotificationManger {
                 groupId: this.groupId,
             },
         });
-        await this.updateSummaryNotification(channelId);
+        await this.updateSummaryNotification(this.channelId!);
     }
 
     public async completeDownload(
@@ -202,10 +201,6 @@ class DownloadNotificationManger {
             return true;
         });
         // Show complete notification
-        const channelId = await notifee.createChannel({
-            id: 'Downloadnotifications',
-            name: 'Episode download notifications',
-        });
         await notifee.displayNotification({
             id: showName + episodeNumber,
             title: `${showName} ep: ${episodeNumber}`,
@@ -215,11 +210,11 @@ class DownloadNotificationManger {
             },
             android: {
                 smallIcon: 'subsplease_notification_complete_icon',
-                channelId,
+                channelId: this.channelId,
                 groupId: this.groupId,
             },
         });
-        await this.updateSummaryNotification(channelId);
+        await this.updateSummaryNotification(this.channelId!);
         if (this.getInprogressDownloads().currentDownloadCount === 0) {
             console.log('Stopping foreground service');
             await notifee.cancelNotification(this.foregroundNotificationId);

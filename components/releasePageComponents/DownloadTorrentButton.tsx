@@ -20,6 +20,7 @@ import { styledToast } from '../../services/ToastService';
 import { useInterpolateConfig } from 'react-native-reanimated';
 import { Storage } from '../../services/Storage';
 import { useNavigation } from '@react-navigation/native';
+import { useStore } from '../../stores/RootStore';
 
 type DownloadTorrentButtonProps = {
     resolution: string;
@@ -59,6 +60,7 @@ export const DownloadTorrentButton = ({
     onShowDownloaded,
 }: DownloadTorrentButtonProps) => {
     const navigation = useNavigation<any>();
+    const { downloadStatisticsStore } = useStore();
     const desiredResoltion = availableDownloads.find(
         (showDownload) => showDownload.res === resolution,
     );
@@ -177,6 +179,12 @@ export const DownloadTorrentButton = ({
                             bytesDownloadSpeed,
                         );
                     }
+                } else if (msg.name === 'torrent-download-bytes') {
+                    downloadStatisticsStore.addToTotalDownloadedBytes(
+                        msg.bytes,
+                    );
+                } else if (msg.name === 'torrent-upload-bytes') {
+                    downloadStatisticsStore.addToTotalUploadedBytes(msg.bytes);
                 } else if (msg.name === 'torrent-done') {
                     onShowDownloaded();
                     await downloadedShows.addDownloadedShow(
