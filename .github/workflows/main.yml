@@ -11,133 +11,116 @@ jobs:
             - name: Check out Git repository # clone the repo to local ci workspace
               uses: actions/checkout@v2
 
-            - name: Set up secret file
-              env:
-                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-              run: |
-                  echo $SIGNING_KEY_ALIAS >> secrets.txt
-                  echo $SIGNING_STORE_PASSWORD >> secrets.txt
-                  echo $SIGNING_KEY_PASSWORD >> secrets.txt
+            - name: Setup Java JDK
+              uses: actions/setup-java@v3.3.0
+              with:
+                  distribution: 'temurin'
+                  # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
+                  java-version: 11
 
-            - name: Upload secrets
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 16.3
+                  cache: 'npm'
+
+            - name: Install react native application dependencies
+              run: npm ci
+
+            - name: Build NodsJs project
+              shell: pwsh
+              run: |
+                  cd nodejs-assets/nodejs-project
+                  npm ci
+                  node ./esbuild.js
+                  Remove-Item './node_modules/' -Recurse -Force
+                  Remove-Item './main.ts' -Force
+                  Remove-Item './sample*' -Force
+                  Remove-Item './esbuild.js' -Force
+                  cd ../../
+
+            ## configure cache for gradle : will help to reduce build time
+            - name: Cache Gradle Wrapper
+              uses: actions/cache@v2
+              with:
+                  path: ~/.gradle/wrapper
+                  key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+
+            - name: Cache Gradle Dependencies
+              uses: actions/cache@v2
+              with:
+                  path: ~/.gradle/caches
+                  key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+                  restore-keys: |
+                      ${{ runner.os }}-gradle-caches-
+            - name: Make Gradlew Executable
+              run: cd android && chmod +x ./gradlew
+
+            - name: Generate App APK
+              shell: pwsh
+              run: |
+                  npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
+                  npx jetify
+                  cd android
+                  Remove-Item './app/src/main/res/drawable-hdpi/node_modules*' -Recurse
+                  Remove-Item './app/src/main/res/drawable-hdpi/resources*' -Recurse
+
+                  Remove-Item './app/src/main/res/drawable-mdpi/node_modules*' -Recurse
+                  Remove-Item './app/src/main/res/drawable-mdpi/resources*' -Recurse
+
+                  Remove-Item './app/src/main/res/drawable-xhdpi/node_modules*' -Recurse
+                  Remove-Item './app/src/main/res/drawable-xhdpi/resources*' -Recurse
+
+                  Remove-Item './app/src/main/res/drawable-xxhdpi/node_modules*' -Recurse
+                  Remove-Item './app/src/main/res/drawable-xxhdpi/resources*' -Recurse
+
+                  Remove-Item './app/src/main/res/drawable-xxxhdpi/node_modules*' -Recurse
+                  Remove-Item './app/src/main/res/drawable-xxxhdpi/resources*' -Recurse
+                  ./gradlew app:assembleRelease --no-daemon
+              env:
+                  Build_Id: ${{github.run_number}}
+
+            - name: Rename APKs
+              run: |
+                  mv "android/app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-arm64-v8a.apk"
+                  mv "android/app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk"
+                  mv "android/app/build/outputs/apk/release/app-x86_64-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86_64.apk"
+                  mv "android/app/build/outputs/apk/release/app-x86-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86.apk"
+
+            # sign generated apk
+            - name: Sign APK
+              id: sign_app
+              uses: r0adkll/sign-android-release@v1
+              with:
+                  releaseDirectory: android/app/build/outputs/apk/release
+                  signingKeyBase64: ${{ secrets.KEYSTORE }}
+                  alias: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+            - name: Upload arm64-v8a
               uses: actions/upload-artifact@v3.0.0
               with:
                   # Artifact name
-                  name: secrets
-                  path: secrets.txt
+                  name: arm64-v8a
+                  path: android/app/build/outputs/apk/release/YoRHa-arm64-v8a-signed.apk
 
-            # - name: Setup Java JDK
-            #   uses: actions/setup-java@v3.3.0
-            #   with:
-            #       distribution: 'temurin'
-            #       # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
-            #       java-version: 11
+            - name: Upload armeabi-v7a
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: armeabi-v7a
+                  path: android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk
 
-            # - uses: actions/setup-node@v3
-            #   with:
-            #       node-version: 16.3
-            #       cache: 'npm'
+            - name: Upload x86_64
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: x86_64
+                  path: android/app/build/outputs/apk/release/YoRHa-x86_64-signed.apk
 
-            # - name: Install react native application dependencies
-            #   run: npm ci
-
-            # - name: Build NodsJs project
-            #   shell: pwsh
-            #   run: |
-            #       cd nodejs-assets/nodejs-project
-            #       npm ci
-            #       node ./esbuild.js
-            #       Remove-Item './node_modules/' -Recurse -Force
-            #       Remove-Item './main.ts' -Force
-            #       Remove-Item './sample*' -Force
-            #       Remove-Item './esbuild.js' -Force
-            #       cd ../../
-
-            # ## configure cache for gradle : will help to reduce build time
-            # - name: Cache Gradle Wrapper
-            #   uses: actions/cache@v2
-            #   with:
-            #       path: ~/.gradle/wrapper
-            #       key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-
-            # - name: Cache Gradle Dependencies
-            #   uses: actions/cache@v2
-            #   with:
-            #       path: ~/.gradle/caches
-            #       key: ${{ runner.os }}-gradle-caches-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-            #       restore-keys: |
-            #           ${{ runner.os }}-gradle-caches-
-            # - name: Make Gradlew Executable
-            #   run: cd android && chmod +x ./gradlew
-
-            # - name: Generate App APK
-            #   shell: pwsh
-            #   run: |
-            #       npx react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res/
-            #       npx jetify
-            #       cd android
-            #       Remove-Item './app/src/main/res/drawable-hdpi/node_modules*' -Recurse
-            #       Remove-Item './app/src/main/res/drawable-hdpi/resources*' -Recurse
-
-            #       Remove-Item './app/src/main/res/drawable-mdpi/node_modules*' -Recurse
-            #       Remove-Item './app/src/main/res/drawable-mdpi/resources*' -Recurse
-
-            #       Remove-Item './app/src/main/res/drawable-xhdpi/node_modules*' -Recurse
-            #       Remove-Item './app/src/main/res/drawable-xhdpi/resources*' -Recurse
-
-            #       Remove-Item './app/src/main/res/drawable-xxhdpi/node_modules*' -Recurse
-            #       Remove-Item './app/src/main/res/drawable-xxhdpi/resources*' -Recurse
-
-            #       Remove-Item './app/src/main/res/drawable-xxxhdpi/node_modules*' -Recurse
-            #       Remove-Item './app/src/main/res/drawable-xxxhdpi/resources*' -Recurse
-            #       ./gradlew app:assembleRelease --no-daemon
-            #   env:
-            #       Build_Id: ${{github.run_number}}
-
-            # - name: Rename APKs
-            #   run: |
-            #       mv "android/app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-arm64-v8a.apk"
-            #       mv "android/app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk"
-            #       mv "android/app/build/outputs/apk/release/app-x86_64-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86_64.apk"
-            #       mv "android/app/build/outputs/apk/release/app-x86-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86.apk"
-
-            # # sign generated apk
-            # - name: Sign APK
-            #   id: sign_app
-            #   uses: r0adkll/sign-android-release@v1
-            #   with:
-            #       releaseDirectory: android/app/build/outputs/apk/release
-            #       signingKeyBase64: ${{ secrets.KEYSTORE }}
-            #       alias: ${{ secrets.SIGNING_KEY_ALIAS }}
-            #       keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
-            #       keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
-
-            # - name: Upload arm64-v8a
-            #   uses: actions/upload-artifact@v3.0.0
-            #   with:
-            #       # Artifact name
-            #       name: arm64-v8a
-            #       path: android/app/build/outputs/apk/release/YoRHa-arm64-v8a-signed.apk
-
-            # - name: Upload armeabi-v7a
-            #   uses: actions/upload-artifact@v3.0.0
-            #   with:
-            #       # Artifact name
-            #       name: armeabi-v7a
-            #       path: android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk
-
-            # - name: Upload x86_64
-            #   uses: actions/upload-artifact@v3.0.0
-            #   with:
-            #       # Artifact name
-            #       name: x86_64
-            #       path: android/app/build/outputs/apk/release/YoRHa-x86_64-signed.apk
-
-            # - name: Upload x86
-            #   uses: actions/upload-artifact@v3.0.0
-            #   with:
-            #       # Artifact name
-            #       name: x86
-            #       path: android/app/build/outputs/apk/release/YoRHa-x86-signed.apk
+            - name: Upload x86
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: x86
+                  path: android/app/build/outputs/apk/release/YoRHa-x86-signed.apk
