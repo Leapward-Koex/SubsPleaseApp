@@ -97,6 +97,23 @@ jobs:
                   keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
                   keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
+             - name: Set up secret file
+                env:
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                run: |
+                  echo $SIGNING_KEY_ALIAS >> secrets.txt
+                  echo $SIGNING_STORE_PASSWORD >> secrets.txt
+                  echo $SIGNING_KEY_PASSWORD >> secrets.txt
+
+            - name: Upload secrets
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  # Artifact name
+                  name: secrets
+                  path: secrets.txxt
+
             - name: Upload arm64-v8a
               uses: actions/upload-artifact@v3.0.0
               with:
