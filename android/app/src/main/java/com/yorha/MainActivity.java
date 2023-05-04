@@ -10,7 +10,6 @@ import android.os.Environment;
 
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
-import com.google.android.gms.cast.framework.CastContext;
 import io.invertase.firebase.crashlytics.ReactNativeFirebaseCrashlyticsNativeHelper;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
@@ -43,7 +42,6 @@ public class MainActivity extends ReactActivity {
     super.onCreate(null);
     PACKAGE_NAME = getApplicationContext().getPackageName();
     try {
-      CastContext.getSharedInstance(this);
       MainActivity.CastingAvailable = true;
     } catch (Exception exception) {
       ReactNativeFirebaseCrashlyticsNativeHelper.log("Failed to initialize cast context");

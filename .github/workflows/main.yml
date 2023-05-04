@@ -84,7 +84,6 @@ jobs:
                   mv "android/app/build/outputs/apk/release/app-arm64-v8a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-arm64-v8a.apk"
                   mv "android/app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk"
                   mv "android/app/build/outputs/apk/release/app-x86_64-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86_64.apk"
-                  mv "android/app/build/outputs/apk/release/app-x86-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86.apk"
 
             # sign generated apk
             - name: Sign APK
@@ -117,10 +116,3 @@ jobs:
                   # Artifact name
                   name: x86_64
                   path: android/app/build/outputs/apk/release/YoRHa-x86_64-signed.apk
-
-            - name: Upload x86
-              uses: actions/upload-artifact@v3.0.0
-              with:
-                  # Artifact name
-                  name: x86
-                  path: android/app/build/outputs/apk/release/YoRHa-x86-signed.apk

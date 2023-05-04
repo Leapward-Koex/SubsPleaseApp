@@ -10,9 +10,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JSIModulePackage;
 import com.facebook.soloader.SoLoader;
-import com.horcrux.svg.SvgPackage;
 import com.yorha.newarchitecture.MainApplicationReactNativeHost;
-import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -29,7 +27,6 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected List<ReactPackage> getPackages() {
            List<ReactPackage> packages = new PackageList(this).getPackages();
-           packages.add(new SvgPackage());
            packages.add(new YorhaPackage());
            return packages;
         }
