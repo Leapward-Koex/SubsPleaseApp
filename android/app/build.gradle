@@ -135,6 +135,7 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+			resValue "string", "app_name", "YoRHa"
         }
         release {
             // signingConfig signingConfigs.release

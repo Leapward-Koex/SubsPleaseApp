@@ -11,7 +11,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { EmitterSubscription, View } from 'react-native';
 import { localWebServerManager } from '../../services/LocalWebServerManager';
-import ReactNativeBlobUtil from 'react-native-blob-util';
 import { convert } from '../../services/converter';
 import Toast from 'react-native-toast-message';
 import {
