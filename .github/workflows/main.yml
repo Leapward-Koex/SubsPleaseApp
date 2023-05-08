@@ -87,7 +87,7 @@ jobs:
               uses: actions/upload-artifact@v3.0.0
               with:
                   name: Universal
-                  path: android/app/build/outputs/apk/release/YoRHa.apk
+                  path: android/app/build/outputs/apk/release/YoRHa-signed.apk
 
             # - name: Upload arm64-v8a
             #   uses: actions/upload-artifact@v3.0.0

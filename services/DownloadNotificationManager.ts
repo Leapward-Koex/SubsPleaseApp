@@ -20,11 +20,6 @@ class DownloadNotificationManger {
     private summaryNotificationId = 'summary-notification-id';
     private channelId: string | undefined;
     constructor() {
-        notifee.registerForegroundService((notification) => {
-            return new Promise(() => {
-                console.log('notification callback');
-            });
-        });
         notifee.onBackgroundEvent(async ({ type, detail }) => {
             if (
                 type === EventType.PRESS &&
@@ -118,8 +113,8 @@ class DownloadNotificationManger {
                 console.log('Showing foreground notification');
                 await notifee.displayNotification({
                     title: 'Episode downloads in progress',
-                    body: 'test body',
                     android: {
+                        onlyAlertOnce: true,
                         channelId: foreGroundServiceChannelId,
                         asForegroundService: true,
                         color: AndroidColor.RED,
@@ -216,6 +211,7 @@ class DownloadNotificationManger {
         });
         await this.updateSummaryNotification(this.channelId!);
         if (this.getInprogressDownloads().currentDownloadCount === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
             console.log('Stopping foreground service');
             await notifee.cancelNotification(this.foregroundNotificationId);
             await notifee.stopForegroundService();

@@ -65,9 +65,18 @@ export const ReleaseTabHeader = ({
         },
     });
 
-    const onChangeText = (query: string) => {
+    const onChangeText = async (query: string) => {
         onSearchChanged(query);
         setSearchQuery(query);
+        if (query && filter !== ShowFilter.None) {
+            onFilterChanged(ShowFilter.None);
+        } else if (!query) {
+            const lastFilter = await Storage.getItem(
+                StorageKeys.HeaderFilter,
+                ShowFilter.None,
+            );
+            onFilterChanged(lastFilter);
+        }
     };
 
     const onFilterPressed = async (filterValue: ShowFilter) => {

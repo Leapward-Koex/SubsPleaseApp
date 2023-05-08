@@ -93,6 +93,11 @@ export const DownloadTorrentButton = ({
         let path: string | null | undefined = '';
         if (!(await requestStoragePermission())) {
             console.warn('Required permissions were not accepted.');
+            styledToast.showToast(
+                'error',
+                'Cannot start download',
+                'Please enable "Manage all files" permission in your system settings',
+            );
             return;
         }
 
