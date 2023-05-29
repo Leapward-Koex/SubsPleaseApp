@@ -28,6 +28,7 @@ type DownloadTorrentButtonProps = {
     showName: string;
     episodeNumber: string;
     callbackId: string;
+    showRecheckButton: boolean;
     onDownloadStatusChange: (newStatus: DownloadingStatus) => void;
     onFileSizeObtained?: (fileSize: number) => void;
     onDownloadProgress?: (percentage: number) => void; // 0 -> 1
@@ -51,6 +52,7 @@ export const DownloadTorrentButton = ({
     showName,
     episodeNumber,
     callbackId,
+    showRecheckButton,
     onDownloadStatusChange,
     onFileSizeObtained,
     onDownloadProgress,
@@ -223,7 +225,7 @@ export const DownloadTorrentButton = ({
 
     return (
         <Button mode="text" onPress={onPress}>
-            {`${resolution}p`}
+            {showRecheckButton ? 'Recheck' : `${resolution}p`}
         </Button>
     );
 };

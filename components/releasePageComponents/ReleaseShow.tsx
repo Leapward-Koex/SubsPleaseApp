@@ -21,7 +21,7 @@ import {
     humanFileSize,
     isCastingAvailable,
 } from '../../HelperFunctions';
-import { ShowInfo, WatchList } from '../../models/models';
+import { ShowInfo, ShowResolution, WatchList } from '../../models/models';
 import { SubsPleaseApi } from '../../ExternalApis/SubsPleaseApi';
 import nodejs from 'nodejs-mobile-react-native';
 import * as Progress from 'react-native-progress';
@@ -182,12 +182,58 @@ export const ReleaseShow = observer(
             );
         };
 
+        const getRecheckButton = () => {
+            const magnet720 = showInfo.downloads.find(
+                (download) => download.res === '720',
+            )?.magnet;
+            const magnet1080 = showInfo.downloads.find(
+                (download) => download.res === '1080',
+            )?.magnet;
+            let downloadedResolution: ShowResolution | undefined;
+            if (showDownloaded === magnet720) {
+                downloadedResolution = '720';
+            } else if (showDownloaded === magnet1080) {
+                downloadedResolution = '1080';
+            }
+
+            if (downloadedResolution) {
+                return (
+                    <DownloadTorrentButton
+                        resolution={downloadedResolution}
+                        showRecheckButton
+                        availableDownloads={showInfo.downloads}
+                        showName={showInfo.show}
+                        episodeNumber={showInfo.episode}
+                        callbackId={callbackId}
+                        onDownloadStatusChange={setDownloadingStatus}
+                        onDownloadSpeed={setDownloadSpeed}
+                        onDownloadProgress={setDownloadProgress}
+                        onUploadSpeed={setUploadSpeed}
+                        onShowDownloaded={() =>
+                            setShowDownloaded(
+                                showInfo.downloads.find(
+                                    (download) =>
+                                        download.res === downloadedResolution,
+                                )?.magnet || '',
+                            )
+                        }
+                    />
+                );
+            }
+            return <></>;
+        };
+
         const getActionInfoSection = () => {
             if (
                 showDownloaded &&
                 downloadingStatus === DownloadingStatus.NotDownloading
             ) {
-                return getPlayButton();
+                return (
+                    <View style={{ flexDirection: 'row' }}>
+                        {getPlayButton()}
+                        {getRecheckButton()}
+                    </View>
+                );
             }
             if (downloadingStatus === DownloadingStatus.NotDownloading) {
                 return (
@@ -198,6 +244,7 @@ export const ReleaseShow = observer(
                             showName={showInfo.show}
                             episodeNumber={showInfo.episode}
                             callbackId={callbackId}
+                            showRecheckButton={false}
                             onDownloadStatusChange={setDownloadingStatus}
                             onDownloadSpeed={setDownloadSpeed}
                             onDownloadProgress={setDownloadProgress}
@@ -216,6 +263,7 @@ export const ReleaseShow = observer(
                             showName={showInfo.show}
                             episodeNumber={showInfo.episode}
                             callbackId={callbackId}
+                            showRecheckButton={false}
                             onDownloadStatusChange={setDownloadingStatus}
                             onDownloadSpeed={setDownloadSpeed}
                             onDownloadProgress={setDownloadProgress}
@@ -282,6 +330,7 @@ export const ReleaseShow = observer(
                     </View>
 
                     {getPlayButton()}
+                    {getRecheckButton()}
                 </View>
             );
         };
