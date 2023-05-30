@@ -31,6 +31,8 @@ import { Appbar } from 'react-native-paper';
 import { pickDirectory } from 'react-native-document-picker';
 import nodejs from 'nodejs-mobile-react-native';
 import { logger } from '../../services/Logger';
+import RNRestart from 'react-native-restart'; // Import package from node modules
+import { styledToast } from '../../services/ToastService';
 
 type ImportExportListItemProps = {
     type: 'Import' | 'Export';
@@ -79,16 +81,25 @@ export const ImportExportListItem = ({ type }: ImportExportListItemProps) => {
             if (msg.callbackId === callbackId) {
                 if (msg.error) {
                     logger.error(msg.error);
+                    styledToast.showToast('error', 'Failed to import settings');
                 } else {
                     const importedSettings = JSON.parse(msg.payload) as [
                         string,
                         string | null,
                     ][];
                     const nonNullSettings = importedSettings.filter(
-                        (setting) => setting[1] !== null,
+                        (setting) => setting && setting[1] !== null,
                     ) as [string, string][];
                     await AsyncStorage.multiSet(nonNullSettings);
                     console.log('Successfully restored settings');
+                    styledToast.showToast(
+                        'success',
+                        'Successfully imported up settings',
+                        'Restarting app...',
+                    );
+                    setTimeout(() => {
+                        RNRestart.restart();
+                    }, 2000);
                 }
             }
         });
@@ -120,7 +131,12 @@ export const ImportExportListItem = ({ type }: ImportExportListItemProps) => {
             if (msg.callbackId === callbackId) {
                 if (msg.error) {
                     console.error(msg.error);
+                    styledToast.showToast('error', 'Error backing up settings');
                 } else {
+                    styledToast.showToast(
+                        'success',
+                        'Successfully backed up settings',
+                    );
                     console.log('Successfully backed up settings');
                 }
             }

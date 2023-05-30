@@ -30,6 +30,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
+import java.util.concurrent.CompletableFuture;
 
 public class FilePathModule extends ReactContextBaseJavaModule {
     FilePathModule(ReactApplicationContext context) {
@@ -116,8 +117,10 @@ public class FilePathModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void fileExists(final String filePath, Callback callBack) {
-        File file = new File(filePath);
-        callBack.invoke(file.exists());
+        CompletableFuture.runAsync(() -> {
+            File file = new File(filePath);
+            callBack.invoke(file.exists());
+        });
     }
 
     @ReactMethod
