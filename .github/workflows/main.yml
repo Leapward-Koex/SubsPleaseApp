@@ -16,11 +16,11 @@ jobs:
               with:
                   distribution: 'temurin'
                   # The Java version to set up. Takes a whole or semver Java version. See examples of supported syntax in README file
-                  java-version: 11
+                  java-version: 17
 
             - uses: actions/setup-node@v3
               with:
-                  node-version: 16.3
+                  node-version: 20.X
                   cache: 'npm'
 
             - name: Install react native application dependencies
