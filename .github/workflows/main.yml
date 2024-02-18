@@ -72,6 +72,13 @@ jobs:
                   #mv "android/app/build/outputs/apk/release/app-armeabi-v7a-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-armeabi-v7a.apk"
                   #mv "android/app/build/outputs/apk/release/app-x86_64-release-unsigned.apk" "android/app/build/outputs/apk/release/YoRHa-x86_64.apk"
 
+            - name: Setup build tool version variable
+              shell: bash
+              run: |
+                  BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
+                  echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
+                  echo Last build tool version is: $BUILD_TOOL_VERSION
+
             # sign generated apk
             - name: Sign APK
               id: sign_app
@@ -82,6 +89,8 @@ jobs:
                   alias: ${{ secrets.SIGNING_KEY_ALIAS }}
                   keyStorePassword: ${{ secrets.SIGNING_STORE_PASSWORD }}
                   keyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+              env:
+                  BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
             - name: Upload universal
               uses: actions/upload-artifact@v3.0.0
